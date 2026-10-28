@@ -1,0 +1,27 @@
+import { useI18n } from "@/lib/i18n";
+import { useSession } from "@/lib/session";
+import { LanguagePicker } from "@/components/language-picker";
+import { Button, Message, Screen } from "@/components/ui";
+
+// S21: account, store, language and logout. Payout account (S25) follows.
+export default function ProfileTab() {
+  const { d } = useI18n();
+  const { session, store, chooseStore, signOut } = useSession();
+  return (
+    <Screen title={d.tabs.profile}>
+      <Message>
+        {d.profile.signedInAs}: {session?.user.email}
+      </Message>
+      <Message>
+        {d.profile.store}: {store?.name}
+      </Message>
+      <LanguagePicker />
+      <Button
+        label={d.login.changeStore}
+        variant="secondary"
+        onPress={() => chooseStore(null)}
+      />
+      <Button label={d.account.logout} onPress={() => void signOut()} />
+    </Screen>
+  );
+}
