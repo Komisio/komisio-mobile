@@ -21,7 +21,8 @@ platform for second-hand stores. Built with Expo and React Native.
 
 ## Getting started
 
-Requires Node.js 22 or later.
+Requires Node.js 22.13+, 24.3+ or 26+, as declared in `engines` in
+`package.json`. `.nvmrc` selects Node 24 (`nvm use`).
 
 ```bash
 npm install
