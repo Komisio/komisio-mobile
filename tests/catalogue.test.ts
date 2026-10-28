@@ -128,6 +128,158 @@ test("refresh discards old rows immediately and reports a failed refresh", async
   assert.equal(pager.getState().status, "failed");
 });
 
+test("returning to a 34-item catalogue keeps both pages until revalidation completes", async () => {
+  const rows = Array.from({ length: 34 }, (_, index) => ({
+    ...row,
+    id: `00000000-0000-4000-8000-${String(index + 10).padStart(12, "0")}`,
+  }));
+  const lastPage = deferred<CataloguePage>();
+  const requests: [string, number][] = [];
+  let returning = false;
+  const pager = createCataloguePager(async (query, offset) => {
+    requests.push([query, offset]);
+    if (returning && offset === 30) return lastPage.promise;
+    return {
+      ...page(offset),
+      total: 34,
+      items: rows.slice(offset, offset + 30).map((r) => ({
+        ...r,
+        priceOre: returning ? 9999 : r.priceOre,
+      })),
+    };
+  });
+  await pager.search(" coat ");
+  await pager.more();
+  const previousRows = pager.getState().items;
+  pager.cancel(); // Blur to item detail or another tab.
+  returning = true;
+  const snapshots: ReturnType<typeof pager.getState>[] = [];
+  pager.subscribe(() => snapshots.push(pager.getState()));
+  const returningLoad = pager.revalidate();
+  await Promise.resolve();
+  assert.equal(pager.getState().items, previousRows);
+  assert.equal(pager.getState().refreshing, true);
+  await pager.more(); // Do not mix pagination into a range refresh.
+  lastPage.resolve({ ...page(30), total: 34, items: rows.slice(30) });
+  await returningLoad;
+  assert.deepEqual(requests, [
+    ["coat", 0],
+    ["coat", 30],
+    ["coat", 0],
+    ["coat", 30],
+  ]);
+  assert.ok(
+    snapshots.every((s) => s.status === "ready" && s.items.length === 34),
+  );
+  assert.equal(pager.getState().offset, 34);
+  assert.equal(pager.getState().items[0].priceOre, 9999);
+  assert.equal(pager.getState().refreshing, false);
+});
+
+test("revalidation retains rows on network failure and retries the loaded range", async () => {
+  let offline = false;
+  const pager = createCataloguePager(async (_q, offset) => {
+    if (offline) throw new Error("offline");
+    return {
+      ...page(offset),
+      items: [{ ...row, id: String(offset) }],
+      total: 2,
+    };
+  });
+  await pager.revalidate();
+  await pager.more();
+  const rows = pager.getState().items;
+  offline = true;
+  await pager.revalidate();
+  assert.equal(pager.getState().items, rows);
+  assert.equal(pager.getState().status, "ready");
+  assert.equal(pager.getState().failure, "failed");
+  assert.equal(pager.getState().refreshing, false);
+  offline = false;
+  await pager.revalidate();
+  assert.equal(pager.getState().items.length, 2);
+  assert.equal(pager.getState().failure, null);
+});
+
+test("denied access on a later revalidation page clears the entire catalogue", async () => {
+  let denied = false;
+  const pager = createCataloguePager(async (_q, offset) => {
+    if (denied && offset) throw { code: "42501" };
+    return { ...page(offset), total: 2 };
+  });
+  await pager.revalidate();
+  await pager.more();
+  denied = true;
+  await pager.revalidate();
+  assert.equal(pager.getState().status, "failed");
+  assert.equal(pager.getState().failure, "denied");
+  assert.deepEqual(pager.getState().items, []);
+});
+
+test("a new search supersedes an in-flight revalidation", async () => {
+  const response = deferred<CataloguePage>();
+  let returning = false;
+  const pager = createCataloguePager(async (q) => {
+    if (q === "new") return { ...page(), items: [{ ...row, title: "New" }] };
+    return returning ? response.promise : page();
+  });
+  await pager.revalidate();
+  returning = true;
+  const old = pager.revalidate();
+  await pager.search("new");
+  response.resolve(page());
+  await old;
+  assert.equal(pager.getState().items[0].title, "New");
+  assert.equal(pager.getState().refreshing, false);
+});
+
+test("blur cancels revalidation and pagination without leaving busy controls", async () => {
+  for (const operation of ["revalidate", "more"] as const) {
+    const response = deferred<CataloguePage>();
+    let delay = false;
+    let signal: AbortSignal | undefined;
+    const pager = createCataloguePager(async (_q, _offset, s) => {
+      signal = s;
+      return delay ? response.promise : page();
+    });
+    await pager.revalidate();
+    const previousRows = pager.getState().items;
+    delay = true;
+    const pending = pager[operation]();
+    pager.cancel();
+    assert.equal(signal?.aborted, true);
+    assert.equal(pager.getState().more, false);
+    assert.equal(pager.getState().refreshing, false);
+    response.resolve({ ...page(), items: [] });
+    await pending;
+    assert.equal(pager.getState().items, previousRows);
+    delay = false;
+    await pager.revalidate();
+    assert.equal(pager.getState().status, "ready");
+  }
+});
+
+test("revalidation stops when inventory shrinks instead of retaining removed rows", async () => {
+  let shrinking = false;
+  const offsets: number[] = [];
+  const pager = createCataloguePager(async (_q, offset) => {
+    offsets.push(offset);
+    return {
+      ...page(offset),
+      items: shrinking ? [] : [{ ...row, id: String(offset) }],
+      total: shrinking ? 0 : 2,
+    };
+  });
+  await pager.revalidate();
+  await pager.more();
+  shrinking = true;
+  await pager.revalidate();
+  assert.deepEqual(offsets, [0, 1, 0]);
+  assert.equal(pager.getState().status, "ready");
+  assert.equal(pager.getState().total, 0);
+  assert.deepEqual(pager.getState().items, []);
+});
+
 test("read parsers reject malformed amounts, foreign photo paths and unexpected detail identities", () => {
   assert.deepEqual(parsePage(page(), tenant), page());
   assert.throws(() =>

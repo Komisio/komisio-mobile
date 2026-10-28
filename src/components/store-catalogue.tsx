@@ -35,7 +35,7 @@ export function StoreCatalogue({
   );
   useFocusEffect(
     useCallback(() => {
-      void pager.refresh();
+      void pager.revalidate();
       return pager.cancel;
     }, [pager]),
   );
@@ -130,6 +130,7 @@ export function StoreCatalogue({
                 <Button
                   label={state.failure ? d.retry : t.more}
                   busy={state.more}
+                  disabled={state.refreshing}
                   onPress={() => void pager.more()}
                 />
               )}
@@ -137,7 +138,8 @@ export function StoreCatalogue({
                 label={t.refresh}
                 variant="secondary"
                 disabled={state.more}
-                onPress={() => void pager.refresh()}
+                busy={state.refreshing}
+                onPress={() => void pager.revalidate()}
               />
             </View>
           }

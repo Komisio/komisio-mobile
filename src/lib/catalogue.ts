@@ -175,6 +175,7 @@ type PageState = {
   total: number;
   offset: number;
   more: boolean;
+  refreshing: boolean;
   failure: ReadFailure | null;
 };
 export type FetchPage = (
@@ -193,6 +194,7 @@ export function createCataloguePager(fetchPage: FetchPage) {
     total: 0,
     offset: 0,
     more: false,
+    refreshing: false,
     failure: null,
   };
   let query = "",
@@ -207,58 +209,78 @@ export function createCataloguePager(fetchPage: FetchPage) {
     generation++;
     pending?.abort();
     pending = null;
+    if (state.more || state.refreshing)
+      set({ ...state, more: false, refreshing: false });
   };
-  async function load(append: boolean) {
+  async function load(mode: "reset" | "append" | "revalidate") {
+    const append = mode === "append";
+    const keepRows = mode === "revalidate" && state.status === "ready";
     if (
       append &&
-      (state.status !== "ready" || state.more || state.offset >= state.total)
+      (state.status !== "ready" ||
+        state.more ||
+        state.refreshing ||
+        state.offset >= state.total)
     )
       return;
     cancel();
     const run = generation;
     const controller = new AbortController();
     pending = controller;
-    const offset = append ? state.offset : 0;
+    let offset = append ? state.offset : 0;
+    const targetOffset = keepRows ? state.offset : 0;
     set(
       append
         ? { ...state, more: true, failure: null }
-        : {
-            ...state,
-            status: "loading",
-            items: [],
-            total: 0,
-            offset: 0,
-            more: false,
-            failure: null,
-          },
+        : keepRows
+          ? { ...state, refreshing: true, failure: null }
+          : {
+              ...state,
+              status: "loading",
+              items: [],
+              total: 0,
+              offset: 0,
+              more: false,
+              refreshing: false,
+              failure: null,
+            },
     );
     try {
-      const page = await fetchPage(query, offset, controller.signal);
-      if (run !== generation) return;
-      if (
-        page.offset !== offset ||
-        (append && page.currency !== state.currency)
-      )
-        invalid();
       const items = new Map((append ? state.items : []).map((i) => [i.id, i]));
-      page.items.forEach((i) => items.set(i.id, i));
-      // Offsets follow server rows, not deduplicated rows: inventory can change
-      // between pages. An empty page stops paging until the next refresh.
+      let page: CataloguePage;
+      let expectedCurrency = append ? state.currency : null;
+      do {
+        page = await fetchPage(query, offset, controller.signal);
+        if (run !== generation) return;
+        if (
+          page.offset !== offset ||
+          (expectedCurrency !== null && page.currency !== expectedCurrency)
+        )
+          invalid();
+        expectedCurrency = page.currency;
+        page.items.forEach((i) => items.set(i.id, i));
+        // Offsets follow server rows, not deduplicated rows. An empty page
+        // stops paging until the next refresh, including shrinking inventory.
+        offset = page.items.length ? offset + page.items.length : page.total;
+      } while (keepRows && offset < targetOffset && offset < page.total);
+      // Publish the entire loaded range together. Keeping status ready during
+      // revalidation leaves the FlatList mounted and preserves its scroll.
       set({
         status: "ready",
         items: [...items.values()],
         currency: page.currency,
         total: page.total,
-        offset: page.items.length ? offset + page.items.length : page.total,
+        offset,
         more: false,
+        refreshing: false,
         failure: null,
       });
     } catch (error) {
       if (run !== generation) return;
       const failure = readFailure(error);
       set(
-        append && failure === "failed"
-          ? { ...state, more: false, failure }
+        (append || keepRows) && failure === "failed"
+          ? { ...state, more: false, refreshing: false, failure }
           : {
               ...state,
               status: "failed",
@@ -266,9 +288,12 @@ export function createCataloguePager(fetchPage: FetchPage) {
               total: 0,
               offset: 0,
               more: false,
+              refreshing: false,
               failure,
             },
       );
+    } finally {
+      if (run === generation) pending = null;
     }
   }
   return {
@@ -281,10 +306,11 @@ export function createCataloguePager(fetchPage: FetchPage) {
     },
     search(next: string) {
       query = next.trim();
-      return load(false);
+      return load("reset");
     },
-    refresh: () => load(false),
-    more: () => load(true),
+    refresh: () => load("reset"),
+    revalidate: () => load("revalidate"),
+    more: () => load("append"),
     cancel,
   };
 }

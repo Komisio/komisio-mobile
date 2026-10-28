@@ -52,8 +52,10 @@ ID, not a client-supplied seller ID.
 
 Search matches titles and categories. The two-column list loads 30 rows at a
 time; the detail shows the current price, descriptive facts and photos. Changes
-to store/account discard the previous view, and returning to a view reloads its
-data. Favourites and category filter chips are outside this slice.
+to store/account discard the previous view. Returning to the catalogue refreshes
+all loaded pages in place, keeping the list mounted and its scroll position.
+Network failures retain the rows for retry; denied access clears them. A new
+search resets the list. Favourites and category filter chips are outside this slice.
 
 Photos use authenticated Storage URLs with the current session token. No public
 or signed URL is stored, and Expo Image's persistent cache is disabled. Failed
