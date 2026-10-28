@@ -34,6 +34,7 @@ npm install
 npm start          # Expo dev server
 npm run typecheck  # TypeScript
 npm run lint       # ESLint
+npm test           # unit tests (node:test)
 ```
 
 Routes live in `src/app/`; keep components, hooks and utilities outside it.
