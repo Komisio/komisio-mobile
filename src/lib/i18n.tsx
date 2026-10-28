@@ -1,8 +1,16 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { getLocales } from "expo-localization";
 import { secureStorage } from "./secure-storage";
+import { catalogueCopy } from "./catalogue-copy";
 
 const sv = {
+  catalogue: catalogueCopy.sv,
   languageName: "Svenska",
   language: "Språk",
   loading: "Laddar…",
@@ -58,6 +66,7 @@ const sv = {
 export type Dictionary = typeof sv;
 
 const en: Dictionary = {
+  catalogue: catalogueCopy.en,
   languageName: "English",
   language: "Language",
   loading: "Loading…",
@@ -131,7 +140,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(deviceLocale);
   useEffect(() => {
     secureStorage.getItem(KEY).then((saved) => {
-      if (saved && locales.includes(saved as Locale)) setLocaleState(saved as Locale);
+      if (saved && locales.includes(saved as Locale))
+        setLocaleState(saved as Locale);
     });
   }, []);
   const setLocale = (next: Locale) => {

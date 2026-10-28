@@ -1,0 +1,290 @@
+// Reviewed read contract: Komisio/komisio#715. No seller or financial history.
+export type Photo = {
+  id: string;
+  bucket: "item-photos" | "reception-photos";
+  path: string;
+};
+export type CatalogueItem = {
+  id: string;
+  title: string | null;
+  category: string | null;
+  priceOre: number;
+  photo: Photo | null;
+};
+export type CataloguePage = {
+  currency: string;
+  items: CatalogueItem[];
+  total: number;
+  offset: number;
+};
+export const factKeys = [
+  "category",
+  "brand",
+  "size",
+  "color",
+  "material",
+  "condition",
+] as const;
+export type FactKey = (typeof factKeys)[number];
+export type CatalogueDetail = {
+  id: string;
+  title: string | null;
+  currency: string;
+  priceOre: number;
+  facts: { slug: FactKey; value: string }[];
+  photos: Photo[];
+};
+export type ReadFailure = "denied" | "missing" | "failed";
+
+export function readFailure(error: unknown): ReadFailure {
+  const e = error as { code?: string; message?: string } | null;
+  if (
+    e?.code === "42501" ||
+    e?.message === "AUTH_REQUIRED" ||
+    e?.message === "FORBIDDEN"
+  )
+    return "denied";
+  if (e?.message === "ITEM_NOT_FOUND") return "missing";
+  return "failed";
+}
+
+function invalid(): never {
+  throw new Error("INVALID_CATALOGUE_RESPONSE");
+}
+function object(value: unknown): Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : invalid();
+}
+export function isId(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(value)
+  );
+}
+function id(value: unknown): string {
+  return isId(value) ? value : invalid();
+}
+function text(value: unknown): string {
+  return typeof value === "string" ? value : invalid();
+}
+function optionalText(value: unknown): string | null {
+  return value === null ? null : text(value);
+}
+function integer(value: unknown): number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : invalid();
+}
+function currency(value: unknown): string {
+  return typeof value === "string" && /^[A-Z]{3}$/.test(value)
+    ? value
+    : invalid();
+}
+function array(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : invalid();
+}
+function photo(value: unknown, tenant: string): Photo {
+  const p = object(value);
+  const photoId = id(p.id);
+  if (p.bucket !== "item-photos" && p.bucket !== "reception-photos") invalid();
+  const path = text(p.path);
+  const parts = path.split("/");
+  if (
+    parts.length !== 3 ||
+    parts[0] !== tenant ||
+    !isId(parts[1]) ||
+    ![`${photoId}.jpg`, `${photoId}.png`].includes(parts[2])
+  )
+    invalid();
+  return { id: photoId, bucket: p.bucket, path };
+}
+
+export function parsePage(value: unknown, tenant: string): CataloguePage {
+  const p = object(value);
+  const items = array(p.items).map((value) => {
+    const i = object(value);
+    return {
+      id: id(i.id),
+      title: optionalText(i.title),
+      category: optionalText(i.category),
+      priceOre: integer(i.priceOre),
+      photo: i.photo === null ? null : photo(i.photo, tenant),
+    };
+  });
+  if (items.length > 30) invalid();
+  return {
+    currency: currency(p.currency),
+    total: integer(p.total),
+    offset: integer(p.offset),
+    items,
+  };
+}
+
+export function parseDetail(
+  value: unknown,
+  tenant: string,
+  itemId: string,
+): CatalogueDetail {
+  const p = object(value);
+  if (id(p.id) !== itemId) invalid();
+  const facts = array(p.facts).map((value) => {
+    const f = object(value);
+    if (!factKeys.includes(f.slug as FactKey)) invalid();
+    return { slug: f.slug as FactKey, value: text(f.value) };
+  });
+  const photos = array(p.photos).map((p) => photo(p, tenant));
+  if (photos.length > 20 || facts.length > factKeys.length) invalid();
+  return {
+    id: itemId,
+    title: optionalText(p.title),
+    currency: currency(p.currency),
+    priceOre: integer(p.priceOre),
+    facts,
+    photos,
+  };
+}
+
+export function formatPrice(ore: number, code: string, locale: string): string {
+  return new Intl.NumberFormat(locale === "sv" ? "sv-SE" : "en-GB", {
+    style: "currency",
+    currency: code,
+  }).format(ore / 100);
+}
+
+// The token is sent only to the configured Supabase origin, never to a URL
+// supplied by a catalogue row. Authenticated downloads recheck Storage RLS.
+export function photoSource(
+  p: Photo,
+  tenant: string,
+  url: string,
+  key: string,
+  token: string,
+) {
+  const checked = photo(p, tenant);
+  return {
+    uri: `${url.replace(/\/$/, "")}/storage/v1/object/authenticated/${checked.bucket}/${checked.path}`,
+    headers: { apikey: key, Authorization: `Bearer ${token}` },
+  };
+}
+
+type PageState = {
+  status: "loading" | "ready" | "failed";
+  items: CatalogueItem[];
+  currency: string;
+  total: number;
+  offset: number;
+  more: boolean;
+  failure: ReadFailure | null;
+};
+export type FetchPage = (
+  query: string,
+  offset: number,
+  signal: AbortSignal,
+) => Promise<CataloguePage>;
+
+// Each mounted account/store gets its own controller. Requests are cancelled
+// and generation-checked, including transports that ignore AbortSignal.
+export function createCataloguePager(fetchPage: FetchPage) {
+  let state: PageState = {
+    status: "loading",
+    items: [],
+    currency: "SEK",
+    total: 0,
+    offset: 0,
+    more: false,
+    failure: null,
+  };
+  let query = "",
+    generation = 0;
+  let pending: AbortController | null = null;
+  const listeners = new Set<() => void>();
+  const set = (next: PageState) => {
+    state = next;
+    listeners.forEach((l) => l());
+  };
+  const cancel = () => {
+    generation++;
+    pending?.abort();
+    pending = null;
+  };
+  async function load(append: boolean) {
+    if (
+      append &&
+      (state.status !== "ready" || state.more || state.offset >= state.total)
+    )
+      return;
+    cancel();
+    const run = generation;
+    const controller = new AbortController();
+    pending = controller;
+    const offset = append ? state.offset : 0;
+    set(
+      append
+        ? { ...state, more: true, failure: null }
+        : {
+            ...state,
+            status: "loading",
+            items: [],
+            total: 0,
+            offset: 0,
+            more: false,
+            failure: null,
+          },
+    );
+    try {
+      const page = await fetchPage(query, offset, controller.signal);
+      if (run !== generation) return;
+      if (
+        page.offset !== offset ||
+        (append && page.currency !== state.currency)
+      )
+        invalid();
+      const items = new Map((append ? state.items : []).map((i) => [i.id, i]));
+      page.items.forEach((i) => items.set(i.id, i));
+      // Offsets follow server rows, not deduplicated rows: inventory can change
+      // between pages. An empty page stops paging until the next refresh.
+      set({
+        status: "ready",
+        items: [...items.values()],
+        currency: page.currency,
+        total: page.total,
+        offset: page.items.length ? offset + page.items.length : page.total,
+        more: false,
+        failure: null,
+      });
+    } catch (error) {
+      if (run !== generation) return;
+      const failure = readFailure(error);
+      set(
+        append && failure === "failed"
+          ? { ...state, more: false, failure }
+          : {
+              ...state,
+              status: "failed",
+              items: [],
+              total: 0,
+              offset: 0,
+              more: false,
+              failure,
+            },
+      );
+    }
+  }
+  return {
+    getState: () => state,
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    search(next: string) {
+      query = next.trim();
+      return load(false);
+    },
+    refresh: () => load(false),
+    more: () => load(true),
+    cancel,
+  };
+}
