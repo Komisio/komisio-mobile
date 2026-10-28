@@ -1,17 +1,24 @@
 import type { CommandOutcome } from "./pending-command.ts";
 import type { BankCommand } from "./bank-account.ts";
 
-export async function sendBankCommand(
-  command: BankCommand,
-  deps: {
-    endpoint: string | null;
-    user: string;
-    session: () => Promise<{ user: string; token: string } | null>;
-    request: (
-      url: string,
-      init: RequestInit,
-    ) => Promise<Pick<Response, "status" | "text">>;
-  },
+export type CommandTransport = {
+  endpoint: string | null;
+  user: string;
+  session: () => Promise<{ user: string; token: string } | null>;
+  request: (
+    url: string,
+    init: RequestInit,
+  ) => Promise<Pick<Response, "status" | "text">>;
+};
+
+export function sendBankCommand(command: BankCommand, deps: CommandTransport) {
+  return sendMobileCommand(command, deps, bankCommandOutcome);
+}
+
+export async function sendMobileCommand<C extends { requestId: string }>(
+  command: C,
+  deps: CommandTransport,
+  outcome: (status: number, body: unknown, requestId: string) => CommandOutcome,
 ): Promise<CommandOutcome> {
   const unknown: CommandOutcome = { kind: "unknown", code: "UNKNOWN" };
   if (!deps.endpoint) return unknown;
@@ -34,11 +41,7 @@ export async function sendBankCommand(
     });
     const text = await response.text();
     if (text.length > 4096) return unknown;
-    return bankCommandOutcome(
-      response.status,
-      JSON.parse(text),
-      command.requestId,
-    );
+    return outcome(response.status, JSON.parse(text), command.requestId);
   } catch {
     return unknown;
   } finally {
