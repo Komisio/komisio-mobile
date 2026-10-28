@@ -4,7 +4,7 @@ Mobile app for [Komisio](https://github.com/Komisio/komisio), the consignment
 platform for second-hand stores. Built with Expo and React Native.
 
 > Status: store picker, login with two-step verification, profile, and the
-> store catalogue with item detail (S10/S11). My items, overview and money
+> store catalogue with item detail (S10/S11), and store information (S12). My items, overview and money
 > are still placeholders (see `docs/screens.md`).
 
 ## Direction
@@ -66,6 +66,22 @@ Unit tests cover stale requests, pagination, revoked access and the read
 contract. Native-device behavior, real Storage downloads and staging must also
 be verified before release; successful JavaScript export alone does not verify
 those paths.
+
+## Store information (S12)
+
+Open **Store information** from the Store tab for published descriptions,
+address, contact details and opening hours. This uses the existing public
+`public_store_profile(p_slug)` RPC; no new database migration is needed.
+Store changes discard the previous response, and focus/retry reads can be cancelled.
+Unpublished information and missing opening hours are shown explicitly; a missing
+weekday does not mean closed. Store-authored text remains in its published language.
+
+The map button opens the published address in an external map; it does not
+request device location. Contact actions allow only HTTPS websites, plain email
+addresses and phone numbers, and show an error if the destination cannot open.
+The S12 reference is in [reference PR #4](https://github.com/Komisio/komisio-mobile/pull/4).
+Hand-in actions remain postponed. Browser navigation, large text and native
+map/phone/email hand-offs still need interactive verification before release.
 
 ## Licence
 
