@@ -26,11 +26,14 @@ function Routes() {
       <Stack.Protected guard={Boolean(store) && !session}>
         <Stack.Screen name="login" />
       </Stack.Protected>
-      <Stack.Protected guard={Boolean(store) && Boolean(session) && mfaRequired}>
+      <Stack.Protected
+        guard={Boolean(store) && Boolean(session) && mfaRequired}
+      >
         <Stack.Screen name="mfa" />
       </Stack.Protected>
       <Stack.Protected guard={Boolean(store) && signedIn}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="catalogue/[tenant]/[item]" />
       </Stack.Protected>
     </Stack>
   );
