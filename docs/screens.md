@@ -19,6 +19,25 @@ app and self-service sign-up come later.
 - **Seller accounts are created by the store.** There is no sign-up in the app
   in version 1 (S03 and S04 are postponed). A seller gets an account from the
   store and logs in with it.
+- **Activation and email links finish on the web.** A store-created account
+  is activated by the platform's existing journey: the seller opens the
+  activation link from the email in a browser, the platform confirms the
+  address and the seller chooses a password (`/auth/activate`,
+  `/seller/activate`). The same applies to the password reset link (S07). The
+  app does not handle these links in version 1; after the web step the seller
+  returns to the app and logs in (S02). Opening email links directly in the
+  app is a later change.
+- **Store catalogue read model.** S10 and S11 need a store-wide read of items
+  for sale. The platform's existing seller reads (`my_items`,
+  `my_items_page`) only return the signed-in seller's own items, and the
+  roadmap places the per-store catalogue later (section 3.11). A new read
+  contract in `Komisio/komisio` is required before S10 and S11 can be built.
+  Proposed contract, to be settled in that platform change: signed-in sellers
+  of the store may read it; it returns only items currently for sale in that
+  store; it exposes title, current price with currency, photos and the item's
+  descriptive facts (such as category, size, brand and colour); it never
+  exposes the seller's identity, commission, payout or cost data. The
+  "Visa butik i mobilappen" setting does not provide this.
 - **Payouts go to a bank account.** Swish is not offered (S23).
 
 ## Version 1 screens
@@ -26,19 +45,19 @@ app and self-service sign-up come later.
 | ID | Screen | Earlier route | Notes from the review |
 | --- | --- | --- | --- |
 | S01 | Choose store | `/tenant` | Keep, including the language choice. Drop the code for test stores; use the store setting above instead. Layout may be refreshed, as for the whole app. |
-| S02 | Log in | `/auth` | Keep. The technology behind it changes (Supabase Auth). Remove the technical "Token endpoint" row. |
+| S02 | Log in | `/auth` | Keep. Email and password with Supabase Auth. Remove the technical "Token endpoint" row. If the account has two-factor authentication (TOTP) enrolled, login continues to a code step before the app opens, as on the web (`/mfa`). An account that is not yet activated is sent to the web activation above. |
 | S05 | Forgot password | `/forgot-password` | Keep. |
 | S06 | Email sent | `/mail-sent` | Keep. |
-| S07 | Reset password | `/reset-password` | Keep. |
+| S07 | Reset password | `/reset-password` | Keep, completed on the web in version 1 (see prerequisites). |
 | S08 | Seller agreement | `/agreement` | Keep. Use the platform's versioned seller agreements and their language versions. |
-| S10 | Store: all items | `/browse` | Keep. |
-| S11 | Item detail | `/browse/[id]` | Keep. |
+| S10 | Store: all items | `/browse` | Keep. Requires the store catalogue read model above. |
+| S11 | Item detail | `/browse/[id]` | Keep. Requires the store catalogue read model above. |
 | S12 | Store info and directions | `/submitinfoscreen` | Keep as store information with map and the store's own texts. The links to handing in items (S13, S14) are postponed with those screens. |
 | S19 + S52 | My items | `/my-items`, `/portal/items` | Keep. One screen that combines the app list with the portal's filters (active, expiring soon, sold) and return dates. Statuses follow the new platform's item statuses. |
 | S20 | My item: detail | `/my-items/[id]` | Keep. |
 | S22 + S51 | Overview | `/settings/sales-overview`, `/portal` | Keep. One overview with balance, sold items, items expiring soon and recent payouts. |
 | S23 + S24 + S53 | Payouts | `/settings/payout`, `/settings/payout/history`, `/portal/payouts` | Keep. Request a payout and see payout history in one place. No Swish. |
-| S54 | Statement | `/portal/statement` | New in the app, taken from the web portal. Statement for a period: opening balance, net sales, payouts and closing balance. |
+| S54 | Statements | `/portal/statement` | New in the app. Shows the platform's issued settlement statements, list and detail, as in the web seller portal (`my_seller_statement`). A running account overview for any chosen date range is not part of version 1, because it needs a different data contract. |
 | S25 | Payout account | `/settings/payout/account` | Keep. Same fields as the seller portal in Komisio. |
 | S21 | Profile | `/settings` | Keep. A dark theme is optional and only if it fits the visual identity. Translate all labels. |
 
