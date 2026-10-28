@@ -1,11 +1,21 @@
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { I18nProvider } from "@/lib/i18n";
+import { I18nProvider, useI18n } from "@/lib/i18n";
 import { SessionProvider, useSession } from "@/lib/session";
-import { Loading } from "@/components/ui";
+import { Button, Loading, Message, Screen } from "@/components/ui";
 
 function Routes() {
-  const { ready, store, session, mfaRequired } = useSession();
+  const { d } = useI18n();
+  const { ready, authFailed, retryAuth, store, session, mfaRequired } =
+    useSession();
+  // No route opens until session and two-step state are known.
+  if (authFailed)
+    return (
+      <Screen title="Komisio">
+        <Message tone="error">{d.authFailed}</Message>
+        <Button label={d.retry} onPress={retryAuth} />
+      </Screen>
+    );
   if (!ready) return <Loading />;
   const signedIn = Boolean(session) && !mfaRequired;
   return (

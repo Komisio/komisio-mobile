@@ -7,6 +7,7 @@ const sv = {
   language: "Språk",
   loading: "Laddar…",
   retry: "Försök igen",
+  authFailed: "Inloggningen kunde inte läsas in. Försök igen.",
   notConfigured:
     "Appen saknar anslutning till Komisio. Ange EXPO_PUBLIC_SUPABASE_URL och EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
   store: {
@@ -61,6 +62,7 @@ const en: Dictionary = {
   language: "Language",
   loading: "Loading…",
   retry: "Try again",
+  authFailed: "Your sign-in could not be loaded. Try again.",
   notConfigured:
     "The app is not connected to Komisio. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
   store: {

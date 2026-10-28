@@ -1,14 +1,15 @@
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import { secureStorage } from "./secure-storage";
+import { createAuthBootstrap } from "./auth-bootstrap";
 
 export type AppStore = { id: string; name: string; slug: string };
 export type SellerAccount = {
@@ -19,8 +20,13 @@ export type SellerAccount = {
 
 const STORE_KEY = "komisio.store";
 
+const authState = createAuthBootstrap(supabase.auth);
+
 type State = {
   ready: boolean;
+  // The session or two-step state could not be read; retryAuth reads again.
+  authFailed: boolean;
+  retryAuth: () => void;
   store: AppStore | null;
   session: Session | null;
   mfaRequired: boolean;
@@ -46,22 +52,18 @@ function isStore(value: unknown): value is AppStore {
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [storeLoaded, setStoreLoaded] = useState(false);
-  const [sessionLoaded, setSessionLoaded] = useState(false);
   const [store, setStore] = useState<AppStore | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [mfaRequired, setMfaRequired] = useState(false);
+  const auth = useSyncExternalStore(
+    authState.subscribe,
+    authState.getState,
+    authState.getState,
+  );
+  const { session, mfaRequired } = auth;
   const [lookup, setLookup] = useState<{
     key: string;
     account: SellerAccount | null | "failed";
   } | null>(null);
   const [attempt, setAttempt] = useState(0);
-
-  const refreshAssurance = useCallback(async () => {
-    const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    setMfaRequired(
-      data?.nextLevel === "aal2" && data.currentLevel !== "aal2",
-    );
-  }, []);
 
   useEffect(() => {
     secureStorage
@@ -73,18 +75,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         } catch {}
       })
       .finally(() => setStoreLoaded(true));
-    supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session);
-      if (data.session) await refreshAssurance();
-      setSessionLoaded(true);
-    });
-    const { data } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next);
-      if (next) void refreshAssurance();
-      else setMfaRequired(false);
-    });
-    return () => data.subscription.unsubscribe();
-  }, [refreshAssurance]);
+    return authState.start();
+  }, []);
 
   // The seller account in the chosen store, once fully signed in.
   const accountKey =
@@ -124,14 +116,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   return (
     <SessionContext.Provider
       value={{
-        ready: storeLoaded && sessionLoaded,
+        ready: storeLoaded && auth.status === "ready",
+        authFailed: auth.status === "failed",
+        retryAuth: () => void authState.retry(),
         store,
         session,
         mfaRequired,
         account,
         retryAccount: () => setAttempt((n) => n + 1),
         chooseStore,
-        refreshAssurance,
+        refreshAssurance: authState.refresh,
         signOut,
       }}
     >
