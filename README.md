@@ -15,7 +15,8 @@ platform for second-hand stores. Built with Expo and React Native.
   web. Direct Supabase reads only for named, reviewed read functions.
 - **Screen by screen.** Screens from the earlier app are the design reference;
   the owner decides per screen and function what to keep, change, remove or
-  postpone before it is built here.
+  postpone before it is built here. The decisions for version 1 are in
+  [`docs/screens.md`](docs/screens.md).
 - **Older app versions keep working** for a defined support period, and retried
   commands never create duplicate operations.
 
