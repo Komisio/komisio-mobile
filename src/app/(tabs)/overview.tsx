@@ -1,7 +1,25 @@
 import { useI18n } from "@/lib/i18n";
-import { Placeholder } from "@/components/placeholder";
+import { useSession } from "@/lib/session";
+import { SellerGate } from "@/components/seller-gate";
+import { SellerOverviewScreen } from "@/components/seller-overview";
 
 export default function OverviewTab() {
   const { d } = useI18n();
-  return <Placeholder title={d.tabs.overview} />;
+  const { account, session, store } = useSession();
+  return (
+    <SellerGate title={d.tabs.overview}>
+      {account &&
+      account !== "failed" &&
+      session &&
+      store &&
+      account.tenantId === store.id ? (
+        <SellerOverviewScreen
+          key={`${session.user.id}:${account.tenantId}:${account.sellerId}`}
+          tenant={account.tenantId}
+          seller={account.sellerId}
+          storeName={store.name}
+        />
+      ) : null}
+    </SellerGate>
+  );
 }

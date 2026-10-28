@@ -9,8 +9,10 @@ import { getLocales } from "expo-localization";
 import { secureStorage } from "./secure-storage";
 import { catalogueCopy } from "./catalogue-copy";
 import { sellerItemsCopy } from "./seller-items-copy";
+import { overviewCopy } from "./overview-copy";
 
 const sv = {
+  overview: overviewCopy.sv,
   items: sellerItemsCopy.sv,
   catalogue: catalogueCopy.sv,
   languageName: "Svenska",
@@ -68,6 +70,7 @@ const sv = {
 export type Dictionary = typeof sv;
 
 const en: Dictionary = {
+  overview: overviewCopy.en,
   items: sellerItemsCopy.en,
   catalogue: catalogueCopy.en,
   languageName: "English",
