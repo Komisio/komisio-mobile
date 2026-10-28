@@ -11,8 +11,10 @@ import { catalogueCopy } from "./catalogue-copy";
 import { sellerItemsCopy } from "./seller-items-copy";
 import { overviewCopy } from "./overview-copy";
 import { agreementCopy } from "./agreement-copy";
+import { bankCopy } from "./bank-copy";
 
 const sv = {
+  bank: bankCopy.sv,
   agreement: agreementCopy.sv,
   overview: overviewCopy.sv,
   items: sellerItemsCopy.sv,
@@ -72,6 +74,7 @@ const sv = {
 export type Dictionary = typeof sv;
 
 const en: Dictionary = {
+  bank: bankCopy.en,
   agreement: agreementCopy.en,
   overview: overviewCopy.en,
   items: sellerItemsCopy.en,

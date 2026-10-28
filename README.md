@@ -123,6 +123,43 @@ signature, PDF or database migration. The old S08 reference contains only a
 loading spinner; the reader follows the platform contract and existing app theme.
 Interactive large-text/history navigation and native checks remain pending.
 
+## Payout account (S25)
+
+Profile opens the selected seller's bank details through `seller_bank_details`.
+Holder, searchable ISO country, IBAN/local account and routing follow the seller
+portal contract, including IBAN country/checksum validation. There is no Swish.
+Saving uses the expected bank version; a concurrent edit requires reloading and
+reviewing the latest details, never silently overwriting them.
+
+Writes depend on [platform PR #720](https://github.com/Komisio/komisio/pull/720),
+its opt-in mobile API flag and the exact browser-origin allowlist. The app uses
+`EXPO_PUBLIC_KOMISIO_WEB_URL` as the portal origin (HTTPS, or HTTP loopback for
+development), and `POST /api/mobile/v1/seller` with the current user's bearer token.
+Explicit SDK 58 `expo/fetch` rejects redirects and omits cookies. The API still
+enforces the live seller identity, MFA, recovery restrictions and engine rules.
+
+SDK-matched `expo-crypto` generates request UUIDs. Before sending, the app saves
+and reads back an immutable command bound to the user, tenant, seller, Supabase
+project and portal destination. Native storage is one SecureStore value: storage
+failures prevent dispatch, and incomplete auth-store chunks are never interpreted
+as an absent command. Web is a development target and uses localStorage plus an
+exclusive Web Lock; browsers without Web Locks fail closed for writes. Native
+views share an in-process lock. No bank payload or bearer token is logged.
+
+An uncertain outcome, including a timeout followed by an auth failure, retains
+the exact command across navigation and restart. Explicit retry reuses its ID
+and contents. A new edit is blocked until exact success or a definite bank-version
+conflict is confirmed and the local record is removed. Failed cleanup is retried
+without sending a new command. There is no background replay or discard button.
+Clearing app/browser storage or reinstalling while a command is unresolved loses
+that recovery record; this is not an offline synchronization system.
+
+Unit tests cover durable replay, failed writes/readback/removal, scope changes,
+concurrent views, transport identity/headers, validation and conflict handling.
+Native storage limits, cold-start recovery, web multi-tab interaction, keyboard
+and large-text layout still require interactive verification before release.
+The dependency API has not been deployed by this mobile change.
+
 ## Licence
 
 Not decided yet. Until a licence is added, no rights are granted beyond
