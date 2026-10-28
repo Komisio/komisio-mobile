@@ -3,7 +3,8 @@
 Mobile app for [Komisio](https://github.com/Komisio/komisio), the consignment
 platform for second-hand stores. Built with Expo and React Native.
 
-> Status: scaffold only. No screens, authentication or platform calls yet.
+> Status: app shell. Store picker, login with two-step verification and
+> the seller tabs; the tab contents are built next (see `docs/screens.md`).
 
 ## Direction
 
@@ -25,11 +26,15 @@ platform for second-hand stores. Built with Expo and React Native.
 Requires Node.js 22.13+, 24.3+ or 26+, as declared in `engines` in
 `package.json`. `.nvmrc` selects Node 24 (`nvm use`).
 
+Copy `.env.example` to `.env.local` and point it at a Komisio platform
+(local Supabase or staging). Only public client values belong there.
+
 ```bash
 npm install
 npm start          # Expo dev server
 npm run typecheck  # TypeScript
 npm run lint       # ESLint
+npm test           # unit tests (node:test)
 ```
 
 Routes live in `src/app/`; keep components, hooks and utilities outside it.
