@@ -75,7 +75,7 @@ export function SellerPayouts({
   };
   const data = state.data;
   return (
-    <Screen title={t.title}>
+    <Screen title={t.title} bottomSafeArea={false}>
       <Button
         label={d.statements.title}
         variant="secondary"

@@ -25,14 +25,16 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: colors.muted,
-        tabBarActiveBackgroundColor: colors.accent,
         tabBarLabelPosition: "below-icon",
         // Start with one line; grow only when the measured labels wrap.
         // The navigator applies the bottom inset as padding within this height.
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.line,
-          height: 44 + labelHeight + bottom,
+          // 28pt icon slot + 5pt item padding on each side + a hairline.
+          height: 39 + labelHeight + bottom,
+          paddingBottom: bottom,
+          borderTopWidth: 1,
         },
         tabBarLabel: ({ children, color }) => (
           <Text
