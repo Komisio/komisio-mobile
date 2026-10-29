@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
+import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
 import { Button, colors, Loading, Message, Screen } from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
@@ -127,7 +128,9 @@ function AgreementRead({
               ? a.pending
               : change.code === "success"
                 ? a.cleanupSuccess
-                : a.cleanupConflict}
+                : change.code === "rejected"
+                  ? d.bank.rejected
+                  : a.cleanupConflict}
           </Message>
           {change.command ? (
             <View style={styles.card}>
@@ -181,6 +184,12 @@ function AgreementRead({
             disabled={!agreementEndpoint && change.status === "pending"}
             onPress={() => void writer.retry()}
           />
+          {change.status === "pending" && change.command ? (
+            <PendingDiscard
+              key={change.command.command.requestId}
+              onDiscard={() => void writer.discard()}
+            />
+          ) : null}
         </>
       ) : null}
       {change.status === "blocked" ? (
@@ -199,6 +208,17 @@ function AgreementRead({
         <>
           <Message>
             {change.status === "success" ? a.registered : a.changed}
+          </Message>
+          <Button
+            label={a.refresh}
+            onPress={() => setSelection({ version: null, text: null, page: 0 })}
+          />
+        </>
+      ) : null}
+      {change.status === "rejected" || change.status === "discarded" ? (
+        <>
+          <Message>
+            {change.status === "rejected" ? d.bank.rejected : d.bank.discarded}
           </Message>
           <Button
             label={a.refresh}
