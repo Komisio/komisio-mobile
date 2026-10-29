@@ -88,7 +88,7 @@ function ItemRead({
     }, [tenant, item]),
   );
   return (
-    <Screen topSafeArea={false} title={t.detail}>
+    <Screen topSafeArea={false} title={data ? undefined : t.detail}>
       {failure ? (
         <>
           <Message tone="error">{t[failure]}</Message>
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   control: { flex: 1 },
   summary: { gap: 8, paddingVertical: 8 },
   title: { ...uiStyles.title },
-  price: { ...uiStyles.amount, fontSize: 28, lineHeight: 36 },
+  price: { ...uiStyles.amount, fontSize: 24, lineHeight: 32 },
   heading: { ...uiStyles.heading },
   facts: { ...uiStyles.surface, paddingHorizontal: 16 },
   fact: {

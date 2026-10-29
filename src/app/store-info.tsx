@@ -168,17 +168,21 @@ function StoreContent({ info }: { info: StoreInfo }) {
         ) : null}
       </Section>
       <Section title={t.hours}>
-        {weekdays.map((day) => {
-          const hours = info.openingHours.find((row) => row.day === day);
-          return (
-            <View key={day} style={styles.hours}>
-              <Text style={styles.day}>{t.days[day]}</Text>
-              <Text style={styles.text}>
-                {hours ? `${hours.opens}–${hours.closes}` : t.unknown}
-              </Text>
-            </View>
-          );
-        })}
+        {info.openingHours.length ? (
+          weekdays.map((day) => {
+            const hours = info.openingHours.find((row) => row.day === day);
+            return (
+              <View key={day} style={styles.hours}>
+                <Text style={styles.day}>{t.days[day]}</Text>
+                <Text style={styles.text}>
+                  {hours ? `${hours.opens}–${hours.closes}` : t.unknown}
+                </Text>
+              </View>
+            );
+          })
+        ) : (
+          <Text style={styles.text}>{t.unknown}</Text>
+        )}
       </Section>
       <Section title={t.contact}>
         {contacts.length ? (

@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -63,13 +64,30 @@ export function PageHeading({
 export function StatusBadge({
   children,
   attention = false,
+  tone = "positive",
+  live = false,
 }: {
   children: ReactNode;
   attention?: boolean;
+  tone?: "neutral" | "positive" | "warning";
+  live?: boolean;
 }) {
   return (
-    <View style={[styles.badge, attention && styles.attention]}>
-      <Text style={[styles.badgeText, attention && { color: colors.warning }]}>
+    <View
+      accessibilityLiveRegion={live ? "polite" : undefined}
+      style={[
+        styles.badge,
+        tone === "neutral" && styles.neutralBadge,
+        (attention || tone === "warning") && styles.attention,
+      ]}
+    >
+      <Text
+        style={[
+          styles.badgeText,
+          tone === "neutral" && { color: colors.muted },
+          (attention || tone === "warning") && { color: colors.warning },
+        ]}
+      >
         {children}
       </Text>
     </View>
@@ -81,11 +99,13 @@ export function ItemCard({
   media,
   label,
   onPress,
+  compact = false,
 }: {
   children: ReactNode;
   media?: ReactNode;
   label: string;
   onPress: () => void;
+  compact?: boolean;
 }) {
   const { focused, focusProps } = useControlFocus();
   return (
@@ -96,11 +116,16 @@ export function ItemCard({
       {...focusProps}
       style={({ pressed }) => [
         styles.itemCard,
+        compact && styles.compactItem,
         focused && styles.focused,
         pressed && styles.pressed,
       ]}
     >
-      {media ? <View style={styles.media}>{media}</View> : null}
+      {media ? (
+        <View style={[styles.media, compact && styles.compactMedia]}>
+          {media}
+        </View>
+      ) : null}
       <View style={styles.itemBody}>{children}</View>
     </Pressable>
   );
@@ -116,6 +141,33 @@ export function FilterChip({
   onPress: () => void;
 }) {
   return <Choice label={label} selected={selected} onPress={onPress} />;
+}
+
+export function IconButton({
+  label,
+  onPress,
+  children,
+}: {
+  label: string;
+  onPress: () => void;
+  children: ReactNode;
+}) {
+  const { focused, focusProps } = useControlFocus();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      {...focusProps}
+      style={({ pressed }) => [
+        styles.iconButton,
+        focused && styles.focused,
+        pressed && styles.pressed,
+      ]}
+    >
+      {children}
+    </Pressable>
+  );
 }
 
 export function Choice({
@@ -211,13 +263,15 @@ export function Screen({
   brand = false,
   bottomSafeArea = true,
   topSafeArea = true,
+  refresh,
 }: {
-  title: string;
+  title?: string;
   intro?: string;
   children?: ReactNode;
   brand?: boolean;
   bottomSafeArea?: boolean;
   topSafeArea?: boolean;
+  refresh?: { refreshing: boolean; onRefresh: () => void; label: string };
 }) {
   return (
     <SafeAreaView
@@ -232,9 +286,20 @@ export function Screen({
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          refresh ? (
+            <RefreshControl
+              refreshing={refresh.refreshing}
+              onRefresh={refresh.onRefresh}
+              accessibilityLabel={refresh.label}
+              tintColor={colors.brand}
+              colors={[colors.brand]}
+            />
+          ) : undefined
+        }
       >
         {brand ? <Brand /> : null}
-        <PageHeading title={title} intro={intro} />
+        {title ? <PageHeading title={title} intro={intro} /> : null}
         {children}
       </ScrollView>
     </SafeAreaView>
@@ -268,7 +333,7 @@ export function Button({
   onPress: () => void;
   busy?: boolean;
   disabled?: boolean;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "text";
   accessibilityLabel?: string;
   expanded?: boolean;
 }) {
@@ -288,6 +353,7 @@ export function Button({
       style={({ pressed }) => [
         styles.button,
         variant === "secondary" && styles.secondary,
+        variant === "text" && styles.textButton,
         focused && styles.focused,
         (pressed || off) && styles.dimmed,
       ]}
@@ -300,7 +366,7 @@ export function Button({
         <Text
           style={[
             styles.buttonText,
-            variant === "secondary" && styles.secondaryText,
+            variant !== "primary" && styles.secondaryText,
           ]}
         >
           {label}
@@ -336,6 +402,14 @@ export function Loading() {
 }
 
 const styles = StyleSheet.create({
+  iconButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.accent,
+  },
   navigationArrow: {
     width: 32,
     height: 32,
@@ -379,6 +453,13 @@ const styles = StyleSheet.create({
     borderColor: colors.control,
   },
   dimmed: { opacity: 0.6 },
+  textButton: {
+    backgroundColor: "transparent",
+    minHeight: 44,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    alignSelf: "flex-start",
+  },
   buttonText: {
     color: "#fff",
     fontSize: 16,
@@ -412,20 +493,24 @@ const styles = StyleSheet.create({
   },
   itemBody: { flex: 1, minWidth: 0, gap: 6 },
   media: { width: 88, borderRadius: 10, overflow: "hidden" },
+  compactItem: { padding: 12, gap: 12, minHeight: 76 },
+  compactMedia: { width: 72 },
   badge: {
+    maxWidth: "100%",
     alignSelf: "flex-start",
     backgroundColor: colors.accent,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 12,
   },
   badgeText: {
     color: colors.brand,
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 13,
+    lineHeight: 18,
     fontWeight: "500",
   },
   attention: { backgroundColor: colors.warningSurface },
+  neutralBadge: { backgroundColor: colors.neutralSurface },
   chip: {
     maxWidth: "100%",
     minHeight: 48,

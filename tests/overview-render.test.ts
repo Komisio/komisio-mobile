@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
 import { overviewCopy } from "../src/lib/overview-copy.ts";
+import { payoutBadgeTone } from "../src/lib/seller-overview.ts";
 
 const require = createRequire(import.meta.url);
 const { transformSync } = require("@babel/core");
@@ -27,17 +28,42 @@ const compiled = transformSync(source, {
 }).code;
 assert.match(compiled, /react\/compiler-runtime/);
 
-for (const status of ["idle", "loading", "failed", "ready"]) {
-  test(`compiled overview renders ${status} without accessing absent data`, () => {
+for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
+  test(`compiled overview renders ${scenario} without accessing absent data or hiding activity`, () => {
+    const populated = scenario === "populated";
+    const status = populated ? "ready" : scenario;
     const values: number[] = [];
     const data =
       status === "ready"
         ? {
             currency: "SEK",
             balance: { availableOre: 36000, reservedOre: 0, paidOre: 10000 },
-            counts: { active: 2, sold: 3, expiring: 0, ended: 0 },
-            expiring: [],
-            payouts: [],
+            counts: {
+              active: 2,
+              sold: 3,
+              expiring: populated ? 1 : 0,
+              ended: 0,
+            },
+            expiring: populated
+              ? [
+                  {
+                    id: "item",
+                    title: "Synthetic item",
+                    reference: "S-1",
+                    periodEnd: "2026-10-31",
+                  },
+                ]
+              : [],
+            payouts: populated
+              ? [
+                  {
+                    id: "payout",
+                    amountOre: 5000,
+                    status: "requested",
+                    requestedAt: "2026-10-29",
+                  },
+                ]
+              : [],
           }
         : null;
     const state = { status, data, failure: "denied" };
@@ -66,6 +92,7 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
             overview: overviewCopy.sv,
             tabs: { overview: "Översikt" },
             login: { changeStore: "Byt butik" },
+            items: { untitled: "Untitled", periodEnd: "Period end" },
           },
         }),
       },
@@ -77,6 +104,7 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
         }),
       },
       "@/lib/seller-overview-api": {},
+      "@/lib/seller-overview": { payoutBadgeTone },
       "@/lib/catalogue": {
         formatPrice: (ore: number, currency: string) => {
           assert.equal(currency, "SEK");
@@ -84,12 +112,14 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
           return String(ore);
         },
       },
-      "@/lib/seller-items": {},
+      "@/lib/seller-items": { formatItemDate: (value: string) => value },
       "./ui": {
         Screen: "main",
         Loading: "progress",
         Message: "p",
         Button: "button",
+        ItemCard: "article",
+        StatusBadge: "badge",
         colors: {},
         uiStyles: {},
       },
@@ -108,6 +138,35 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
       storeName: "Synthetic store",
     });
     assert.ok(element);
-    assert.deepEqual(values, status === "ready" ? [36000, 0, 10000] : []);
+    assert.deepEqual(
+      values,
+      status === "ready" ? [36000, 0, 10000, ...(populated ? [5000] : [])] : [],
+    );
+    const nodes: any[] = [];
+    function visit(node: any) {
+      if (Array.isArray(node)) return node.forEach(visit);
+      if (!node || typeof node !== "object") return;
+      nodes.push(node);
+      visit(node.props?.children);
+    }
+    visit(element);
+    const headings = nodes
+      .filter((node) => node.props?.accessibilityRole === "header")
+      .map((node) => node.props.children);
+    assert.equal(headings.includes(overviewCopy.sv.expiring), populated);
+    assert.equal(headings.includes(overviewCopy.sv.recentPayouts), populated);
+    if (populated) {
+      assert.ok(nodes.some((node) => node.type === "article"));
+      assert.ok(
+        nodes.some(
+          (node) =>
+            node.type === "badge" &&
+            node.props.children === overviewCopy.sv.statuses.requested,
+        ),
+      );
+      assert.ok(
+        nodes.some((node) => node.props?.label === overviewCopy.sv.allPayouts),
+      );
+    }
   });
 }

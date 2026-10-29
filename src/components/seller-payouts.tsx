@@ -12,11 +12,13 @@ import {
   Loading,
   Message,
   Screen,
+  NavigationRow,
 } from "./ui";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
 import { formatPrice } from "@/lib/catalogue";
+import { payoutBadgeTone } from "@/lib/seller-overview";
 import { formatAgreementTime } from "@/lib/seller-agreement";
 import { payoutEndpoint, payoutWriter, readPayouts } from "@/lib/payout-api";
 import {
@@ -76,11 +78,6 @@ export function SellerPayouts({
   const data = state.data;
   return (
     <Screen title={t.title} bottomSafeArea={false}>
-      <Button
-        label={d.statements.title}
-        variant="secondary"
-        onPress={() => router.push("/statements")}
-      />
       <View style={styles.views}>
         {(["request", "history"] as const).map((value) => (
           <Choice
@@ -91,11 +88,6 @@ export function SellerPayouts({
           />
         ))}
       </View>
-      <Button
-        label={d.bank.title}
-        variant="secondary"
-        onPress={() => router.push("/bank-account")}
-      />
       {!payoutEndpoint ? <Message>{t.notConfigured}</Message> : null}
       {change.status === "busy" || change.status === "idle" ? (
         <Loading />
@@ -251,7 +243,7 @@ export function SellerPayouts({
                     <Text style={styles.heading}>
                       {formatPrice(payout.amountOre, data.currency, locale)}
                     </Text>
-                    <StatusBadge>
+                    <StatusBadge tone={payoutBadgeTone(payout.status)}>
                       {d.overview.statuses[payout.status]}
                     </StatusBadge>
                     <Text style={styles.note}>
@@ -276,27 +268,41 @@ export function SellerPayouts({
                   onPress={() => setPage(0)}
                 />
               ) : null}
-              <Button
-                label={t.previous}
-                variant="secondary"
-                disabled={page === 0}
-                onPress={() => setPage(page - 1)}
-              />
-              <Button
-                label={t.next}
-                variant="secondary"
-                disabled={(page + 1) * 25 >= data.total || page >= 100000}
-                onPress={() => setPage(page + 1)}
-              />
+              {data.total > 25 || page > 0 ? (
+                <>
+                  <Button
+                    label={t.previous}
+                    variant="secondary"
+                    disabled={page === 0}
+                    onPress={() => setPage(page - 1)}
+                  />
+                  <Button
+                    label={t.next}
+                    variant="secondary"
+                    disabled={(page + 1) * 25 >= data.total || page >= 100000}
+                    onPress={() => setPage(page + 1)}
+                  />
+                </>
+              ) : null}
             </>
           )}
           <Button
             label={t.refresh}
-            variant="secondary"
+            variant="text"
             onPress={() => void read.refresh()}
           />
         </>
       ) : null}
+      <View style={{ gap: 8 }}>
+        <NavigationRow
+          label={d.bank.title}
+          onPress={() => router.push("/bank-account")}
+        />
+        <NavigationRow
+          label={d.statements.title}
+          onPress={() => router.push("/statements")}
+        />
+      </View>
     </Screen>
   );
 }
@@ -319,9 +325,14 @@ function PayoutForm({
   const canRequest =
     data.balance.availableOre > 0 &&
     data.balance.availableOre >= data.thresholdOre;
+  if (!canRequest)
+    return (
+      <View style={styles.card}>
+        <Message>{t.insufficient}</Message>
+      </View>
+    );
   return (
     <View style={styles.card}>
-      {!canRequest ? <Message>{t.insufficient}</Message> : null}
       <Field
         label={t.amount.replace("{currency}", data.currency)}
         value={amount}

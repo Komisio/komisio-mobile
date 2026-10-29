@@ -13,6 +13,13 @@ export type PayoutSummary = {
   status: (typeof payoutStatuses)[number];
   requestedAt: string;
 };
+export function payoutBadgeTone(status: PayoutSummary["status"]) {
+  return status === "paid"
+    ? ("positive" as const)
+    : status === "requested" || status === "rejected"
+      ? ("warning" as const)
+      : ("neutral" as const);
+}
 export type SellerOverview = {
   currency: string;
   balance: { availableOre: number; reservedOre: number; paidOre: number };

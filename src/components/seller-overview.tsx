@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
 import { readSellerOverview } from "@/lib/seller-overview-api";
+import { payoutBadgeTone } from "@/lib/seller-overview";
 import { formatPrice } from "@/lib/catalogue";
 import { formatItemDate } from "@/lib/seller-items";
 import {
@@ -15,6 +16,7 @@ import {
   Message,
   Screen,
   ItemCard,
+  StatusBadge,
 } from "./ui";
 
 export function SellerOverviewScreen({
@@ -53,6 +55,11 @@ export function SellerOverviewScreen({
       bottomSafeArea={false}
       title={d.tabs.overview}
       intro={t.intro.replace("{store}", storeName)}
+      refresh={{
+        refreshing: state.status === "loading",
+        onRefresh: () => void read.refresh(),
+        label: t.refresh,
+      }}
     >
       {state.status === "idle" || state.status === "loading" ? (
         <Loading />
@@ -107,78 +114,68 @@ export function SellerOverviewScreen({
               </View>
             ))}
           </View>
-          <Button
-            label={t.myItems}
-            variant="secondary"
-            onPress={() => router.navigate("/(tabs)/items")}
-          />
-          <View style={styles.section}>
-            <Text style={styles.heading} accessibilityRole="header">
-              {t.expiring}
-            </Text>
-            <Text style={styles.text}>
-              {data.counts.expiring
-                ? t.expiringIntro.replace(
-                    "{count}",
-                    String(data.counts.expiring),
-                  )
-                : t.noExpiring}
-            </Text>
-            {data.expiring.map((item) => (
-              <ItemCard
-                key={item.id}
-                label={`${item.title ?? d.items.untitled}, ${item.reference}`}
-                onPress={() =>
-                  router.push({
-                    pathname: "/my-items/[tenant]/[item]",
-                    params: { tenant, item: item.id },
-                  })
-                }
-              >
-                <Text style={styles.itemTitle}>
-                  {item.title ?? d.items.untitled}
-                </Text>
-                <Text style={styles.note}>{item.reference}</Text>
-                <Text style={styles.text}>
-                  {d.items.periodEnd}: {formatItemDate(item.periodEnd, locale)}
-                </Text>
-              </ItemCard>
-            ))}
-            {data.counts.expiring > data.expiring.length ? (
-              <Text style={styles.note}>
-                {t.preview
-                  .replace("{shown}", String(data.expiring.length))
-                  .replace("{count}", String(data.counts.expiring))}
+          {data.counts.expiring > 0 ? (
+            <View style={styles.section}>
+              <Text style={styles.heading} accessibilityRole="header">
+                {t.expiring}
               </Text>
-            ) : null}
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.heading} accessibilityRole="header">
-              {t.recentPayouts}
-            </Text>
-            <Text style={styles.note}>{t.payoutIntro}</Text>
-            {data.payouts.length ? (
-              data.payouts.map((payout) => (
+              {data.expiring.map((item) => (
+                <ItemCard
+                  compact
+                  key={item.id}
+                  label={`${item.title ?? d.items.untitled}, ${item.reference}`}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/my-items/[tenant]/[item]",
+                      params: { tenant, item: item.id },
+                    })
+                  }
+                >
+                  <Text style={styles.itemTitle}>
+                    {item.title ?? d.items.untitled}
+                  </Text>
+                  <Text style={styles.note}>{item.reference}</Text>
+                  <Text style={styles.text}>
+                    {d.items.periodEnd}:{" "}
+                    {formatItemDate(item.periodEnd, locale)}
+                  </Text>
+                </ItemCard>
+              ))}
+              {data.counts.expiring > data.expiring.length ? (
+                <Text style={styles.note}>
+                  {t.preview
+                    .replace("{shown}", String(data.expiring.length))
+                    .replace("{count}", String(data.counts.expiring))}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+          {data.payouts.length > 0 ? (
+            <View style={styles.section}>
+              <Text style={styles.heading} accessibilityRole="header">
+                {t.recentPayouts}
+              </Text>
+              {data.payouts.map((payout) => (
                 <View key={payout.id} style={styles.item}>
                   <Text style={styles.itemTitle}>
                     {money(payout.amountOre)}
                   </Text>
-                  <Text style={styles.text}>{t.statuses[payout.status]}</Text>
+                  <StatusBadge tone={payoutBadgeTone(payout.status)}>
+                    {t.statuses[payout.status]}
+                  </StatusBadge>
                   <Text style={styles.note}>
                     {t.requestedAt}:{" "}
                     {formatItemDate(payout.requestedAt, locale)}
                   </Text>
                 </View>
-              ))
-            ) : (
-              <Text style={styles.text}>{t.noPayouts}</Text>
-            )}
-          </View>
-          <Button
-            label={t.refresh}
-            variant="secondary"
-            onPress={() => void read.refresh()}
-          />
+              ))}
+              <Button
+                label={t.allPayouts}
+                variant="text"
+                onPress={() => router.navigate("/(tabs)/money")}
+              />
+            </View>
+          ) : null}
         </>
       ) : null}
     </Screen>

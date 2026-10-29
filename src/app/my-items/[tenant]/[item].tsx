@@ -99,7 +99,7 @@ function ItemRead({
     next = item ? plannedMarkdown(item) : null,
     collection = item ? collectionDate(item) : null;
   return (
-    <Screen topSafeArea={false} title={t.detail}>
+    <Screen topSafeArea={false} title={item ? undefined : t.detail}>
       {failure ? (
         <>
           <Message tone="error">{t[failure]}</Message>
@@ -114,6 +114,7 @@ function ItemRead({
           </Text>
           {item.category && <Text style={styles.muted}>{item.category}</Text>}
           <StatusBadge
+            tone={item.stage === "sold" ? "positive" : "neutral"}
             attention={
               item.stage === "period_ending" || item.stage === "period_ended"
             }
@@ -186,7 +187,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   title: uiStyles.title,
   muted: uiStyles.note,
-  price: { ...uiStyles.amount, fontSize: 30, lineHeight: 38 },
+  price: { ...uiStyles.amount, fontSize: 24, lineHeight: 32 },
   facts: uiStyles.card,
   fact: { gap: 4 },
   value: uiStyles.body,

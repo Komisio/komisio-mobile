@@ -63,7 +63,16 @@ function Statements({ tenant, seller }: { tenant: string; seller: string }) {
   );
   const data = state.data;
   return (
-    <Screen topSafeArea={false} title={t.title} intro={t.intro}>
+    <Screen
+      topSafeArea={false}
+      title={t.title}
+      intro={t.intro}
+      refresh={{
+        refreshing: state.status === "loading",
+        onRefresh: () => void read.refresh(),
+        label: t.refresh,
+      }}
+    >
       {state.status === "idle" || state.status === "loading" ? (
         <Loading />
       ) : state.status === "failed" ? (
@@ -145,11 +154,6 @@ function Statements({ tenant, seller }: { tenant: string; seller: string }) {
               />
             </>
           ) : null}
-          <Button
-            label={t.refresh}
-            variant="secondary"
-            onPress={() => void read.refresh()}
-          />
         </>
       ) : null}
     </Screen>
