@@ -160,6 +160,39 @@ Native storage limits, cold-start recovery, web multi-tab interaction, keyboard
 and large-text layout still require interactive verification before release.
 The dependency API has not been deployed by this mobile change.
 
+## Payout request and history (S23/S24/S53)
+
+The Money tab has request/history views based on the earlier app's payout screens.
+Available, reserved and paid amounts and the minimum threshold are server facts;
+the app preserves negative balances and does not sum a history page. Amount input
+accepts up to two decimal digits and converts them to integer minor units without
+rounding. The full-balance shortcut uses the same bounded request contract.
+
+History requires [platform PR #722](https://github.com/Komisio/komisio/pull/722):
+`my_seller_payouts_page` returns 25 rows, a complete total, store currency and
+balance/threshold facts under the exact seller guard. Request dates are explicitly
+labelled; a requested/approved payout is not presented as already paid. Page reads
+are live snapshots, not a frozen export. Refresh, navigation and account changes
+discard stale reads. The bank-account shortcut opens S25; no Swish is offered.
+
+Writes use the same opt-in API as S25, with a separate durable payout journal.
+Only the command fields enter the API; its local journal also keeps display currency
+so an uncertain amount remains understandable if a subsequent read fails. A lost
+response retries the same request ID and amount. Confirmed success, post-replay
+threshold/balance conflicts and explicit first-attempt API refusals release the
+journal. A refusal after an uncertain earlier attempt retains it. Sellers can
+release an unresolved request with the explicit confirmation described above;
+this cancels nothing server-side and requires checking history before a new request. Creating a
+request does not transfer money or reserve the balance until the store approves it.
+
+An integration smoke test connected the actual mobile command controller and
+transport to the in-process API and real local Supabase Auth/RPC. It lost a response
+after commit, recreated the controller, replayed the request and verified one
+request/event, unchanged balance/reservation and a real balance-conflict response.
+This used synthetic local fixtures, Node transport and in-memory storage. Native
+network/storage recovery, browser interactions and independent Opus review remain
+required before release; JavaScript export does not verify those behaviors.
+
 ## Licence
 
 Not decided yet. Until a licence is added, no rights are granted beyond
