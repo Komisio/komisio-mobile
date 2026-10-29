@@ -210,21 +210,24 @@ export function Screen({
   children,
   brand = false,
   bottomSafeArea = true,
+  topSafeArea = true,
 }: {
   title: string;
   intro?: string;
   children?: ReactNode;
   brand?: boolean;
   bottomSafeArea?: boolean;
+  topSafeArea?: boolean;
 }) {
   return (
     <SafeAreaView
       style={styles.safe}
-      edges={
-        bottomSafeArea
-          ? ["top", "left", "right", "bottom"]
-          : ["top", "left", "right"]
-      }
+      edges={{
+        top: topSafeArea ? "additive" : "off",
+        bottom: bottomSafeArea ? "additive" : "off",
+        left: "additive",
+        right: "additive",
+      }}
     >
       <ScrollView
         contentContainerStyle={styles.content}

@@ -23,7 +23,7 @@ export default function StatementsScreen() {
   const { account, store, session } = useSession();
   const { d } = useI18n();
   return (
-    <SellerGate title={d.statements.title}>
+    <SellerGate topSafeArea={false} title={d.statements.title}>
       {account &&
       account !== "failed" &&
       store &&
@@ -63,14 +63,7 @@ function Statements({ tenant, seller }: { tenant: string; seller: string }) {
   );
   const data = state.data;
   return (
-    <Screen title={t.title} intro={t.intro}>
-      <Button
-        label={t.back}
-        variant="secondary"
-        onPress={() =>
-          router.canGoBack() ? router.back() : router.replace("/(tabs)/money")
-        }
-      />
+    <Screen topSafeArea={false} title={t.title} intro={t.intro}>
       {state.status === "idle" || state.status === "loading" ? (
         <Loading />
       ) : state.status === "failed" ? (

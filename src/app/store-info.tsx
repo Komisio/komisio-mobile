@@ -1,6 +1,6 @@
 import { useCallback, useState, type ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import * as Linking from "expo-linking";
 import { Button, uiStyles, Loading, Message, Screen } from "@/components/ui";
 import { useSession } from "@/lib/session";
@@ -78,14 +78,7 @@ function ProfileRead({
     }, [slug]),
   );
   return (
-    <Screen title={t.title} intro={name}>
-      <Button
-        label={t.back}
-        variant="secondary"
-        onPress={() =>
-          router.canGoBack() ? router.back() : router.replace("/(tabs)")
-        }
-      />
+    <Screen topSafeArea={false} title={t.title} intro={name}>
       {state.status === "loading" ? (
         <Loading />
       ) : state.status === "failed" ? (

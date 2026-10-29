@@ -111,13 +111,120 @@ test("tab screens omit the second bottom inset; standalone screens retain it", (
     "./brand": { Brand: "Brand" },
   });
   assert.equal(
-    ui
-      .Screen({ title: "Profile", bottomSafeArea: false })
-      .props.edges.includes("bottom"),
-    false,
+    ui.Screen({ title: "Profile", bottomSafeArea: false }).props.edges.bottom,
+    "off",
   );
-  assert.equal(
-    ui.Screen({ title: "Bank" }).props.edges.includes("bottom"),
+  assert.equal(ui.Screen({ title: "Login" }).props.edges.bottom, "additive");
+  assert.equal(ui.Screen({ title: "Login" }).props.edges.top, "additive");
+  const detail = ui.Screen({ title: "Bank", topSafeArea: false });
+  assert.equal(detail.props.edges.top, "off");
+  assert.equal(detail.props.edges.bottom, "additive");
+});
+
+test("native back is preserved with history; direct links retain an accessible escape", () => {
+  let hasHistory = false;
+  const actions: string[] = [];
+  const header = compile("../src/components/detail-navigation.tsx", {
+    "expo-router": {
+      router: {
+        canGoBack: () => hasHistory,
+        back: () => actions.push("back"),
+        replace: (route: string) => actions.push(route),
+      },
+    },
+    "expo-image": { Image: "Image" },
+    "react-native": {
+      Pressable: "Pressable",
+      StyleSheet: { create: (value: unknown) => value },
+    },
+    "./theme": { colors: {} },
+    "../../assets/icons/back.svg": "back.svg",
+  });
+  const options = header.detailHeaderOptions(
+    "/(tabs)/profile",
+    "Tillbaka",
     true,
   );
+  assert.equal(options.headerShown, true);
+  assert.equal(options.headerBackButtonDisplayMode, "minimal");
+  assert.equal(options.headerLeft, undefined);
+  const direct = header.detailHeaderOptions(
+    "/(tabs)/profile",
+    "Tillbaka",
+    false,
+  );
+  const button = direct.headerLeft();
+  assert.equal(button.props.accessibilityRole, "button");
+  assert.equal(button.props.accessibilityLabel, "Tillbaka");
+  button.props.onPress();
+  hasHistory = true;
+  button.props.onPress();
+  assert.deepEqual(actions, ["/(tabs)/profile", "back"]);
+});
+
+test("all seven detail routes configure back navigation with their own fallback", () => {
+  const layout = compile("../src/app/_layout.tsx", {
+    "expo-router": {
+      Stack: Object.assign(() => null, { Screen: "Route", Protected: "Guard" }),
+    },
+    "react-native-safe-area-context": { SafeAreaProvider: "SafeAreaProvider" },
+    "@/lib/i18n": {
+      I18nProvider: "I18nProvider",
+      useI18n: () => ({
+        d: Object.fromEntries(
+          [
+            "catalogue",
+            "storeInfo",
+            "items",
+            "agreement",
+            "bank",
+            "statements",
+          ].map((key) => [key, { back: "Back" }]),
+        ),
+      }),
+    },
+    "@/lib/session": {
+      SessionProvider: "SessionProvider",
+      useSession: () => ({
+        ready: true,
+        store: {},
+        session: {},
+        mfaRequired: false,
+      }),
+    },
+    "@/components/ui": {},
+    "@/components/detail-navigation": {
+      detailHeaderOptions: (
+        fallback: string,
+        label: string,
+        canGoBack: boolean,
+      ) => ({ fallback, label, canGoBack }),
+    },
+  });
+  const routesElement =
+    layout.default().props.children.props.children.props.children;
+  const stack = routesElement.type();
+  assert.equal(stack.props.screenOptions.headerShown, false);
+  const screens = stack.props.children.at(-1).props.children;
+  assert.equal(screens[0].props.name, "(tabs)");
+  assert.equal(screens[0].props.options, undefined);
+  const expected: Record<string, string> = {
+    "catalogue/[tenant]/[item]": "/(tabs)",
+    "store-info": "/(tabs)",
+    "my-items/[tenant]/[item]": "/(tabs)/items",
+    agreement: "/(tabs)/profile",
+    "bank-account": "/(tabs)/profile",
+    "statements/index": "/(tabs)/money",
+    "statements/[tenant]/[statement]": "/statements",
+  };
+  assert.equal(screens.length, 8);
+  for (const screen of screens.slice(1)) {
+    for (const canGoBack of [true, false]) {
+      const options = screen.props.options({
+        navigation: { canGoBack: () => canGoBack },
+      });
+      assert.equal(options.fallback, expected[screen.props.name]);
+      assert.equal(options.canGoBack, canGoBack);
+    }
+  }
 });
