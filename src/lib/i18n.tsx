@@ -9,9 +9,23 @@ import { getLocales } from "expo-localization";
 import { secureStorage } from "./secure-storage";
 import { catalogueCopy } from "./catalogue-copy";
 import { storeInfoCopy } from "./store-info-copy";
+import { sellerItemsCopy } from "./seller-items-copy";
+import { overviewCopy } from "./overview-copy";
+import { agreementCopy } from "./agreement-copy";
+import { bankCopy } from "./bank-copy";
+import { payoutCopy } from "./payout-copy";
+import { statementCopy } from "./statement-copy";
+import { agreementAcceptCopy } from "./agreement-accept-copy";
 
 const sv = {
   storeInfo: storeInfoCopy.sv,
+  agreementAccept: agreementAcceptCopy.sv,
+  statements: statementCopy.sv,
+  payouts: payoutCopy.sv,
+  bank: bankCopy.sv,
+  agreement: agreementCopy.sv,
+  overview: overviewCopy.sv,
+  items: sellerItemsCopy.sv,
   catalogue: catalogueCopy.sv,
   languageName: "Svenska",
   language: "Språk",
@@ -69,6 +83,13 @@ export type Dictionary = typeof sv;
 
 const en: Dictionary = {
   storeInfo: storeInfoCopy.en,
+  agreementAccept: agreementAcceptCopy.en,
+  statements: statementCopy.en,
+  payouts: payoutCopy.en,
+  bank: bankCopy.en,
+  agreement: agreementCopy.en,
+  overview: overviewCopy.en,
+  items: sellerItemsCopy.en,
   catalogue: catalogueCopy.en,
   languageName: "English",
   language: "Language",
