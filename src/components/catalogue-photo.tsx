@@ -30,7 +30,7 @@ export function CataloguePhoto({
     );
   return (
     <RemotePhoto
-      key={`${photo.path}:${attempt}`}
+      key={`${photo.bucket}:${photo.path}:${attempt}`}
       source={photoSource(photo, tenant, url, key, session.access_token)}
       label={label}
       retryable={retryable}
