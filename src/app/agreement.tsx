@@ -113,11 +113,13 @@ function AgreementRead({
     t.version.replace("{version}", String(version));
   return (
     <Screen topSafeArea={false} title={t.title}>
-      <Button
-        label={t.current}
-        variant="secondary"
-        onPress={() => setSelection({ version: null, text: null, page: 0 })}
-      />
+      {selection.version || selection.text || selection.page > 0 ? (
+        <Button
+          label={t.current}
+          variant="secondary"
+          onPress={() => setSelection({ version: null, text: null, page: 0 })}
+        />
+      ) : null}
       {!agreementEndpoint ? <Message>{a.unavailable}</Message> : null}
       {change.status === "idle" || change.status === "busy" ? (
         <Loading />
@@ -256,25 +258,29 @@ function AgreementRead({
               <Text style={styles.text}>
                 {t.language}: {agreementLanguages[agreement.language]}
               </Text>
-              <View style={styles.languages}>
-                {data.languages.map((row) => (
-                  <Choice
-                    key={row.id}
-                    label={agreementLanguages[row.language]}
-                    selected={
-                      row.id === (agreement.translationId ?? agreement.id)
-                    }
-                    onPress={() =>
-                      setSelection({
-                        ...selection,
-                        version: agreement.id,
-                        text: row.id,
-                      })
-                    }
-                  />
-                ))}
-              </View>
-              <Text style={styles.note}>{t.verbatim}</Text>
+              {data.languages.length > 1 ? (
+                <View style={styles.languages}>
+                  {data.languages.map((row) => (
+                    <Choice
+                      key={row.id}
+                      label={agreementLanguages[row.language]}
+                      selected={
+                        row.id === (agreement.translationId ?? agreement.id)
+                      }
+                      onPress={() =>
+                        setSelection({
+                          ...selection,
+                          version: agreement.id,
+                          text: row.id,
+                        })
+                      }
+                    />
+                  ))}
+                </View>
+              ) : null}
+              <Text style={styles.note}>
+                {data.languages.length > 1 ? t.verbatim : t.asPublished}
+              </Text>
               <View style={styles.card}>
                 <Text selectable style={styles.body}>
                   {agreement.body}

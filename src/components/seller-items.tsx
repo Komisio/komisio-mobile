@@ -102,13 +102,27 @@ export function SellerItems({
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled"
+        refreshing={state.refreshing}
+        onRefresh={() => void pager.revalidate()}
         ListHeaderComponent={
           <>
             {header}
             {state.status === "ready" && (
-              <Text accessibilityLiveRegion="polite" style={styles.count}>
-                {t.count.replace("{count}", String(state.total))}
-              </Text>
+              <View style={styles.resultRow}>
+                <StatusBadge tone="neutral" live>
+                  {t.count.replace("{count}", String(state.total))}
+                </StatusBadge>
+                {submittedQuery ? (
+                  <Button
+                    variant="text"
+                    label={d.catalogue.clear}
+                    onPress={() => {
+                      setQuery("");
+                      setSubmittedQuery("");
+                    }}
+                  />
+                ) : null}
+              </View>
             )}
           </>
         }
@@ -117,6 +131,7 @@ export function SellerItems({
             date = sellerItemDate(item);
           return (
             <ItemCard
+              compact
               label={`${item.title ?? t.untitled}, ${t.statuses[sellerItemStatus(item)]}`}
               onPress={() =>
                 router.push({
@@ -136,6 +151,7 @@ export function SellerItems({
                   : formatPrice(price, state.currency, locale)}
               </Text>
               <StatusBadge
+                tone={item.stage === "sold" ? "positive" : "neutral"}
                 attention={
                   item.stage === "period_ending" ||
                   item.stage === "period_ended"
@@ -185,13 +201,15 @@ export function SellerItems({
                   onPress={() => void pager.more()}
                 />
               )}
-              <Button
-                label={state.failure ? t.retryRefresh : t.refresh}
-                variant="secondary"
-                disabled={state.more}
-                busy={state.refreshing}
-                onPress={() => void pager.revalidate()}
-              />
+              {state.failure ? (
+                <Button
+                  label={state.failure ? t.retryRefresh : t.refresh}
+                  variant="text"
+                  disabled={state.more}
+                  busy={state.refreshing}
+                  onPress={() => void pager.revalidate()}
+                />
+              ) : null}
             </View>
           ) : undefined
         }
@@ -213,10 +231,16 @@ const styles = StyleSheet.create({
   filters: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   message: { ...uiStyles.content },
   list: { ...uiStyles.content, gap: 12 },
-  count: { ...uiStyles.note, marginBottom: 4 },
-  itemTitle: { ...uiStyles.body, fontWeight: "600" },
+  resultRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  itemTitle: uiStyles.itemName,
   reference: { ...uiStyles.note },
-  price: { ...uiStyles.amount },
+  price: uiStyles.itemPrice,
   date: { ...uiStyles.note },
   footer: { paddingVertical: 16, gap: 12 },
 });

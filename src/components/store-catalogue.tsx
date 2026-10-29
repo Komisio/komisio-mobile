@@ -15,8 +15,10 @@ import {
   Message,
   PageHeading,
   ItemCard,
+  StatusBadge,
+  IconButton,
 } from "./ui";
-import { Brand } from "./brand";
+import { InfoIcon } from "./brand";
 import { CataloguePhoto } from "./catalogue-photo";
 
 export function StoreCatalogue({
@@ -56,13 +58,17 @@ export function StoreCatalogue({
   const failure = state.failure ? t[state.failure] : null;
   const header = (
     <View style={styles.header}>
-      <Brand />
-      <PageHeading title={name} />
-      <Button
-        label={d.storeInfo.title}
-        variant="secondary"
-        onPress={() => router.push("/store-info")}
-      />
+      <View style={styles.titleRow}>
+        <View style={{ flex: 1 }}>
+          <PageHeading title={name} />
+        </View>
+        <IconButton
+          label={d.storeInfo.title}
+          onPress={() => router.push("/store-info")}
+        >
+          <InfoIcon />
+        </IconButton>
+      </View>
       <View style={styles.searchRow}>
         <View style={styles.search}>
           <Field
@@ -86,18 +92,34 @@ export function StoreCatalogue({
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled"
+        refreshing={state.refreshing}
+        onRefresh={() => void pager.revalidate()}
         ListHeaderComponent={
           <>
             {header}
             {state.status === "ready" && (
-              <Text style={styles.count}>
-                {t.count.replace("{count}", String(state.total))}
-              </Text>
+              <View style={styles.resultRow}>
+                <StatusBadge tone="neutral" live>
+                  {t.count.replace("{count}", String(state.total))}
+                </StatusBadge>
+                {submittedQuery ? (
+                  <Button
+                    variant="text"
+                    label={t.clear}
+                    onPress={() => {
+                      setQuery("");
+                      setSubmittedQuery("");
+                      void pager.search("");
+                    }}
+                  />
+                ) : null}
+              </View>
             )}
           </>
         }
         renderItem={({ item }) => (
           <ItemCard
+            compact
             label={`${item.title ?? t.untitled}, ${formatPrice(item.priceOre, state.currency, locale)}`}
             media={
               item.photo ? (
@@ -117,7 +139,7 @@ export function StoreCatalogue({
           >
             <Text style={styles.itemTitle}>{item.title ?? t.untitled}</Text>
             {item.category ? (
-              <Text style={styles.category}>{item.category}</Text>
+              <StatusBadge tone="neutral">{item.category}</StatusBadge>
             ) : null}
             <Text style={styles.price}>
               {formatPrice(item.priceOre, state.currency, locale)}
@@ -147,6 +169,13 @@ export function StoreCatalogue({
           state.status === "ready" ? (
             <View style={styles.footer}>
               {failure && <Message tone="error">{failure}</Message>}
+              {state.offset < state.total ? (
+                <Text style={uiStyles.note}>
+                  {t.loaded
+                    .replace("{shown}", String(state.items.length))
+                    .replace("{total}", String(state.total))}
+                </Text>
+              ) : null}
               {state.offset < state.total && (
                 <Button
                   label={state.failure ? d.retry : t.more}
@@ -155,13 +184,15 @@ export function StoreCatalogue({
                   onPress={() => void pager.more()}
                 />
               )}
-              <Button
-                label={t.refresh}
-                variant="secondary"
-                disabled={state.more}
-                busy={state.refreshing}
-                onPress={() => void pager.revalidate()}
-              />
+              {state.failure && state.offset >= state.total ? (
+                <Button
+                  label={t.refresh}
+                  variant="text"
+                  disabled={state.more}
+                  busy={state.refreshing}
+                  onPress={() => void pager.revalidate()}
+                />
+              ) : null}
             </View>
           ) : undefined
         }
@@ -172,7 +203,15 @@ export function StoreCatalogue({
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  header: { gap: 16, marginBottom: 16 },
+  header: { gap: 14, marginBottom: 12 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  resultRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
   searchRow: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -182,9 +221,7 @@ const styles = StyleSheet.create({
   search: { flexGrow: 1, flexBasis: 180, minWidth: 0 },
   message: { ...uiStyles.content },
   list: { ...uiStyles.content, gap: 12 },
-  count: { ...uiStyles.note, marginBottom: 4 },
-  itemTitle: { ...uiStyles.body, fontWeight: "600" },
-  category: { ...uiStyles.note },
-  price: { ...uiStyles.amount },
+  itemTitle: uiStyles.itemName,
+  price: uiStyles.itemPrice,
   footer: { paddingVertical: 16, gap: 12 },
 });

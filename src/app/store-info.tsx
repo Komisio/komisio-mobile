@@ -112,6 +112,11 @@ function StoreContent({ info }: { info: StoreInfo }) {
   const [opening, setOpening] = useState(false);
   const [failed, setFailed] = useState(false);
   const address = addressLines(info.address);
+  const hasAddress = Boolean(
+    info.address.street.trim() ||
+    info.address.postalCode.trim() ||
+    info.address.city.trim(),
+  );
   const map = mapUrl(info.address);
   const contacts = [
     {
@@ -147,42 +152,53 @@ function StoreContent({ info }: { info: StoreInfo }) {
   );
   return (
     <>
+      {!hasAddress &&
+      !contacts.length &&
+      !info.openingHours.length &&
+      !info.concept.trim() &&
+      !info.accepts.trim() ? (
+        <Message>{t.missing}</Message>
+      ) : null}
       {info.concept.trim() ? (
         <Section title={t.concept}>
           <Text style={styles.text}>{info.concept}</Text>
         </Section>
       ) : null}
-      <Section title={t.address}>
-        <Text selectable style={styles.text}>
-          {address.length ? address.join("\n") : t.noAddress}
-        </Text>
-        {map ? (
-          <>
-            <Button
-              label={t.map}
-              disabled={opening}
-              onPress={() => void open(map)}
-            />
-            <Text style={styles.note}>{t.externalMap}</Text>
-          </>
-        ) : null}
-      </Section>
-      <Section title={t.hours}>
-        {weekdays.map((day) => {
-          const hours = info.openingHours.find((row) => row.day === day);
-          return (
-            <View key={day} style={styles.hours}>
-              <Text style={styles.day}>{t.days[day]}</Text>
-              <Text style={styles.text}>
-                {hours ? `${hours.opens}–${hours.closes}` : t.unknown}
-              </Text>
-            </View>
-          );
-        })}
-      </Section>
-      <Section title={t.contact}>
-        {contacts.length ? (
-          contacts.map(({ value, url, label }) => (
+      {hasAddress ? (
+        <Section title={t.address}>
+          <Text selectable style={styles.text}>
+            {address.join("\n")}
+          </Text>
+          {map ? (
+            <>
+              <Button
+                label={t.map}
+                disabled={opening}
+                onPress={() => void open(map)}
+              />
+              <Text style={styles.note}>{t.externalMap}</Text>
+            </>
+          ) : null}
+        </Section>
+      ) : null}
+      {info.openingHours.length ? (
+        <Section title={t.hours}>
+          {weekdays.map((day) => {
+            const hours = info.openingHours.find((row) => row.day === day);
+            return (
+              <View key={day} style={styles.hours}>
+                <Text style={styles.day}>{t.days[day]}</Text>
+                <Text style={styles.text}>
+                  {hours ? `${hours.opens}–${hours.closes}` : t.unknown}
+                </Text>
+              </View>
+            );
+          })}
+        </Section>
+      ) : null}
+      {contacts.length ? (
+        <Section title={t.contact}>
+          {contacts.map(({ value, url, label }) => (
             <View key={label} style={styles.contact}>
               <Text selectable style={styles.text}>
                 {value}
@@ -196,11 +212,9 @@ function StoreContent({ info }: { info: StoreInfo }) {
                 />
               ) : null}
             </View>
-          ))
-        ) : (
-          <Text style={styles.text}>{t.noContact}</Text>
-        )}
-      </Section>
+          ))}
+        </Section>
+      ) : null}
       {failed ? <Message tone="error">{t.linkFailed}</Message> : null}
       {info.accepts.trim() ? (
         <Section title={t.accepts}>

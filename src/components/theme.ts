@@ -17,6 +17,7 @@ export const colors = {
   dangerSurface: "#fff0ed",
   warning: "#745018",
   warningSurface: "#fbf1dc",
+  neutralSurface: "#eef0ed",
 };
 
 export const uiStyles = StyleSheet.create({
@@ -28,8 +29,8 @@ export const uiStyles = StyleSheet.create({
     gap: 20,
   },
   title: {
-    fontSize: 30,
-    lineHeight: 38,
+    fontSize: 26,
+    lineHeight: 34,
     fontWeight: "700",
     color: colors.text,
   },
@@ -57,6 +58,19 @@ export const uiStyles = StyleSheet.create({
   amount: {
     fontSize: 22,
     lineHeight: 30,
+    fontWeight: "600",
+    fontVariant: ["tabular-nums"],
+    color: colors.brand,
+  },
+  itemName: {
+    fontSize: 17,
+    lineHeight: 23,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  itemPrice: {
+    fontSize: 18,
+    lineHeight: 24,
     fontWeight: "600",
     fontVariant: ["tabular-nums"],
     color: colors.brand,

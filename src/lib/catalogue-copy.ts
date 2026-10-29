@@ -2,6 +2,8 @@ export const catalogueCopy = {
   sv: {
     search: "Sök bland butikens varor",
     searchButton: "Sök",
+    clear: "Rensa sökning",
+    loaded: "Visar {shown} av {total} varor",
     count: "{count} varor",
     empty: "Det finns inga varor att visa just nu.",
     noMatches: "Inga varor matchar sökningen.",
@@ -33,6 +35,8 @@ export const catalogueCopy = {
   en: {
     search: "Search the store's items",
     searchButton: "Search",
+    clear: "Clear search",
+    loaded: "Showing {shown} of {total} items",
     count: "{count} items",
     empty: "There are no items to show right now.",
     noMatches: "No items match your search.",

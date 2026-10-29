@@ -23,6 +23,16 @@ const icons = {
   profile: require("../../assets/icons/profile.svg"),
 };
 
+export function InfoIcon() {
+  return (
+    <Image
+      source={require("../../assets/icons/info.svg")}
+      style={{ width: 24, height: 24 }}
+      accessible={false}
+    />
+  );
+}
+
 export function TabIcon({
   name,
   color,
