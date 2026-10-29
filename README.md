@@ -4,8 +4,8 @@ Mobile app for [Komisio](https://github.com/Komisio/komisio), the consignment
 platform for second-hand stores. Built with Expo and React Native.
 
 > Status: store picker, login with two-step verification, profile, and the
-> store catalogue with item detail (S10/S11). My items, overview and money
-> are still placeholders (see `docs/screens.md`).
+> store catalogue with item detail (S10/S11), and own items (S19/S20).
+> Overview and money are still placeholders (see `docs/screens.md`).
 
 ## Direction
 
@@ -66,6 +66,30 @@ Unit tests cover stale requests, pagination, revoked access and the read
 contract. Native-device behavior, real Storage downloads and staging must also
 be verified before release; successful JavaScript export alone does not verify
 those paths.
+
+## My items (S19/S20)
+
+The My items tab uses `my_items_page` with the chosen store's seller ID from
+`my_seller_accounts`. Active, expiring, sold, ended and all groups are filtered
+on the server before 25-row paging. Search matches titles, categories and item
+references. Detail uses the exact own-item `my_item_detail` RPC, including
+sold and ended items; it never substitutes a store-catalogue item read.
+
+The connected platform needs [platform PR #718](https://github.com/Komisio/komisio/pull/718)
+for detail and the expiring filter. Missing contracts produce an explicit
+failure with retry, rather than a partial or unrelated fallback. This dependency
+is not deployed by the mobile app.
+
+The screen shows the engine's recorded prices, lifecycle status and dates.
+It does not compute a seller payout or promise that an item is ready to collect.
+Planned markdowns are labelled as plans; calendar dates use the platform's
+Stockholm timezone. Own-item photos are outside this read contract. Search and
+filter changes reset the list; returning from detail revalidates the loaded
+range in place. Account/store changes discard the prior view.
+
+Unit tests cover contract validation, amount/date presentation, 25-row paging,
+stale scopes and denied/offline refresh. Browser and native-device verification
+remain required before release; typecheck, lint and export are not UI tests.
 
 ## Licence
 
