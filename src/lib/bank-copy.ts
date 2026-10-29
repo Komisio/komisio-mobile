@@ -10,12 +10,11 @@ export const bankCopy = {
       "Den lokala begäran är borttagen. Läs in aktuella uppgifter innan du fortsätter. Ingenting har avbrutits hos butiken.",
     rejected:
       "Begäran avvisades och skickas inte igen automatiskt. Läs in aktuella uppgifter och kontrollera din åtkomst innan du försöker igen.",
-    webPrivacy:
-      "I webbversionen sparas en väntande kontoändring i webbläsaren tills den bekräftats eller du loggar ut. Logga alltid ut på en delad dator. Efter utloggning behöver du kontrollera aktuellt konto innan du gör en ny ändring.",
     back: "Tillbaka",
     intro: "Kontot som butiken använder för bankutbetalningar.",
     holder: "Kontohavare",
     country: "Kontots land",
+    chooseCountry: "Välj land",
     countrySearch: "Sök land eller landskod",
     noCountries: "Inga länder matchar sökningen.",
     moreCountries: "Sök för att begränsa listan.",
@@ -67,12 +66,11 @@ export const bankCopy = {
       "The local request has been removed. Load current details before continuing. Nothing was cancelled at the store.",
     rejected:
       "The request was refused and will not be sent again automatically. Load current details and check your access before trying again.",
-    webPrivacy:
-      "On web, a pending bank change is stored in the browser until confirmed or you log out. Always log out on a shared computer. After logging out, check the current account before making another change.",
     back: "Back",
     intro: "The account the store uses for bank payouts.",
     holder: "Account holder",
     country: "Account country",
+    chooseCountry: "Choose country",
     countrySearch: "Search country or country code",
     noCountries: "No countries match your search.",
     moreCountries: "Search to narrow the list.",

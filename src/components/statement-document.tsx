@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Button, colors, Message } from "./ui";
+import { Button, uiStyles, Message } from "./ui";
 import { useI18n } from "@/lib/i18n";
 import {
   agreementLanguages,
@@ -296,17 +296,10 @@ function InvoiceDetails({ invoice }: { invoice: Invoice }) {
   );
 }
 const styles = StyleSheet.create({
-  card: {
-    padding: 16,
-    gap: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-  },
-  heading: { fontSize: 22, color: colors.brand, fontWeight: "700" },
-  label: { fontSize: 17, color: colors.brand, fontWeight: "600" },
-  text: { fontSize: 16, lineHeight: 24, color: colors.text },
-  note: { fontSize: 14, lineHeight: 21, color: colors.muted },
-  amount: { fontSize: 19, color: colors.brand, fontWeight: "600" },
+  card: uiStyles.card,
+  heading: uiStyles.heading,
+  label: uiStyles.rowTitle,
+  text: uiStyles.body,
+  note: uiStyles.note,
+  amount: uiStyles.amount,
 });

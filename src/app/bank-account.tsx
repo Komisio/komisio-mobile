@@ -1,12 +1,13 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
 import {
   Button,
-  colors,
+  uiStyles,
+  Choice,
   Field,
   Loading,
   Message,
@@ -88,7 +89,6 @@ function BankAccount({
   };
   return (
     <Screen title={t.title} intro={t.intro}>
-      {Platform.OS === "web" ? <Message>{t.webPrivacy}</Message> : null}
       <Button
         label={t.back}
         variant="secondary"
@@ -272,7 +272,7 @@ function BankForm({
     }
   }, [locale]);
   const countryName = (code: string) =>
-    code ? `${names?.of(code) ?? code} (${code})` : t.country;
+    code ? `${names?.of(code) ?? code} (${code})` : t.chooseCountry;
   const countries = bankCountries.filter((code) =>
     countryName(code)
       .toLocaleLowerCase(locale)
@@ -294,19 +294,17 @@ function BankForm({
         autoComplete="off"
       />
       <Text style={styles.label}>{t.country}</Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${t.country}: ${countryName(details.country)}`}
-        accessibilityState={{ expanded: countryOpen, disabled: !enabled }}
+      <Button
+        label={countryName(details.country)}
+        variant="secondary"
         disabled={!enabled}
-        style={styles.choice}
         onPress={() => {
           setSearch("");
           setCountryOpen(!countryOpen);
         }}
-      >
-        <Text style={styles.text}>{countryName(details.country)}</Text>
-      </Pressable>
+        accessibilityLabel={`${t.country}: ${countryName(details.country)}`}
+        expanded={countryOpen}
+      />
       {countryOpen ? (
         <View style={styles.card}>
           <Field
@@ -337,19 +335,13 @@ function BankForm({
       <Text style={styles.label}>{t.kind}</Text>
       <View style={styles.choices}>
         {(["local", "iban"] as const).map((kind) => (
-          <Pressable
+          <Choice
             key={kind}
-            accessibilityRole="button"
-            accessibilityState={{
-              selected: details.kind === kind,
-              disabled: !enabled,
-            }}
+            label={t[kind]}
+            selected={details.kind === kind}
             disabled={!enabled}
             onPress={() => update({ kind })}
-            style={[styles.choice, details.kind === kind && styles.selected]}
-          >
-            <Text style={styles.text}>{t[kind]}</Text>
-          </Pressable>
+          />
         ))}
       </View>
       <Field
@@ -398,26 +390,9 @@ function BankForm({
   );
 }
 const styles = StyleSheet.create({
-  card: {
-    padding: 16,
-    gap: 12,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 12,
-  },
-  heading: { color: colors.brand, fontSize: 20, fontWeight: "700" },
-  text: { color: colors.text, fontSize: 16, lineHeight: 24 },
-  label: { color: colors.text, fontSize: 14, fontWeight: "600" },
-  choices: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  choice: {
-    minHeight: 48,
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.brand,
-    justifyContent: "center",
-    backgroundColor: colors.surface,
-  },
-  selected: { backgroundColor: colors.accent, borderWidth: 2 },
+  card: uiStyles.card,
+  heading: uiStyles.heading,
+  text: uiStyles.body,
+  label: uiStyles.label,
+  choices: uiStyles.choices,
 });

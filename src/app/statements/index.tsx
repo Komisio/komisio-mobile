@@ -1,8 +1,15 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { SellerGate } from "@/components/seller-gate";
-import { Button, colors, Loading, Message, Screen } from "@/components/ui";
+import {
+  Button,
+  ItemCard,
+  uiStyles,
+  Loading,
+  Message,
+  Screen,
+} from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
@@ -85,20 +92,15 @@ function Statements({ tenant, seller }: { tenant: string; seller: string }) {
             <Message>{data.total ? t.pastEnd : t.empty}</Message>
           ) : (
             data.statements.map((s) => (
-              <Pressable
+              <ItemCard
                 key={s.id}
-                accessibilityRole="button"
-                accessibilityLabel={`${t[statementTitleKey(s)]} #${s.number}`}
+                label={`${t[statementTitleKey(s)]} #${s.number}`}
                 onPress={() =>
                   router.push({
                     pathname: "/statements/[tenant]/[statement]",
                     params: { tenant, statement: s.id },
                   })
                 }
-                style={({ pressed }) => [
-                  styles.card,
-                  pressed && styles.pressed,
-                ]}
               >
                 <Text style={styles.heading}>
                   {t[statementTitleKey(s)]} #{s.number}
@@ -117,7 +119,7 @@ function Statements({ tenant, seller }: { tenant: string; seller: string }) {
                   {t.closing}:{" "}
                   {formatPrice(s.closingOre, data.currency, locale)}
                 </Text>
-              </Pressable>
+              </ItemCard>
             ))
           )}
           {data.total ? (
@@ -134,18 +136,22 @@ function Statements({ tenant, seller }: { tenant: string; seller: string }) {
               onPress={() => setPage(0)}
             />
           ) : null}
-          <Button
-            label={t.previous}
-            variant="secondary"
-            disabled={!page}
-            onPress={() => setPage(page - 1)}
-          />
-          <Button
-            label={t.next}
-            variant="secondary"
-            disabled={(page + 1) * 25 >= data.total || page >= 100000}
-            onPress={() => setPage(page + 1)}
-          />
+          {data.total > 25 || page > 0 ? (
+            <>
+              <Button
+                label={t.previous}
+                variant="secondary"
+                disabled={!page}
+                onPress={() => setPage(page - 1)}
+              />
+              <Button
+                label={t.next}
+                variant="secondary"
+                disabled={(page + 1) * 25 >= data.total || page >= 100000}
+                onPress={() => setPage(page + 1)}
+              />
+            </>
+          ) : null}
           <Button
             label={t.refresh}
             variant="secondary"
@@ -157,17 +163,7 @@ function Statements({ tenant, seller }: { tenant: string; seller: string }) {
   );
 }
 const styles = StyleSheet.create({
-  card: {
-    minHeight: 48,
-    padding: 16,
-    gap: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-  },
-  heading: { color: colors.brand, fontSize: 21, fontWeight: "600" },
-  text: { color: colors.text, fontSize: 16, lineHeight: 24 },
-  note: { color: colors.muted, fontSize: 14, lineHeight: 21 },
-  pressed: { opacity: 0.6 },
+  heading: uiStyles.rowTitle,
+  text: uiStyles.body,
+  note: uiStyles.note,
 });

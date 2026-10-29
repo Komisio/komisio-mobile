@@ -19,7 +19,14 @@ import {
 } from "@/lib/seller-items";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
-import { Button, colors, Loading, Message, Screen } from "@/components/ui";
+import {
+  Button,
+  StatusBadge,
+  uiStyles,
+  Loading,
+  Message,
+  Screen,
+} from "@/components/ui";
 import { SellerGate } from "@/components/seller-gate";
 
 const back = () =>
@@ -111,9 +118,13 @@ function ItemRead({
             {item.title ?? t.untitled}
           </Text>
           {item.category && <Text style={styles.muted}>{item.category}</Text>}
-          <Text style={styles.status}>
+          <StatusBadge
+            attention={
+              item.stage === "period_ending" || item.stage === "period_ended"
+            }
+          >
             {t.statuses[sellerItemStatus(item)]}
-          </Text>
+          </StatusBadge>
           <Text style={styles.muted}>
             {item.stage === "sold" ? t.soldPrice : t.price}
           </Text>
@@ -178,30 +189,12 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 const styles = StyleSheet.create({
-  title: { fontSize: 26, color: colors.text, fontWeight: "700" },
-  muted: { fontSize: 15, color: colors.muted },
-  price: { fontSize: 30, color: colors.brand, fontWeight: "700" },
-  status: {
-    alignSelf: "flex-start",
-    backgroundColor: colors.accent,
-    color: colors.brand,
-    fontSize: 16,
-    padding: 8,
-    borderRadius: 8,
-  },
-  facts: {
-    borderRadius: 12,
-    padding: 16,
-    backgroundColor: colors.surface,
-    gap: 16,
-  },
+  title: uiStyles.title,
+  muted: uiStyles.note,
+  price: { ...uiStyles.amount, fontSize: 30, lineHeight: 38 },
+  facts: uiStyles.card,
   fact: { gap: 4 },
-  value: { fontSize: 17, color: colors.text },
-  plan: {
-    gap: 12,
-    padding: 16,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-  },
-  heading: { fontSize: 19, color: colors.brand, fontWeight: "600" },
+  value: uiStyles.body,
+  plan: uiStyles.card,
+  heading: uiStyles.heading,
 });

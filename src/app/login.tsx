@@ -3,7 +3,7 @@ import { openBrowserAsync } from "expo-web-browser";
 import { supabase } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
-import { Button, Field, Message, Screen } from "@/components/ui";
+import { Button, Card, Field, Message, Screen } from "@/components/ui";
 
 const web = process.env.EXPO_PUBLIC_KOMISIO_WEB_URL;
 
@@ -40,41 +40,49 @@ export default function Login() {
   };
 
   return (
-    <Screen title={d.login.title} intro={store?.name}>
-      <Field
-        label={d.login.email}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        autoComplete="email"
-        keyboardType="email-address"
-        textContentType="username"
-      />
-      <Field
-        label={d.login.password}
-        value={password}
-        onChangeText={setPassword}
-        autoComplete="current-password"
-        secureTextEntry
-        textContentType="password"
-        onSubmitEditing={submit}
-      />
-      {error ? <Message tone="error">{error}</Message> : null}
-      <Button
-        label={d.login.submit}
-        busy={busy}
-        disabled={!email.trim() || !password}
-        onPress={submit}
-      />
+    <Screen brand title={d.login.title} intro={store?.name}>
+      <Card>
+        <Field
+          label={d.login.email}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          textContentType="username"
+        />
+        <Field
+          label={d.login.password}
+          value={password}
+          onChangeText={setPassword}
+          autoComplete="current-password"
+          secureTextEntry
+          textContentType="password"
+          onSubmitEditing={submit}
+        />
+        {error ? <Message tone="error">{error}</Message> : null}
+        <Button
+          label={d.login.submit}
+          busy={busy}
+          disabled={!email.trim() || !password}
+          onPress={submit}
+        />
+      </Card>
       <Message>{d.login.firstTime}</Message>
       {web ? (
         <Button
           label={d.login.forgot}
           variant="secondary"
-          onPress={() => void openBrowserAsync(new URL("/reset-password", web).href)}
+          onPress={() =>
+            void openBrowserAsync(new URL("/reset-password", web).href)
+          }
         />
       ) : null}
-      <Button label={d.login.changeStore} variant="secondary" onPress={() => chooseStore(null)} />
+      <Button
+        label={d.login.changeStore}
+        variant="secondary"
+        onPress={() => chooseStore(null)}
+      />
     </Screen>
   );
 }

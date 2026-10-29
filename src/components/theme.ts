@@ -38,6 +38,19 @@ export const uiStyles = StyleSheet.create({
   },
   body: { fontSize: 16, lineHeight: 24, color: colors.text },
   note: { fontSize: 14, lineHeight: 21, color: colors.muted },
+  label: {
+    fontSize: 14,
+    lineHeight: 21,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  rowTitle: {
+    fontSize: 17,
+    lineHeight: 25,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  choices: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   amount: {
     fontSize: 22,
     lineHeight: 30,
@@ -50,5 +63,13 @@ export const uiStyles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.line,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.line,
+    padding: 16,
+    gap: 16,
   },
 });

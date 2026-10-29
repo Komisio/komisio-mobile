@@ -1,17 +1,47 @@
 import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
+  type PressableProps,
   type TextInputProps,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, uiStyles } from "./theme";
+import { Brand } from "./brand";
 export { colors, uiStyles } from "./theme";
+
+function useControlFocus() {
+  const [focused, setFocused] = useState(false);
+  const focusProps: Pick<
+    PressableProps,
+    "onFocus" | "onBlur" | "onKeyDown" | "onPointerDown"
+  > = {
+    onFocus: (event) => {
+      // RN Web forwards the DOM element. Native keeps its existing focus ring.
+      const target = event.currentTarget as unknown as {
+        matches?: (selector: string) => boolean;
+      };
+      setFocused(
+        Platform.OS !== "web" || (target.matches?.(":focus-visible") ?? true),
+      );
+    },
+    onBlur: () => setFocused(false),
+    ...(Platform.OS === "web"
+      ? {
+          // Also handle modality changes while the same control retains focus.
+          onPointerDown: () => setFocused(false),
+          onKeyDown: () => setFocused(true),
+        }
+      : {}),
+  };
+  return { focused, focusProps };
+}
 
 export function PageHeading({
   title,
@@ -57,14 +87,13 @@ export function ItemCard({
   label: string;
   onPress: () => void;
 }) {
-  const [focused, setFocused] = useState(false);
+  const { focused, focusProps } = useControlFocus();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      {...focusProps}
       style={({ pressed }) => [
         styles.itemCard,
         focused && styles.focused,
@@ -86,25 +115,88 @@ export function FilterChip({
   selected: boolean;
   onPress: () => void;
 }) {
-  const [focused, setFocused] = useState(false);
+  return <Choice label={label} selected={selected} onPress={onPress} />;
+}
+
+export function Choice({
+  label,
+  selected,
+  onPress,
+  disabled = false,
+  role = "button",
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  disabled?: boolean;
+  role?: "button" | "radio" | "checkbox";
+}) {
+  const { focused, focusProps } = useControlFocus();
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
+      accessibilityRole={role}
+      accessibilityLabel={label}
+      accessibilityState={
+        role === "button"
+          ? { selected, disabled }
+          : { checked: selected, disabled }
+      }
+      aria-checked={role === "button" ? undefined : selected}
+      aria-pressed={role === "button" ? selected : undefined}
+      aria-disabled={disabled}
+      {...focusProps}
+      {...(Platform.OS === "web" && role !== "button"
+        ? {
+            // RN Web handles Space for buttons, but not radio/checkbox roles.
+            onKeyDown: (
+              event: Parameters<NonNullable<PressableProps["onKeyDown"]>>[0],
+            ) => {
+              focusProps.onKeyDown?.(event);
+              if (event.nativeEvent.key === " ") {
+                event.preventDefault();
+                if (!disabled && !event.nativeEvent.repeat) onPress();
+              }
+            },
+          }
+        : {})}
+      disabled={disabled}
       onPress={onPress}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
       style={({ pressed }) => [
         styles.chip,
         selected && styles.chipSelected,
         focused && styles.focused,
-        pressed && styles.pressed,
+        pressed && styles.dimmed,
+        disabled && styles.dimmed,
       ]}
     >
       <Text style={[styles.chipText, selected && styles.chipSelectedText]}>
+        {role === "checkbox" ? `${selected ? "☑" : "☐"} ` : ""}
         {label}
       </Text>
     </Pressable>
+  );
+}
+
+export function Card({ children }: { children: ReactNode }) {
+  return <View style={uiStyles.card}>{children}</View>;
+}
+
+export function NavigationRow({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <ItemCard label={label} onPress={onPress}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <Text style={[uiStyles.rowTitle, { flex: 1 }]}>{label}</Text>
+        <Text aria-hidden style={uiStyles.heading}>
+          ›
+        </Text>
+      </View>
+    </ItemCard>
   );
 }
 
@@ -112,10 +204,12 @@ export function Screen({
   title,
   intro,
   children,
+  brand = false,
 }: {
   title: string;
   intro?: string;
   children?: ReactNode;
+  brand?: boolean;
 }) {
   return (
     <SafeAreaView style={styles.safe}>
@@ -123,6 +217,7 @@ export function Screen({
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
+        {brand ? <Brand /> : null}
         <PageHeading title={title} intro={intro} />
         {children}
       </ScrollView>
@@ -150,23 +245,30 @@ export function Button({
   busy,
   disabled,
   variant = "primary",
+  accessibilityLabel,
+  expanded,
 }: {
   label: string;
   onPress: () => void;
   busy?: boolean;
   disabled?: boolean;
   variant?: "primary" | "secondary";
+  accessibilityLabel?: string;
+  expanded?: boolean;
 }) {
   const off = disabled || busy;
-  const [focused, setFocused] = useState(false);
+  const { focused, focusProps } = useControlFocus();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: off, busy }}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled: off, busy, expanded }}
+      aria-disabled={off}
+      aria-busy={busy}
+      aria-expanded={expanded}
       disabled={off}
       onPress={onPress}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      {...focusProps}
       style={({ pressed }) => [
         styles.button,
         variant === "secondary" && styles.secondary,
@@ -301,6 +403,7 @@ const styles = StyleSheet.create({
   },
   attention: { backgroundColor: colors.warningSurface },
   chip: {
+    maxWidth: "100%",
     minHeight: 48,
     paddingHorizontal: 14,
     paddingVertical: 10,

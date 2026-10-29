@@ -2,7 +2,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Linking from "expo-linking";
-import { Button, colors, Loading, Message, Screen } from "@/components/ui";
+import { Button, uiStyles, Loading, Message, Screen } from "@/components/ui";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
@@ -137,18 +137,21 @@ function StoreContent({ info }: { info: StoreInfo }) {
       label: t.website,
     },
   ].filter((contact) => contact.value.trim());
-  const open = useCallback(async (url: string) => {
-    if (opening) return;
-    setOpening(true);
-    setFailed(false);
-    try {
-      await Linking.openURL(url);
-    } catch {
-      setFailed(true);
-    } finally {
-      setOpening(false);
-    }
-  }, [opening]);
+  const open = useCallback(
+    async (url: string) => {
+      if (opening) return;
+      setOpening(true);
+      setFailed(false);
+      try {
+        await Linking.openURL(url);
+      } catch {
+        setFailed(true);
+      } finally {
+        setOpening(false);
+      }
+    },
+    [opening],
+  );
   return (
     <>
       {info.concept.trim() ? (
@@ -216,17 +219,10 @@ function StoreContent({ info }: { info: StoreInfo }) {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    padding: 16,
-    gap: 14,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 14,
-  },
-  heading: { color: colors.brand, fontWeight: "700", fontSize: 20 },
-  text: { color: colors.text, fontSize: 16, lineHeight: 24, flexShrink: 1 },
-  note: { color: colors.muted, fontSize: 14 },
+  card: uiStyles.card,
+  heading: uiStyles.heading,
+  text: { ...uiStyles.body, flexShrink: 1 },
+  note: uiStyles.note,
   hours: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -234,6 +230,6 @@ const styles = StyleSheet.create({
     columnGap: 16,
     rowGap: 4,
   },
-  day: { color: colors.text, fontSize: 16, lineHeight: 24, fontWeight: "600" },
+  day: { ...uiStyles.body, fontWeight: "600" },
   contact: { gap: 8 },
 });
