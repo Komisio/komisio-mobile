@@ -1,4 +1,6 @@
 import { Tabs } from "expo-router/tabs";
+import { Text, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useI18n } from "@/lib/i18n";
 import { colors } from "@/components/ui";
 import { TabIcon } from "@/components/brand";
@@ -8,6 +10,8 @@ import { TabIcon } from "@/components/brand";
 // profile (S21, S25).
 export default function TabsLayout() {
   const { d } = useI18n();
+  const { bottom } = useSafeAreaInsets();
+  const { fontScale } = useWindowDimensions();
   return (
     <Tabs
       screenOptions={{
@@ -15,11 +19,28 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: colors.muted,
         tabBarActiveBackgroundColor: colors.accent,
+        tabBarLabelPosition: "below-icon",
+        // Two full label lines, including at increased system text size.
+        // The navigator applies the bottom inset as padding within this height.
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.line,
+          height: 44 + 32 * Math.max(1, fontScale) + bottom,
         },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: "600" },
+        tabBarLabel: ({ children, color }) => (
+          <Text
+            style={{
+              color,
+              fontSize: 12,
+              lineHeight: 16,
+              fontWeight: "600",
+              textAlign: "center",
+              alignSelf: "stretch",
+            }}
+          >
+            {children}
+          </Text>
+        ),
       }}
     >
       <Tabs.Screen
