@@ -5,6 +5,9 @@ import {
   parseBankCommand,
   parseBankDetails,
   parseBankVersion,
+  storeBankCountry,
+  localBankFields,
+  localBankDetails,
 } from "../src/lib/bank-account.ts";
 import {
   mobileEndpoint,
@@ -23,6 +26,84 @@ const details = {
   account: "00012345",
   routing: "0123",
 };
+test("local bank country comes only from the matching published store profile", () => {
+  const profile = (country: unknown) => ({
+    slug: "chosen",
+    profile: { address: { country } },
+  });
+  assert.equal(storeBankCountry(profile("DK"), "chosen"), "DK");
+  assert.equal(storeBankCountry(profile("SE"), "chosen"), "SE");
+  assert.equal(storeBankCountry(null, "chosen"), null);
+  assert.equal(storeBankCountry(profile(undefined), "chosen"), null);
+  assert.equal(storeBankCountry(profile(""), "chosen"), null);
+  for (const country of ["XX", "Sweden", "se", 42])
+    assert.throws(() => storeBankCountry(profile(country), "chosen"));
+  assert.throws(() => storeBankCountry(profile("SE"), "another-store"));
+});
+
+test("local form keeps leading zeroes and sets country and kind from store context", () => {
+  const fields = {
+    holder: "  Synthetic  ",
+    routing: " 0123 ",
+    account: " 00012345 ",
+  };
+  assert.deepEqual(localBankDetails(fields, "DK"), {
+    holder: "Synthetic",
+    routing: "0123",
+    account: "00012345",
+    country: "DK",
+    kind: "local",
+  });
+  assert.throws(() => localBankDetails(fields, ""));
+  assert.throws(() => localBankDetails({ ...fields, account: "" }, "SE"));
+});
+
+test("existing IBAN or foreign local numbers are never relabelled as local form defaults", () => {
+  const current = { id: requestId, details, createdAt: "2026-10-29T10:00:00Z" };
+  assert.deepEqual(localBankFields(null, "SE"), {
+    holder: "",
+    account: "",
+    routing: "",
+  });
+  assert.deepEqual(localBankFields(current, "SE"), {
+    holder: details.holder,
+    account: details.account,
+    routing: details.routing,
+  });
+  assert.deepEqual(localBankFields(current, "DK"), {
+    holder: details.holder,
+    account: "",
+    routing: "",
+  });
+  const iban = {
+    ...current,
+    details: normalizeBankDetails({
+      ...details,
+      kind: "iban",
+      country: "GB",
+      account: "GB82WEST12345698765432",
+    }),
+  };
+  assert.deepEqual(localBankFields(iban, "GB"), {
+    holder: details.holder,
+    account: "",
+    routing: "",
+  });
+  // A previously journalled command still parses with its original country/kind.
+  const command = {
+    action: "saveBank",
+    tenantId: tenant,
+    sellerId: seller,
+    requestId,
+    expected: null,
+    details: iban.details,
+  };
+  assert.deepEqual(
+    parseBankCommand(command, tenant, seller).details,
+    iban.details,
+  );
+  assert.equal(iban.details.account, "GB82WEST12345698765432");
+});
 test("bank form preserves leading zeroes and uses the existing platform fields", () => {
   assert.deepEqual(
     normalizeBankDetails({

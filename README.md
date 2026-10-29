@@ -162,8 +162,13 @@ review remain pending.
 ## Payout account (S25)
 
 Profile opens the selected seller's bank details through `seller_bank_details`.
-Holder, searchable ISO country, IBAN/local account and routing follow the seller
-portal contract, including IBAN country/checksum validation. There is no Swish.
+The form has three fields: account holder, clearing/routing number and account
+number. New saves use a local account and the selected store's published address
+country from `public_store_profile`. Missing or unavailable country blocks saving
+with retry; language and currency are never country defaults. Existing IBAN or
+foreign-country accounts remain visible, but their numbers are not prefilled as
+local account numbers. They remain saved until explicitly replaced. Pending
+commands retain their original country/type for exact replay. There is no Swish.
 Saving uses the expected bank version; a concurrent edit requires reloading and
 reviewing the latest details, never silently overwriting them.
 
