@@ -34,6 +34,12 @@ function Routes() {
       <Stack.Protected guard={Boolean(store) && signedIn}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="catalogue/[tenant]/[item]" />
+        <Stack.Screen name="store-info" />
+        <Stack.Screen name="my-items/[tenant]/[item]" />
+        <Stack.Screen name="agreement" />
+        <Stack.Screen name="bank-account" />
+        <Stack.Screen name="statements/index" />
+        <Stack.Screen name="statements/[tenant]/[statement]" />
       </Stack.Protected>
     </Stack>
   );

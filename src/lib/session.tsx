@@ -10,6 +10,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import { secureStorage } from "./secure-storage";
 import { createAuthBootstrap } from "./auth-bootstrap";
+import { setCommandUser } from "./command-storage";
 
 export type AppStore = { id: string; name: string; slug: string };
 export type SellerAccount = {
@@ -75,7 +76,31 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         } catch {}
       })
       .finally(() => setStoreLoaded(true));
-    return authState.start();
+    const stopCommands = authState.subscribe(() => {
+      const current = authState.getState();
+      if (current.status === "ready") {
+        try {
+          setCommandUser(current.session?.user.id ?? null);
+        } catch {
+          // Writes fail closed if browser storage cannot be cleared/read.
+        }
+      }
+    });
+    // SIGNED_OUT can originate in a different browser tab. Purge immediately,
+    // before the asynchronous MFA/bootstrap refresh has resolved.
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        try {
+          setCommandUser(null);
+        } catch {}
+      }
+    });
+    const stopAuth = authState.start();
+    return () => {
+      stopCommands();
+      data.subscription.unsubscribe();
+      stopAuth();
+    };
   }, []);
 
   // The seller account in the chosen store, once fully signed in.
@@ -110,7 +135,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Also clear before sending logout, so an offline logout does not leave
+    // account numbers on a shared browser. No payout replay IDs are removed.
+    try {
+      setCommandUser(null);
+    } finally {
+      await supabase.auth.signOut();
+    }
   };
 
   return (

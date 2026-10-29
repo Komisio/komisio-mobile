@@ -11,12 +11,13 @@ export type CatalogueItem = {
   priceOre: number;
   photo: Photo | null;
 };
-export type CataloguePage = {
+export type ReadPage<T> = {
   currency: string;
-  items: CatalogueItem[];
+  items: T[];
   total: number;
   offset: number;
 };
+export type CataloguePage = ReadPage<CatalogueItem>;
 export const factKeys = [
   "category",
   "brand",
@@ -177,9 +178,9 @@ export function photoSource(
   };
 }
 
-type PageState = {
+type PageState<T> = {
   status: "loading" | "ready" | "failed";
-  items: CatalogueItem[];
+  items: T[];
   currency: string;
   total: number;
   offset: number;
@@ -187,16 +188,19 @@ type PageState = {
   refreshing: boolean;
   failure: ReadFailure | null;
 };
-export type FetchPage = (
+export type FetchPage<T = CatalogueItem> = (
   query: string,
   offset: number,
   signal: AbortSignal,
-) => Promise<CataloguePage>;
+) => Promise<ReadPage<T>>;
 
 // Each mounted account/store gets its own controller. Requests are cancelled
 // and generation-checked, including transports that ignore AbortSignal.
-export function createCataloguePager(fetchPage: FetchPage) {
-  let state: PageState = {
+export function createCataloguePager<T extends { id: string } = CatalogueItem>(
+  fetchPage: FetchPage<T>,
+  initialQuery = "",
+) {
+  let state: PageState<T> = {
     status: "loading",
     items: [],
     currency: "SEK",
@@ -206,11 +210,11 @@ export function createCataloguePager(fetchPage: FetchPage) {
     refreshing: false,
     failure: null,
   };
-  let query = "",
+  let query = initialQuery.trim(),
     generation = 0;
   let pending: AbortController | null = null;
   const listeners = new Set<() => void>();
-  const set = (next: PageState) => {
+  const set = (next: PageState<T>) => {
     state = next;
     listeners.forEach((l) => l());
   };
@@ -256,7 +260,7 @@ export function createCataloguePager(fetchPage: FetchPage) {
     );
     try {
       const items = new Map((append ? state.items : []).map((i) => [i.id, i]));
-      let page: CataloguePage;
+      let page: ReadPage<T>;
       let expectedCurrency = append ? state.currency : null;
       do {
         page = await fetchPage(query, offset, controller.signal);
