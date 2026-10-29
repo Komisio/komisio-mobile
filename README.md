@@ -45,6 +45,20 @@ npm test           # unit tests (node:test)
 Routes live in `src/app/`; keep components, hooks and utilities outside it.
 See `AGENTS.md` for Expo conventions.
 
+## Continuous integration
+
+The **Mobile checks / Test and export** GitHub Actions job runs on pull requests
+to `main` and pushes to `main`. It installs the lockfile with `npm ci`, uses the
+Node version in `.nvmrc`, and runs TypeScript, uncached ESLint, unit tests and
+Expo JavaScript exports for web, iOS and Android. New PR commits cancel the
+superseded run. The job has a 20-minute limit and read-only repository access.
+
+Exports use build-only loopback configuration without credentials or a running
+backend. The workflow does not deploy, sign or distribute the app, and does not
+exercise hosted writes. Passing it does not verify native builds, phone rendering,
+SecureStore recovery or real authentication/API/Storage integration. Those still
+need explicit device and staging verification before distribution.
+
 ## Store catalogue (S10/S11)
 
 The Store tab uses the reviewed `store_catalogue` and `store_catalogue_item`
