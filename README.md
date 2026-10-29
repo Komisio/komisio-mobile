@@ -178,9 +178,11 @@ discard stale reads. The bank-account shortcut opens S25; no Swish is offered.
 Writes use the same opt-in API as S25, with a separate durable payout journal.
 Only the command fields enter the API; its local journal also keeps display currency
 so an uncertain amount remains understandable if a subsequent read fails. A lost
-response retries the same request ID and amount. Only exact confirmed success or
-the engine's post-replay threshold/balance conflicts release the journal. Auth,
-unknown errors and timeouts cannot justify a replacement request. Creating a
+response retries the same request ID and amount. Confirmed success, post-replay
+threshold/balance conflicts and explicit first-attempt API refusals release the
+journal. A refusal after an uncertain earlier attempt retains it. Sellers can
+release an unresolved request with the explicit confirmation described above;
+this cancels nothing server-side and requires checking history before a new request. Creating a
 request does not transfer money or reserve the balance until the store approves it.
 
 An integration smoke test connected the actual mobile command controller and
