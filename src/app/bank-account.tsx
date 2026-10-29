@@ -273,7 +273,7 @@ function BankForm({
     }
   }, [locale]);
   const countryName = (code: string) =>
-    code ? `${names?.of(code) ?? code} (${code})` : t.country;
+    code ? `${names?.of(code) ?? code} (${code})` : t.chooseCountry;
   const countries = bankCountries.filter((code) =>
     countryName(code)
       .toLocaleLowerCase(locale)

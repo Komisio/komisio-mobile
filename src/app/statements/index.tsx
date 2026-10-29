@@ -136,18 +136,22 @@ function Statements({ tenant, seller }: { tenant: string; seller: string }) {
               onPress={() => setPage(0)}
             />
           ) : null}
-          <Button
-            label={t.previous}
-            variant="secondary"
-            disabled={!page}
-            onPress={() => setPage(page - 1)}
-          />
-          <Button
-            label={t.next}
-            variant="secondary"
-            disabled={(page + 1) * 25 >= data.total || page >= 100000}
-            onPress={() => setPage(page + 1)}
-          />
+          {data.total > 25 || page > 0 ? (
+            <>
+              <Button
+                label={t.previous}
+                variant="secondary"
+                disabled={!page}
+                onPress={() => setPage(page - 1)}
+              />
+              <Button
+                label={t.next}
+                variant="secondary"
+                disabled={(page + 1) * 25 >= data.total || page >= 100000}
+                onPress={() => setPage(page + 1)}
+              />
+            </>
+          ) : null}
           <Button
             label={t.refresh}
             variant="secondary"
