@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
+import { PendingDiscard } from "./pending-discard";
 import { Button, colors, Field, Loading, Message, Screen } from "./ui";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
@@ -100,7 +101,9 @@ export function SellerPayouts({
               ? t.pending
               : change.code === "success"
                 ? t.cleanupSuccess
-                : t.cleanupConflict}
+                : change.code === "rejected"
+                  ? d.bank.rejected
+                  : t.cleanupConflict}
           </Message>
           {change.command ? (
             <Text style={styles.amount}>
@@ -137,6 +140,12 @@ export function SellerPayouts({
             disabled={!payoutEndpoint && change.status === "pending"}
             onPress={() => void writer.retry()}
           />
+          {change.status === "pending" && change.command ? (
+            <PendingDiscard
+              key={change.command.command.requestId}
+              onDiscard={() => void writer.discard()}
+            />
+          ) : null}
         </View>
       ) : null}
       {change.status === "blocked" ? (
@@ -154,6 +163,14 @@ export function SellerPayouts({
       {change.status === "success" || change.status === "conflict" ? (
         <>
           <Message>{change.status === "success" ? t.saved : t.changed}</Message>
+          <Button label={t.refresh} onPress={refresh} />
+        </>
+      ) : null}
+      {change.status === "rejected" || change.status === "discarded" ? (
+        <>
+          <Message>
+            {change.status === "rejected" ? d.bank.rejected : d.bank.discarded}
+          </Message>
           <Button label={t.refresh} onPress={refresh} />
         </>
       ) : null}
