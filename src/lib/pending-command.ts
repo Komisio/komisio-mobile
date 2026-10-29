@@ -1,6 +1,7 @@
 export type CommandOutcome =
   | { kind: "success"; id: string }
   | { kind: "conflict"; code: string }
+  | { kind: "rejected"; code: string }
   | { kind: "unknown"; code: string };
 export type CommandState<C> = {
   status:
@@ -10,6 +11,8 @@ export type CommandState<C> = {
     | "pending"
     | "success"
     | "conflict"
+    | "rejected"
+    | "discarded"
     | "cleanup"
     | "blocked";
   command: C | null;
@@ -72,7 +75,7 @@ export function createPendingCommand<C>(deps: {
       publish({
         status: outcome.kind,
         command: null,
-        code: outcome.kind === "conflict" ? outcome.code : null,
+        code: outcome.kind === "success" ? null : outcome.code,
       });
     } catch {
       publish({ status: "cleanup", command, code: outcome.kind });
@@ -96,14 +99,18 @@ export function createPendingCommand<C>(deps: {
       busy = false;
     }
   }
-  async function dispatch(raw: string, command: C) {
+  async function dispatch(raw: string, command: C, firstAttempt = false) {
     let outcome: CommandOutcome;
     try {
       outcome = await deps.send(command);
     } catch {
       outcome = { kind: "unknown", code: "UNKNOWN" };
     }
-    if (outcome.kind === "unknown")
+    // A refusal before replay on a retry does not disprove an earlier commit.
+    if (
+      outcome.kind === "unknown" ||
+      (outcome.kind === "rejected" && !firstAttempt)
+    )
       publish({ status: "pending", command, code: outcome.code });
     else await settle(raw, command, outcome);
   }
@@ -151,7 +158,25 @@ export function createPendingCommand<C>(deps: {
         if ((await deps.storage.getItem(deps.key)) !== raw)
           throw new Error("STORAGE");
         publish({ status: "busy", command, code: null });
-        await dispatch(raw, command);
+        await dispatch(raw, command, true);
+      });
+    },
+    discard: () => {
+      // Bind confirmation to what this view showed, not a replacement from
+      // another tab. Never delete while dispatch or known-result cleanup runs.
+      if (busy || state.status !== "pending" || !state.command)
+        return Promise.resolve();
+      const confirmed = JSON.stringify(state.command);
+      return run(async () => {
+        const raw = await deps.storage.getItem(deps.key);
+        if (raw !== null && JSON.stringify(decode(raw)) !== confirmed) {
+          publish({ status: "pending", command: decode(raw), code: null });
+          return;
+        }
+        if (raw !== null) await deps.storage.removeItem(deps.key);
+        if ((await deps.storage.getItem(deps.key)) !== null)
+          throw new Error("STORAGE");
+        publish({ status: "discarded", command: null, code: null });
       });
     },
     retry: () =>
