@@ -113,21 +113,21 @@ function ItemRead({
               {formatPrice(data.priceOre, data.currency, locale)}
             </Text>
           </View>
-          <Text accessibilityRole="header" style={styles.heading}>
-            {t.facts}
-          </Text>
           {data.facts.length ? (
-            <View style={styles.facts}>
-              {data.facts.map((fact) => (
-                <View key={fact.slug} style={styles.fact}>
-                  <Text style={styles.label}>{t.factLabels[fact.slug]}</Text>
-                  <Text style={styles.value}>{fact.value}</Text>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <Message>{t.noFacts}</Message>
-          )}
+            <>
+              <Text accessibilityRole="header" style={styles.heading}>
+                {t.facts}
+              </Text>
+              <View style={styles.facts}>
+                {data.facts.map((fact) => (
+                  <View key={fact.slug} style={styles.fact}>
+                    <Text style={styles.label}>{t.factLabels[fact.slug]}</Text>
+                    <Text style={styles.value}>{fact.value}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          ) : null}
         </>
       )}
     </Screen>

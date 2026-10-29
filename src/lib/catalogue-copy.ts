@@ -21,7 +21,6 @@ export const catalogueCopy = {
     untitled: "Vara",
     detail: "Varudetaljer",
     facts: "Om varan",
-    noFacts: "Inga fler uppgifter om varan.",
     factLabels: {
       category: "Kategori",
       brand: "Märke",
@@ -53,7 +52,6 @@ export const catalogueCopy = {
     untitled: "Item",
     detail: "Item details",
     facts: "About this item",
-    noFacts: "No further item details.",
     factLabels: {
       category: "Category",
       brand: "Brand",
