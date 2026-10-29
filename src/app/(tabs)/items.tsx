@@ -7,7 +7,7 @@ export default function ItemsTab() {
   const { d } = useI18n();
   const { account, session, store } = useSession();
   return (
-    <SellerGate title={d.tabs.items}>
+    <SellerGate bottomSafeArea={false} title={d.tabs.items}>
       {account &&
         account !== "failed" &&
         session &&

@@ -51,7 +51,7 @@ export function PageHeading({
   intro?: string;
 }) {
   return (
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: 8 }}>
       <Text accessibilityRole="header" style={uiStyles.title}>
         {title}
       </Text>
@@ -192,9 +192,13 @@ export function NavigationRow({
     <ItemCard label={label} onPress={onPress}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <Text style={[uiStyles.rowTitle, { flex: 1 }]}>{label}</Text>
-        <Text aria-hidden style={uiStyles.heading}>
-          ›
-        </Text>
+        <View
+          aria-hidden
+          importantForAccessibility="no-hide-descendants"
+          style={styles.navigationArrow}
+        >
+          <Text style={[uiStyles.heading, { color: colors.brand }]}>›</Text>
+        </View>
       </View>
     </ItemCard>
   );
@@ -205,14 +209,23 @@ export function Screen({
   intro,
   children,
   brand = false,
+  bottomSafeArea = true,
 }: {
   title: string;
   intro?: string;
   children?: ReactNode;
   brand?: boolean;
+  bottomSafeArea?: boolean;
 }) {
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView
+      style={styles.safe}
+      edges={
+        bottomSafeArea
+          ? ["top", "left", "right", "bottom"]
+          : ["top", "left", "right"]
+      }
+    >
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -320,6 +333,14 @@ export function Loading() {
 }
 
 const styles = StyleSheet.create({
+  navigationArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   safe: { flex: 1, backgroundColor: colors.background },
   content: { ...uiStyles.content, paddingBottom: 32 },
   field: { gap: 6 },
@@ -333,7 +354,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     borderWidth: 1,
     borderColor: colors.control,
-    borderRadius: 10,
+    borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
@@ -342,7 +363,7 @@ const styles = StyleSheet.create({
   },
   button: {
     minHeight: 52,
-    borderRadius: 10,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 16,
@@ -407,7 +428,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: colors.control,
     backgroundColor: colors.surface,

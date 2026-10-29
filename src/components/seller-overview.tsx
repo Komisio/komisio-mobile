@@ -50,6 +50,7 @@ export function SellerOverviewScreen({
     data ? formatPrice(ore, data.currency, locale) : "";
   return (
     <Screen
+      bottomSafeArea={false}
       title={d.tabs.overview}
       intro={t.intro.replace("{store}", storeName)}
     >
@@ -72,6 +73,12 @@ export function SellerOverviewScreen({
       ) : data ? (
         <>
           <View style={styles.balance}>
+            <View
+              pointerEvents="none"
+              aria-hidden
+              importantForAccessibility="no-hide-descendants"
+              style={styles.balanceDecoration}
+            />
             <Text style={styles.balanceLabel}>{t.available}</Text>
             <Text style={styles.amount}>
               {money(data.balance.availableOre)}
@@ -179,19 +186,36 @@ export function SellerOverviewScreen({
 }
 const styles = StyleSheet.create({
   balance: {
-    backgroundColor: colors.accent,
-    borderRadius: 18,
+    backgroundColor: colors.brand,
+    borderRadius: 24,
+    overflow: "hidden",
     padding: 22,
     gap: 8,
   },
-  balanceLabel: { ...uiStyles.note },
-  amount: { ...uiStyles.amount, fontSize: 36, lineHeight: 44, marginBottom: 8 },
+  balanceDecoration: {
+    position: "absolute",
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 28,
+    borderColor: colors.brandDecoration,
+    right: -70,
+    top: -80,
+  },
+  balanceLabel: { ...uiStyles.note, color: colors.onBrandMuted },
+  amount: {
+    ...uiStyles.amount,
+    color: colors.onBrand,
+    fontSize: 36,
+    lineHeight: 44,
+    marginBottom: 8,
+  },
   balanceDetails: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 16,
     borderTopWidth: 1,
-    borderTopColor: colors.control,
+    borderTopColor: colors.brandDecoration,
     paddingTop: 16,
   },
   balancePart: {
@@ -201,14 +225,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   balanceValue: {
-    color: colors.text,
+    color: colors.onBrand,
     fontSize: 21,
     fontWeight: "600",
     fontVariant: ["tabular-nums"],
     lineHeight: 29,
     marginBottom: 8,
   },
-  balanceNote: { ...uiStyles.note },
+  balanceNote: { ...uiStyles.note, color: colors.onBrandMuted },
   counts: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   count: {
     flexBasis: 130,

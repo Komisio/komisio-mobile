@@ -7,7 +7,7 @@ export default function MoneyTab() {
   const { d } = useI18n();
   const { account, session, store } = useSession();
   return (
-    <SellerGate title={d.payouts.title}>
+    <SellerGate bottomSafeArea={false} title={d.payouts.title}>
       {account &&
       account !== "failed" &&
       session &&

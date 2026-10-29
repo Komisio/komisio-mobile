@@ -3,6 +3,9 @@ import { StyleSheet } from "react-native";
 // Shared with the portal's forest/paper identity; system type follows device settings.
 export const colors = {
   brand: "#234e40",
+  onBrand: "#ffffff",
+  onBrandMuted: "#dbe8dc",
+  brandDecoration: "#365e4f",
   accent: "#eaf1e7",
   text: "#203d35",
   muted: "#5b6d62",
@@ -27,7 +30,7 @@ export const uiStyles = StyleSheet.create({
   title: {
     fontSize: 30,
     lineHeight: 38,
-    fontWeight: "600",
+    fontWeight: "700",
     color: colors.text,
   },
   heading: {

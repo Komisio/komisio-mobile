@@ -287,6 +287,14 @@ owns headings, fields, buttons, filter chips, item rows and text-labelled status
 badges. System fonts respect device text scaling; there is no downloaded font.
 The five labelled tabs use one local SVG icon family.
 
+The tab bar uses a continuous sage surface through the home-indicator area,
+with a compact white highlight behind the selected icon. Its height follows measured
+label wrapping and system text size; the bottom inset is reserved once by the
+navigator. Tab content omits its own bottom safe-area padding, while standalone
+screens retain it. Clean headings, rounded controls and navigation
+arrows complement the forest-green overview balance card. Decorative elements
+carry no financial meaning and are hidden from accessibility navigation.
+
 Catalogue photos are optional. A row without a photo uses its full text width,
 and a detail without photos has no gallery. Mixed catalogues keep one stable
 list layout during search and paging. Existing images retain loading/error

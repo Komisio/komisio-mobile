@@ -9,7 +9,7 @@ export default function ProfileTab() {
   const { d } = useI18n();
   const { session, store, chooseStore, signOut } = useSession();
   return (
-    <Screen title={d.tabs.profile}>
+    <Screen title={d.tabs.profile} bottomSafeArea={false}>
       <Card>
         <View style={{ gap: 4 }}>
           <Text style={uiStyles.label}>{d.profile.signedInAs}</Text>
