@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  tabIconSelected: { backgroundColor: colors.accent },
+  tabIconSelected: { backgroundColor: colors.surface },
   brand: { flexDirection: "row", alignItems: "center", gap: 4 },
   wordmark: {
     fontSize: 22,

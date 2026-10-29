@@ -69,11 +69,12 @@ test("tabs reserve the home inset once and grow/shrink with measured labels", ()
         },
       }),
     },
-    "@/components/ui": { colors: { surface: "white" } },
+    "@/components/ui": { colors: { surface: "white", accent: "sage" } },
     "@/components/brand": { TabIcon: "Icon" },
   });
   const options = () => tabs.default().props.screenOptions;
-  assert.equal(options().tabBarStyle.height, 89);
+  assert.equal(options().tabBarStyle.height, 87);
+  assert.equal(options().tabBarStyle.backgroundColor, "sage");
   assert.equal(options().tabBarStyle.paddingBottom, 34);
   assert.equal(options().tabBarActiveBackgroundColor, undefined);
   assert.equal(tabs.default().props.children.length, 5);
@@ -93,7 +94,7 @@ test("tabs reserve the home inset once and grow/shrink with measured labels", ()
   dimensions = { width: 768, fontScale: 1 };
   locale = "en";
   bottom = 0;
-  assert.equal(options().tabBarStyle.height, 55);
+  assert.equal(options().tabBarStyle.height, 53);
   assert.equal(options().tabBarStyle.paddingBottom, 0);
 });
 

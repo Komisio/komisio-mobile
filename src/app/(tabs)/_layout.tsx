@@ -16,7 +16,7 @@ export default function TabsLayout() {
   const layoutKey = `${width}:${fontScale}:${locale}`;
   const [labelLayout, setLabelLayout] = useState({ key: "", height: 0 });
   const labelHeight = Math.max(
-    16 * Math.max(1, fontScale),
+    14 * Math.max(1, fontScale),
     labelLayout.key === layoutKey ? labelLayout.height : 0,
   );
   return (
@@ -29,7 +29,7 @@ export default function TabsLayout() {
         // Start with one line; grow only when the measured labels wrap.
         // The navigator applies the bottom inset as padding within this height.
         tabBarStyle: {
-          backgroundColor: colors.surface,
+          backgroundColor: colors.accent,
           borderTopColor: colors.line,
           // 28pt icon slot + 5pt item padding on each side + a hairline.
           height: 39 + labelHeight + bottom,
@@ -49,11 +49,13 @@ export default function TabsLayout() {
             }}
             style={{
               color,
-              fontSize: 12,
-              lineHeight: 16,
+              fontSize: 11,
+              lineHeight: 14,
               fontWeight: "600",
               textAlign: "center",
               alignSelf: "stretch",
+              // Recover some of the item's horizontal padding for full labels.
+              marginHorizontal: -3,
             }}
           >
             {children}
