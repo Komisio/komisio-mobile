@@ -144,13 +144,13 @@ project and portal destination. Native storage is one SecureStore value: storage
 failures prevent dispatch, and incomplete auth-store chunks are never interpreted
 as an absent command. Web is a development target and uses localStorage plus an
 exclusive Web Lock; browsers without Web Locks fail closed for writes. Native
-views share an in-process lock. No bank payload or bearer token is logged.
+views share an in-process lock. Web bank journals remain unencrypted while pending, but logout (including another tab) and identity changes erase bank payloads; stale writers cannot recreate them after logout. Payout/agreement replay IDs are retained. After logout, sellers must check the current bank account before making another change. Native SecureStore recovery is unchanged. No bank payload or bearer token is logged.
 
 An uncertain outcome, including a timeout followed by an auth failure, retains
 the exact command across navigation and restart. Explicit retry reuses its ID
 and contents. A new edit is blocked until exact success or a definite bank-version
 conflict is confirmed and the local record is removed. Failed cleanup is retried
-without sending a new command. There is no background replay or discard button.
+without sending a new command. Explicit first-attempt API refusals release the journal; a refusal on a retry cannot disprove an earlier committed write. An unresolved request can be deliberately released after a second confirmation that the seller has checked the current details/history or contacted the store. This deletes only local recovery, cancels nothing server-side and warns that a new request can duplicate an earlier one. There is no background replay.
 Clearing app/browser storage or reinstalling while a command is unresolved loses
 that recovery record; this is not an offline synchronization system.
 

@@ -1,6 +1,17 @@
 export const bankCopy = {
   sv: {
     title: "Utbetalningskonto",
+    discard: "Släpp väntande begäran",
+    discardWarning:
+      "Detta avbryter ingenting hos butiken. Begäran kan redan ha sparats. Kontrollera först aktuellt konto, avtal eller utbetalningshistorik, eller kontakta butiken. En ny begäran räknas som en separat begäran och kan skapa en dubblett.",
+    confirmDiscard: "Jag har kontrollerat – släpp begäran",
+    keepPending: "Behåll begäran",
+    discarded:
+      "Den lokala begäran är borttagen. Läs in aktuella uppgifter innan du fortsätter. Ingenting har avbrutits hos butiken.",
+    rejected:
+      "Begäran avvisades och skickas inte igen automatiskt. Läs in aktuella uppgifter och kontrollera din åtkomst innan du försöker igen.",
+    webPrivacy:
+      "I webbversionen sparas en väntande kontoändring i webbläsaren tills den bekräftats eller du loggar ut. Logga alltid ut på en delad dator. Efter utloggning behöver du kontrollera aktuellt konto innan du gör en ny ändring.",
     back: "Tillbaka",
     intro: "Kontot som butiken använder för bankutbetalningar.",
     holder: "Kontohavare",
@@ -47,6 +58,17 @@ export const bankCopy = {
   },
   en: {
     title: "Payout account",
+    discard: "Release pending request",
+    discardWarning:
+      "This does not cancel anything at the store. The request may already have been saved. First check the current account, agreement or payout history, or contact the store. A new request is a separate request and may create a duplicate.",
+    confirmDiscard: "I have checked – release request",
+    keepPending: "Keep request",
+    discarded:
+      "The local request has been removed. Load current details before continuing. Nothing was cancelled at the store.",
+    rejected:
+      "The request was refused and will not be sent again automatically. Load current details and check your access before trying again.",
+    webPrivacy:
+      "On web, a pending bank change is stored in the browser until confirmed or you log out. Always log out on a shared computer. After logging out, check the current account before making another change.",
     back: "Back",
     intro: "The account the store uses for bank payouts.",
     holder: "Account holder",

@@ -219,3 +219,91 @@ test("confirmed stale-version conflict releases the old intent without dispatchi
   assert.equal(f.sent.length, 1);
   assert.equal(f.values.size, 0);
 });
+
+test("an explicit refusal on the first attempt releases the journal", async () => {
+  const f = fixture();
+  f.setOutcome({ kind: "rejected", code: "INVALID_INPUT" });
+  const writer = f.writer();
+  await writer.submit(command());
+  assert.equal(writer.getState().status, "rejected");
+  assert.equal(f.values.size, 0);
+  await writer.load();
+  await writer.submit({ id: "corrected", details: { account: "corrected" } });
+  assert.equal(f.sent.length, 2);
+});
+
+test("a refusal after a lost response cannot erase an earlier possible commit", async () => {
+  for (const code of [
+    "INVALID_INPUT",
+    "FORBIDDEN",
+    "NOT_FOUND",
+    "SELLER_CLOSED",
+  ]) {
+    const f = fixture();
+    await f.writer().submit(command());
+    const original = f.values.get("scope");
+    f.setOutcome({ kind: "rejected", code });
+    const recovered = f.writer();
+    await recovered.load();
+    await recovered.retry();
+    assert.equal(recovered.getState().status, "pending");
+    assert.equal(f.values.get("scope"), original);
+    await recovered.discard();
+    assert.equal(recovered.getState().status, "discarded");
+    assert.equal(f.values.size, 0);
+    assert.equal(f.sent.length, 2);
+    await recovered.load();
+    await recovered.submit({
+      id: "new-after-confirmation",
+      details: { account: "new" },
+    });
+    assert.equal(f.sent[2].id, "new-after-confirmation");
+  }
+});
+
+test("discard never removes a replacement from another view", async () => {
+  const f = fixture(),
+    a = f.writer(),
+    b = f.writer();
+  await a.submit(command());
+  await b.load();
+  await a.discard();
+  await a.submit({ id: "replacement", details: { account: "new" } });
+  const raw = f.values.get("scope");
+  await b.discard();
+  assert.equal(f.values.get("scope"), raw);
+  assert.equal(b.getState().command?.id, "replacement");
+});
+
+test("discard fails closed when removal fails and never sends a request", async () => {
+  const f = fixture(),
+    writer = f.writer();
+  await writer.submit(command());
+  f.storage.removeItem = async () => {};
+  await writer.discard();
+  assert.equal(writer.getState().status, "blocked");
+  assert.equal(f.values.size, 1);
+  assert.equal(f.sent.length, 1);
+});
+
+test("discard cannot race a dispatch already holding the command lock", async () => {
+  const f = fixture();
+  await f.writer().submit(command());
+  const observer = f.writer();
+  await observer.load();
+  let release!: (value: CommandOutcome) => void;
+  const sender = createPendingCommand({
+    ...f.deps,
+    send: () =>
+      new Promise<CommandOutcome>((resolve) => {
+        release = resolve;
+      }),
+  });
+  const sending = sender.retry();
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  await observer.discard();
+  assert.equal(observer.getState().code, "BUSY");
+  assert.equal(f.values.size, 1);
+  release({ kind: "unknown", code: "UNKNOWN" });
+  await sending;
+});
