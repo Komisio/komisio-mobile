@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "@/components/pending-discard";
@@ -89,7 +89,6 @@ function BankAccount({
   };
   return (
     <Screen title={t.title} intro={t.intro}>
-      {Platform.OS === "web" ? <Message>{t.webPrivacy}</Message> : null}
       <Button
         label={t.back}
         variant="secondary"
