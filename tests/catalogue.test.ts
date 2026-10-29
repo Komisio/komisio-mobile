@@ -340,3 +340,49 @@ test("photo requests authenticate only against the configured Storage endpoint",
   assert.equal(readFailure({ message: "ITEM_NOT_FOUND" }), "missing");
   assert.equal(readFailure({ message: "AUTH_REQUIRED" }), "denied");
 });
+
+test("safe inherited derivatives are supported without relaxing destination or tenant validation", () => {
+  const derivative = { ...photo, bucket: "seller-reception-photos" as const };
+  assert.deepEqual(
+    parsePage({ ...page(), items: [{ ...row, photo: derivative }] }, tenant)
+      .items[0].photo,
+    derivative,
+  );
+  const detail = {
+    id: item,
+    title: "Coat",
+    currency: "SEK",
+    priceOre: 100,
+    facts: [],
+    photos: [derivative],
+  };
+  assert.deepEqual(parseDetail(detail, tenant, item).photos, [derivative]);
+  const source = photoSource(
+    derivative,
+    tenant,
+    "https://example.supabase.co",
+    "public-key",
+    "test-token",
+  );
+  assert.equal(
+    source.uri,
+    `https://example.supabase.co/storage/v1/object/authenticated/seller-reception-photos/${photo.path}`,
+  );
+  assert.equal(source.headers.Authorization, "Bearer test-token");
+  for (const invalid of [
+    { ...derivative, bucket: "other-private-bucket" },
+    { ...derivative, path: `${tenant}/${item}/${image}.png` },
+    { ...derivative, path: `${item}/${item}/${image}.jpg` },
+    { ...derivative, path: `${tenant}/${item}/${image}.jpg?download=1` },
+    { ...derivative, path: `${tenant}/${item}/${image}.jpg/extra` },
+  ])
+    assert.throws(() =>
+      parseDetail({ ...detail, photos: [invalid] }, tenant, item),
+    );
+  // Keep the old descriptor usable until the coordinated platform rollout.
+  const legacy = { ...photo, bucket: "reception-photos" as const };
+  assert.deepEqual(
+    parseDetail({ ...detail, photos: [legacy] }, tenant, item).photos,
+    [legacy],
+  );
+});

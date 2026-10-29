@@ -67,6 +67,21 @@ contract. Native-device behavior, real Storage downloads and staging must also
 be verified before release; successful JavaScript export alone does not verify
 those paths.
 
+## Catalogue image compatibility
+
+The photo parser also accepts exact JPEG descriptors from `seller-reception-photos`
+for metadata-free inherited images (platform issue Komisio/komisio#725).
+Images still use the configured authenticated Storage endpoint with the current
+session token; arbitrary buckets, foreign tenant paths and derivative PNG paths
+are rejected. Switching a bucket remounts image recovery even if the path is unchanged.
+
+Distribute this compatible app before the platform starts returning derivative
+descriptors: older strict clients reject that new bucket. Legacy descriptors remain
+parseable during rollout, but the server remains responsible for withholding
+original files. This client change grants no Storage permission or hosted release.
+Independent review, actual device/browser image rendering and the coordinated
+platform rollout remain required.
+
 ## Licence
 
 Not decided yet. Until a licence is added, no rights are granted beyond

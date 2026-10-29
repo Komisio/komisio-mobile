@@ -1,7 +1,7 @@
 // Reviewed read contract: Komisio/komisio#715. No seller or financial history.
 export type Photo = {
   id: string;
-  bucket: "item-photos" | "reception-photos";
+  bucket: "item-photos" | "reception-photos" | "seller-reception-photos";
   path: string;
 };
 export type CatalogueItem = {
@@ -87,14 +87,23 @@ function array(value: unknown): unknown[] {
 function photo(value: unknown, tenant: string): Photo {
   const p = object(value);
   const photoId = id(p.id);
-  if (p.bucket !== "item-photos" && p.bucket !== "reception-photos") invalid();
+  if (
+    p.bucket !== "item-photos" &&
+    p.bucket !== "reception-photos" &&
+    p.bucket !== "seller-reception-photos"
+  )
+    invalid();
   const path = text(p.path);
   const parts = path.split("/");
   if (
     parts.length !== 3 ||
     parts[0] !== tenant ||
     !isId(parts[1]) ||
-    ![`${photoId}.jpg`, `${photoId}.png`].includes(parts[2])
+    !(
+      p.bucket === "seller-reception-photos"
+        ? [`${photoId}.jpg`]
+        : [`${photoId}.jpg`, `${photoId}.png`]
+    ).includes(parts[2])
   )
     invalid();
   return { id: photoId, bucket: p.bucket, path };
