@@ -6,8 +6,10 @@ platform for second-hand stores. Built with Expo and React Native.
 > Status: store picker, login with two-step verification, profile, and the
 > store catalogue with item detail (S10/S11), and own items (S19/S20).
 > The seller overview (S22) shows server balances, item counts and recent payouts.
-> Profile links to the agreement reader (S08). Money is still a placeholder
-> (see `docs/screens.md`).
+> Profile links to agreements (S08) and bank details (S25). Money shows payout
+> requests/history (S23/S24/S53) and issued statements (S54). New writes require
+> the platform's opt-in mobile API; these slices await review and interactive
+> verification (see `docs/screens.md`).
 
 ## Direction
 
@@ -117,11 +119,31 @@ are selectable; legal text is shown verbatim, not translated by the app.
 The recorded acceptance date, source and language remain separate from the
 language currently being viewed. Historical versions cannot be accepted here.
 
-This slice is read-only: accepting a new agreement remains in the seller portal
-until the mobile command flow is implemented. There is no new agreement rule,
-signature, PDF or database migration. The old S08 reference contains only a
-loading spinner; the reader follows the platform contract and existing app theme.
-Interactive large-text/history navigation and native checks remain pending.
+An unaccepted current agreement can be explicitly confirmed with a checkbox
+and acceptance button. The exact displayed version and published translation
+are captured before dispatch through the opt-in mobile API (platform PR720).
+Changing the displayed language resets confirmation. Previously accepted or
+historical documents offer no acceptance action. Without a configured API the
+reader directs the seller to the portal.
+
+Acceptance uses a separate durable journal bound to user, store, seller,
+Supabase project and API endpoint. It stores the exact command plus the document
+title, version and language; it never sends on restoration. An uncertain response
+requires an explicit retry of that same acceptance, even after logout or a
+language change. A changed current version requires reloading and reviewing it.
+The engine may return earlier equivalent acceptance evidence with a different
+ID; the app does not mistake this for a failed request. Local-storage and
+reinstallation limitations are the same as S25 below.
+
+There is no new agreement rule, signature, PDF or database migration. The old
+S08 reference contains only a loading spinner; the reader follows the platform
+contract and existing app theme. Unit tests cover exact text selection,
+historical/accepted guards and durable recovery. A synthetic local Auth/API/RPC
+smoke verified loss after commit, exact and equivalent-evidence replay,
+translated evidence, replay after newer publication and stale-version conflict.
+It used in-memory storage and Node transport, not a browser/native runtime.
+Interactive large-text/history navigation, native storage and independent
+review remain pending.
 
 ## Payout account (S25)
 

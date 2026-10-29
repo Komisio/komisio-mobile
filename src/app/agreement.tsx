@@ -1,12 +1,18 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
+import * as Crypto from "expo-crypto";
 import { SellerGate } from "@/components/seller-gate";
 import { Button, colors, Loading, Message, Screen } from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 import { createScopedRead } from "@/lib/scoped-read";
+import {
+  agreementEndpoint,
+  agreementWriter,
+} from "@/lib/agreement-command-api";
+import { agreementIntent } from "@/lib/agreement-command";
 import {
   agreementLanguages,
   agreementOffset,
@@ -27,6 +33,7 @@ export default function AgreementScreen() {
       account.tenantId === store.id ? (
         <AgreementRead
           key={`${session.user.id}:${account.tenantId}:${account.sellerId}`}
+          user={session.user.id}
           tenant={account.tenantId}
           seller={account.sellerId}
         />
@@ -34,10 +41,28 @@ export default function AgreementScreen() {
     </SellerGate>
   );
 }
-function AgreementRead({ tenant, seller }: { tenant: string; seller: string }) {
+function AgreementRead({
+  user,
+  tenant,
+  seller,
+}: {
+  user: string;
+  tenant: string;
+  seller: string;
+}) {
   const { d, locale } = useI18n();
-  const { chooseStore } = useSession();
+  const { chooseStore, signOut, refreshAssurance } = useSession();
   const t = d.agreement;
+  const a = d.agreementAccept;
+  const writer = useMemo(
+    () => agreementWriter(user, tenant, seller),
+    [user, tenant, seller],
+  );
+  const change = useSyncExternalStore(
+    writer.subscribe,
+    writer.getState,
+    writer.getState,
+  );
   const [selection, setSelection] = useState<AgreementSelection>({
     version: null,
     text: null,
@@ -68,8 +93,9 @@ function AgreementRead({ tenant, seller }: { tenant: string; seller: string }) {
   useFocusEffect(
     useCallback(() => {
       void read.refresh();
+      void writer.load();
       return read.cancel;
-    }, [read]),
+    }, [read, writer]),
   );
   const data = state.data,
     agreement = data?.agreement,
@@ -90,6 +116,96 @@ function AgreementRead({ tenant, seller }: { tenant: string; seller: string }) {
         variant="secondary"
         onPress={() => setSelection({ version: null, text: null, page: 0 })}
       />
+      {!agreementEndpoint ? <Message>{a.unavailable}</Message> : null}
+      {change.status === "idle" || change.status === "busy" ? (
+        <Loading />
+      ) : null}
+      {change.status === "pending" || change.status === "cleanup" ? (
+        <>
+          <Message>
+            {change.status === "pending"
+              ? a.pending
+              : change.code === "success"
+                ? a.cleanupSuccess
+                : a.cleanupConflict}
+          </Message>
+          {change.command ? (
+            <View style={styles.card}>
+              <Text style={styles.text}>
+                {a.pendingDocument
+                  .replace("{version}", String(change.command.document.version))
+                  .replace(
+                    "{language}",
+                    agreementLanguages[change.command.document.language],
+                  )
+                  .replace("{title}", change.command.document.title)}
+              </Text>
+              <Button
+                label={a.viewPending}
+                variant="secondary"
+                onPress={() => {
+                  const pending = change.command!;
+                  setSelection({
+                    version: pending.command.agreementId,
+                    text:
+                      pending.command.translationId ??
+                      pending.command.agreementId,
+                    page: 0,
+                  });
+                }}
+              />
+            </View>
+          ) : null}
+          {change.code === "AUTH_REQUIRED" ||
+          change.code === "PASSWORD_UPDATE_REQUIRED" ? (
+            <>
+              <Message tone="error">
+                {change.code === "AUTH_REQUIRED"
+                  ? d.bank.auth
+                  : d.bank.recovery}
+              </Message>
+              <Button label={d.account.logout} onPress={() => void signOut()} />
+            </>
+          ) : null}
+          {change.code === "MFA_REQUIRED" ? (
+            <>
+              <Message tone="error">{d.bank.mfa}</Message>
+              <Button
+                label={d.bank.verify}
+                onPress={() => void refreshAssurance()}
+              />
+            </>
+          ) : null}
+          <Button
+            label={change.status === "cleanup" ? a.finish : a.retrySame}
+            disabled={!agreementEndpoint && change.status === "pending"}
+            onPress={() => void writer.retry()}
+          />
+        </>
+      ) : null}
+      {change.status === "blocked" ? (
+        <>
+          <Message tone="error">
+            {change.code === "BUSY"
+              ? d.bank.busy
+              : change.code === "UNSUPPORTED"
+                ? a.unsupported
+                : d.bank.storage}
+          </Message>
+          <Button label={d.retry} onPress={() => void writer.load()} />
+        </>
+      ) : null}
+      {change.status === "success" || change.status === "conflict" ? (
+        <>
+          <Message>
+            {change.status === "success" ? a.registered : a.changed}
+          </Message>
+          <Button
+            label={a.refresh}
+            onPress={() => setSelection({ version: null, text: null, page: 0 })}
+          />
+        </>
+      ) : null}
       {state.status === "idle" || state.status === "loading" ? (
         <Loading />
       ) : state.status === "failed" ? (
@@ -178,8 +294,25 @@ function AgreementRead({ tenant, seller }: { tenant: string; seller: string }) {
                 ) : (
                   <>
                     <Text style={styles.text}>{t.notAccepted}</Text>
-                    {data.current ? (
-                      <Text style={styles.note}>{t.readOnly}</Text>
+                    {data.current &&
+                    change.status === "ready" &&
+                    agreementEndpoint ? (
+                      <AcceptanceForm
+                        key={`${agreement.id}:${agreement.translationId ?? agreement.id}`}
+                        title={agreement.title}
+                        version={agreement.version}
+                        language={agreementLanguages[agreement.language]}
+                        onAccept={() =>
+                          void writer.submit(
+                            agreementIntent(
+                              data,
+                              tenant,
+                              seller,
+                              Crypto.randomUUID(),
+                            ),
+                          )
+                        }
+                      />
                     ) : null}
                   </>
                 )}
@@ -255,6 +388,53 @@ function AgreementRead({ tenant, seller }: { tenant: string; seller: string }) {
         </>
       ) : null}
     </Screen>
+  );
+}
+function AcceptanceForm({
+  title,
+  version,
+  language,
+  onAccept,
+}: {
+  title: string;
+  version: number;
+  language: string;
+  onAccept: () => void;
+}) {
+  const { d } = useI18n();
+  const [checked, setChecked] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const label = d.agreementAccept.confirm
+    .replace("{version}", String(version))
+    .replace("{language}", language)
+    .replace("{title}", title);
+  return (
+    <>
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityLabel={label}
+        accessibilityState={{ checked }}
+        style={[styles.language, checked && styles.selected]}
+        onPress={() => setChecked(!checked)}
+      >
+        <Text style={styles.text}>
+          {checked ? "☑" : "☐"} {label}
+        </Text>
+      </Pressable>
+      {failed ? <Message tone="error">{d.bank.storage}</Message> : null}
+      <Button
+        label={d.agreementAccept.accept}
+        disabled={!checked}
+        onPress={() => {
+          try {
+            setFailed(false);
+            onAccept();
+          } catch {
+            setFailed(true);
+          }
+        }}
+      />
+    </>
   );
 }
 const styles = StyleSheet.create({
