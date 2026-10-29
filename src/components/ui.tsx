@@ -16,6 +16,33 @@ import { colors, uiStyles } from "./theme";
 import { Brand } from "./brand";
 export { colors, uiStyles } from "./theme";
 
+function useControlFocus() {
+  const [focused, setFocused] = useState(false);
+  const focusProps: Pick<
+    PressableProps,
+    "onFocus" | "onBlur" | "onKeyDown" | "onPointerDown"
+  > = {
+    onFocus: (event) => {
+      // RN Web forwards the DOM element. Native keeps its existing focus ring.
+      const target = event.currentTarget as unknown as {
+        matches?: (selector: string) => boolean;
+      };
+      setFocused(
+        Platform.OS !== "web" || (target.matches?.(":focus-visible") ?? true),
+      );
+    },
+    onBlur: () => setFocused(false),
+    ...(Platform.OS === "web"
+      ? {
+          // Also handle modality changes while the same control retains focus.
+          onPointerDown: () => setFocused(false),
+          onKeyDown: () => setFocused(true),
+        }
+      : {}),
+  };
+  return { focused, focusProps };
+}
+
 export function PageHeading({
   title,
   intro,
@@ -60,14 +87,13 @@ export function ItemCard({
   label: string;
   onPress: () => void;
 }) {
-  const [focused, setFocused] = useState(false);
+  const { focused, focusProps } = useControlFocus();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      {...focusProps}
       style={({ pressed }) => [
         styles.itemCard,
         focused && styles.focused,
@@ -105,7 +131,7 @@ export function Choice({
   disabled?: boolean;
   role?: "button" | "radio" | "checkbox";
 }) {
-  const [focused, setFocused] = useState(false);
+  const { focused, focusProps } = useControlFocus();
   return (
     <Pressable
       accessibilityRole={role}
@@ -118,12 +144,14 @@ export function Choice({
       aria-checked={role === "button" ? undefined : selected}
       aria-pressed={role === "button" ? selected : undefined}
       aria-disabled={disabled}
+      {...focusProps}
       {...(Platform.OS === "web" && role !== "button"
         ? {
             // RN Web handles Space for buttons, but not radio/checkbox roles.
             onKeyDown: (
               event: Parameters<NonNullable<PressableProps["onKeyDown"]>>[0],
             ) => {
+              focusProps.onKeyDown?.(event);
               if (event.nativeEvent.key === " ") {
                 event.preventDefault();
                 if (!disabled && !event.nativeEvent.repeat) onPress();
@@ -133,8 +161,6 @@ export function Choice({
         : {})}
       disabled={disabled}
       onPress={onPress}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
       style={({ pressed }) => [
         styles.chip,
         selected && styles.chipSelected,
@@ -231,7 +257,7 @@ export function Button({
   expanded?: boolean;
 }) {
   const off = disabled || busy;
-  const [focused, setFocused] = useState(false);
+  const { focused, focusProps } = useControlFocus();
   return (
     <Pressable
       accessibilityRole="button"
@@ -242,8 +268,7 @@ export function Button({
       aria-expanded={expanded}
       disabled={off}
       onPress={onPress}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      {...focusProps}
       style={({ pressed }) => [
         styles.button,
         variant === "secondary" && styles.secondary,
