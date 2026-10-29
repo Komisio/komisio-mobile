@@ -16,7 +16,7 @@ export default function TabsLayout() {
   const layoutKey = `${width}:${fontScale}:${locale}`;
   const [labelLayout, setLabelLayout] = useState({ key: "", height: 0 });
   const labelHeight = Math.max(
-    32 * Math.max(1, fontScale),
+    16 * Math.max(1, fontScale),
     labelLayout.key === layoutKey ? labelLayout.height : 0,
   );
   return (
@@ -27,7 +27,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.muted,
         tabBarActiveBackgroundColor: colors.accent,
         tabBarLabelPosition: "below-icon",
-        // Start with two lines; measure wrapping at large text sizes as well.
+        // Start with one line; grow only when the measured labels wrap.
         // The navigator applies the bottom inset as padding within this height.
         tabBarStyle: {
           backgroundColor: colors.surface,
@@ -36,6 +36,7 @@ export default function TabsLayout() {
         },
         tabBarLabel: ({ children, color }) => (
           <Text
+            key={`${layoutKey}:${children}`}
             onLayout={({ nativeEvent }) => {
               const height = Math.ceil(nativeEvent.layout.height);
               setLabelLayout((previous) =>
