@@ -22,10 +22,11 @@ export function CataloguePhoto({
   const [attempt, setAttempt] = useState(0);
   const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
   const key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!photo || !session || !url || !key)
+  if (!photo) return null;
+  if (!session || !url || !key)
     return (
       <View style={styles.placeholder}>
-        <Text style={styles.caption}>{d.catalogue.noPhoto}</Text>
+        <Text style={styles.caption}>{d.catalogue.photoFailed}</Text>
       </View>
     );
   return (
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
   placeholder: {
     width: "100%",
     aspectRatio: 1,
-    backgroundColor: "#e5ebe7",
+    backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
