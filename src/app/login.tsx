@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { openBrowserAsync } from "expo-web-browser";
 import { supabase } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
@@ -15,8 +15,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const submitting = useRef(false);
+  const complete = Boolean(email.trim() && password);
 
   const submit = async () => {
+    // Keyboard submission bypasses the button; lock before React renders busy.
+    if (!complete || submitting.current) return;
+    submitting.current = true;
     setBusy(true);
     setError("");
     try {
@@ -35,6 +40,7 @@ export default function Login() {
     } catch {
       setError(d.login.offline);
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   };
@@ -64,7 +70,7 @@ export default function Login() {
         <Button
           label={d.login.submit}
           busy={busy}
-          disabled={!email.trim() || !password}
+          disabled={!complete}
           onPress={submit}
         />
       </Card>

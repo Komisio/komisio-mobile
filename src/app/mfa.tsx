@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
@@ -12,8 +12,13 @@ export default function Mfa() {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const submitting = useRef(false);
+  const complete = code.length === 6;
 
   const submit = async () => {
+    // One attempt covers both factor lookup and challenge verification.
+    if (!complete || submitting.current) return;
+    submitting.current = true;
     setBusy(true);
     setError("");
     try {
@@ -30,6 +35,7 @@ export default function Mfa() {
     } catch {
       setError(d.login.offline);
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   };
@@ -50,7 +56,7 @@ export default function Mfa() {
         <Button
           label={d.mfa.submit}
           busy={busy}
-          disabled={code.length !== 6}
+          disabled={!complete}
           onPress={submit}
         />
       </Card>
