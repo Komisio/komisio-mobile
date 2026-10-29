@@ -50,6 +50,11 @@ export function StoreCatalogue({
         <Text accessibilityRole="header" style={styles.title}>
           {name}
         </Text>
+        <Button
+          label={d.storeInfo.title}
+          variant="secondary"
+          onPress={() => router.push("/store-info")}
+        />
         <View style={styles.searchRow}>
           <View style={styles.search}>
             <Field

@@ -8,6 +8,7 @@ import {
 import { getLocales } from "expo-localization";
 import { secureStorage } from "./secure-storage";
 import { catalogueCopy } from "./catalogue-copy";
+import { storeInfoCopy } from "./store-info-copy";
 import { sellerItemsCopy } from "./seller-items-copy";
 import { overviewCopy } from "./overview-copy";
 import { agreementCopy } from "./agreement-copy";
@@ -17,6 +18,7 @@ import { statementCopy } from "./statement-copy";
 import { agreementAcceptCopy } from "./agreement-accept-copy";
 
 const sv = {
+  storeInfo: storeInfoCopy.sv,
   agreementAccept: agreementAcceptCopy.sv,
   statements: statementCopy.sv,
   payouts: payoutCopy.sv,
@@ -80,6 +82,7 @@ const sv = {
 export type Dictionary = typeof sv;
 
 const en: Dictionary = {
+  storeInfo: storeInfoCopy.en,
   agreementAccept: agreementAcceptCopy.en,
   statements: statementCopy.en,
   payouts: payoutCopy.en,

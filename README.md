@@ -4,7 +4,7 @@ Mobile app for [Komisio](https://github.com/Komisio/komisio), the consignment
 platform for second-hand stores. Built with Expo and React Native.
 
 > Status: store picker, login with two-step verification, profile, and the
-> store catalogue with item detail (S10/S11), and own items (S19/S20).
+> store catalogue with item detail (S10/S11), own items (S19/S20), and store information (S12).
 > The seller overview (S22) shows server balances, item counts and recent payouts.
 > Profile links to agreements (S08) and bank details (S25). Money shows payout
 > requests/history (S23/S24/S53) and issued statements (S54). New writes require
@@ -248,6 +248,22 @@ Synthetic engine fixtures were fully rolled back. Unit tests also cover date
 boundaries across Stockholm daylight-saving changes, exact identity, correction
 semantics, line order and resource bounds. Interactive large-text/line navigation,
 native rendering and independent Opus review remain required before release.
+
+## Store information (S12)
+
+Open **Store information** from the Store tab for published descriptions,
+address, contact details and opening hours. This uses the existing public
+`public_store_profile(p_slug)` RPC; no new database migration is needed.
+Store changes discard the previous response, and focus/retry reads can be cancelled.
+Unpublished information and missing opening hours are shown explicitly; a missing
+weekday does not mean closed. Store-authored text remains in its published language.
+
+The map button opens the published address in an external map; it does not
+request device location. Contact actions allow only HTTPS websites, plain email
+addresses and phone numbers, and show an error if the destination cannot open.
+The S12 reference is in [reference PR #4](https://github.com/Komisio/komisio-mobile/pull/4).
+Hand-in actions remain postponed. Browser navigation, large text and native
+map/phone/email hand-offs still need interactive verification before release.
 
 ## Licence
 
