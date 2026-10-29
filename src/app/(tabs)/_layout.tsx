@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router/tabs";
+import { useState } from "react";
 import { Text, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useI18n } from "@/lib/i18n";
@@ -9,9 +10,15 @@ import { TabIcon } from "@/components/brand";
 // (S19, S20), overview (S22 + S51), money (payouts and statements) and
 // profile (S21, S25).
 export default function TabsLayout() {
-  const { d } = useI18n();
+  const { d, locale } = useI18n();
   const { bottom } = useSafeAreaInsets();
-  const { fontScale } = useWindowDimensions();
+  const { fontScale, width } = useWindowDimensions();
+  const layoutKey = `${width}:${fontScale}:${locale}`;
+  const [labelLayout, setLabelLayout] = useState({ key: "", height: 0 });
+  const labelHeight = Math.max(
+    32 * Math.max(1, fontScale),
+    labelLayout.key === layoutKey ? labelLayout.height : 0,
+  );
   return (
     <Tabs
       screenOptions={{
@@ -20,15 +27,23 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.muted,
         tabBarActiveBackgroundColor: colors.accent,
         tabBarLabelPosition: "below-icon",
-        // Two full label lines, including at increased system text size.
+        // Start with two lines; measure wrapping at large text sizes as well.
         // The navigator applies the bottom inset as padding within this height.
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.line,
-          height: 44 + 32 * Math.max(1, fontScale) + bottom,
+          height: 44 + labelHeight + bottom,
         },
         tabBarLabel: ({ children, color }) => (
           <Text
+            onLayout={({ nativeEvent }) => {
+              const height = Math.ceil(nativeEvent.layout.height);
+              setLabelLayout((previous) =>
+                previous.key === layoutKey && previous.height >= height
+                  ? previous
+                  : { key: layoutKey, height },
+              );
+            }}
             style={{
               color,
               fontSize: 12,
