@@ -295,6 +295,14 @@ screens retain it. Clean headings, rounded controls and navigation
 arrows complement the forest-green overview balance card. Decorative elements
 carry no financial meaning and are hidden from accessibility navigation.
 
+Signed-in detail screens use the platform stack header for back navigation,
+with an icon-only back button on iOS. The content retains its large wrapping
+heading and does not add a second top safe area. Direct links without stack
+history show an accessible back arrow to the relevant tab (or the statement
+archive). Tab roots and authentication screens keep their existing headers and
+safe-area handling. Native swipe-back and VoiceOver behavior require device
+verification; compiled navigation tests verify options and fallback routing only.
+
 Catalogue photos are optional. A row without a photo uses its full text width,
 and a detail without photos has no gallery. Mixed catalogues keep one stable
 list layout during search and paging. Existing images retain loading/error

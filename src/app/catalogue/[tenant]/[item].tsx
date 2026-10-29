@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   type CatalogueDetail,
   type ReadFailure,
@@ -22,8 +22,6 @@ import {
 import { SellerGate } from "@/components/seller-gate";
 import { CataloguePhoto } from "@/components/catalogue-photo";
 
-const back = () => (router.canGoBack() ? router.back() : router.replace("/"));
-
 export default function CatalogueItemScreen() {
   const { tenant, item } = useLocalSearchParams<{
     tenant: string;
@@ -34,13 +32,12 @@ export default function CatalogueItemScreen() {
   // A stale deep link must not read an item using a newly selected store.
   if (!store || tenant !== store.id || !isId(item))
     return (
-      <Screen title={d.catalogue.detail}>
+      <Screen topSafeArea={false} title={d.catalogue.detail}>
         <Message>{d.catalogue.missing}</Message>
-        <Button label={d.catalogue.back} onPress={back} />
       </Screen>
     );
   return (
-    <SellerGate title={d.catalogue.detail}>
+    <SellerGate topSafeArea={false} title={d.catalogue.detail}>
       <ItemDetail
         key={`${session?.user.id}:${tenant}:${item}`}
         tenant={tenant}
@@ -91,8 +88,7 @@ function ItemRead({
     }, [tenant, item]),
   );
   return (
-    <Screen title={t.detail}>
-      <Button label={t.back} variant="secondary" onPress={back} />
+    <Screen topSafeArea={false} title={t.detail}>
       {failure ? (
         <>
           <Message tone="error">{t[failure]}</Message>
@@ -117,21 +113,21 @@ function ItemRead({
               {formatPrice(data.priceOre, data.currency, locale)}
             </Text>
           </View>
-          <Text accessibilityRole="header" style={styles.heading}>
-            {t.facts}
-          </Text>
           {data.facts.length ? (
-            <View style={styles.facts}>
-              {data.facts.map((fact) => (
-                <View key={fact.slug} style={styles.fact}>
-                  <Text style={styles.label}>{t.factLabels[fact.slug]}</Text>
-                  <Text style={styles.value}>{fact.value}</Text>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <Message>{t.noFacts}</Message>
-          )}
+            <>
+              <Text accessibilityRole="header" style={styles.heading}>
+                {t.facts}
+              </Text>
+              <View style={styles.facts}>
+                {data.facts.map((fact) => (
+                  <View key={fact.slug} style={styles.fact}>
+                    <Text style={styles.label}>{t.factLabels[fact.slug]}</Text>
+                    <Text style={styles.value}>{fact.value}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          ) : null}
         </>
       )}
     </Screen>

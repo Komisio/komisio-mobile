@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
@@ -34,7 +34,7 @@ export default function AgreementScreen() {
   const { account, session, store } = useSession();
   const { d } = useI18n();
   return (
-    <SellerGate title={d.agreement.title}>
+    <SellerGate topSafeArea={false} title={d.agreement.title}>
       {account &&
       account !== "failed" &&
       session &&
@@ -112,14 +112,7 @@ function AgreementRead({
   const versionLabel = (version: number) =>
     t.version.replace("{version}", String(version));
   return (
-    <Screen title={t.title}>
-      <Button
-        label={t.back}
-        variant="secondary"
-        onPress={() =>
-          router.canGoBack() ? router.back() : router.replace("/(tabs)/profile")
-        }
-      />
+    <Screen topSafeArea={false} title={t.title}>
       <Button
         label={t.current}
         variant="secondary"

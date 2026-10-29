@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
@@ -29,7 +29,7 @@ export default function BankAccountScreen() {
   const { account, session, store } = useSession();
   const { d } = useI18n();
   return (
-    <SellerGate title={d.bank.title}>
+    <SellerGate topSafeArea={false} title={d.bank.title}>
       {account &&
       account !== "failed" &&
       session &&
@@ -88,14 +88,7 @@ function BankAccount({
     void writer.load();
   };
   return (
-    <Screen title={t.title} intro={t.intro}>
-      <Button
-        label={t.back}
-        variant="secondary"
-        onPress={() =>
-          router.canGoBack() ? router.back() : router.replace("/(tabs)/profile")
-        }
-      />
+    <Screen topSafeArea={false} title={t.title} intro={t.intro}>
       {!bankEndpoint ? <Message>{t.notConfigured}</Message> : null}
       {change.status === "idle" || change.status === "busy" ? (
         <Loading />

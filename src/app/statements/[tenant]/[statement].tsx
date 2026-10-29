@@ -9,9 +9,6 @@ import { isId } from "@/lib/catalogue";
 import { createScopedRead } from "@/lib/scoped-read";
 import { readStatement } from "@/lib/statement-api";
 import { statementReadFailure } from "@/lib/seller-statements";
-
-const back = () =>
-  router.canGoBack() ? router.back() : router.replace("/statements");
 export default function StatementScreen() {
   const { tenant, statement } = useLocalSearchParams<{
     tenant: string;
@@ -22,13 +19,12 @@ export default function StatementScreen() {
     t = d.statements;
   if (!store || store.id !== tenant || !isId(tenant) || !isId(statement))
     return (
-      <Screen title={t.title}>
+      <Screen topSafeArea={false} title={t.title}>
         <Message>{t.missing}</Message>
-        <Button label={t.back} onPress={back} />
       </Screen>
     );
   return (
-    <SellerGate title={t.title}>
+    <SellerGate topSafeArea={false} title={t.title}>
       {account &&
       account !== "failed" &&
       session &&
@@ -75,8 +71,7 @@ function StatementRead({
     }, [read]),
   );
   return (
-    <Screen title={t.title}>
-      <Button label={t.back} variant="secondary" onPress={back} />
+    <Screen topSafeArea={false} title={t.title}>
       {state.status === "idle" || state.status === "loading" ? (
         <Loading />
       ) : state.status === "failed" ? (
