@@ -1,9 +1,18 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "./pending-discard";
-import { Button, colors, Field, Loading, Message, Screen } from "./ui";
+import {
+  Button,
+  Choice,
+  StatusBadge,
+  uiStyles,
+  Field,
+  Loading,
+  Message,
+  Screen,
+} from "./ui";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
@@ -74,15 +83,12 @@ export function SellerPayouts({
       />
       <View style={styles.views}>
         {(["request", "history"] as const).map((value) => (
-          <Pressable
+          <Choice
             key={value}
-            accessibilityRole="button"
-            accessibilityState={{ selected: value === view }}
-            style={[styles.choice, value === view && styles.selected]}
+            label={t[value]}
+            selected={value === view}
             onPress={() => setView(value)}
-          >
-            <Text style={styles.text}>{t[value]}</Text>
-          </Pressable>
+          />
         ))}
       </View>
       <Button
@@ -245,9 +251,9 @@ export function SellerPayouts({
                     <Text style={styles.heading}>
                       {formatPrice(payout.amountOre, data.currency, locale)}
                     </Text>
-                    <Text style={styles.text}>
+                    <StatusBadge>
                       {d.overview.statuses[payout.status]}
-                    </Text>
+                    </StatusBadge>
                     <Text style={styles.note}>
                       {d.overview.requestedAt}:{" "}
                       {formatAgreementTime(payout.requestedAt, locale)}
@@ -376,28 +382,11 @@ function PayoutForm({
   );
 }
 const styles = StyleSheet.create({
-  views: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  choice: {
-    minHeight: 48,
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.brand,
-    justifyContent: "center",
-    backgroundColor: colors.surface,
-  },
-  selected: { backgroundColor: colors.accent, borderWidth: 2 },
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.line,
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-  },
-  text: { fontSize: 16, lineHeight: 24, color: colors.text },
-  label: { fontSize: 16, color: colors.muted },
-  amount: { fontSize: 30, fontWeight: "700", color: colors.brand },
-  heading: { fontSize: 21, fontWeight: "600", color: colors.brand },
-  note: { fontSize: 14, lineHeight: 21, color: colors.muted },
+  views: uiStyles.choices,
+  card: uiStyles.card,
+  text: uiStyles.body,
+  label: uiStyles.note,
+  amount: { ...uiStyles.amount, fontSize: 30, lineHeight: 38 },
+  heading: uiStyles.heading,
+  note: uiStyles.note,
 });

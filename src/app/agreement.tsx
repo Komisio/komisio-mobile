@@ -1,10 +1,18 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
-import { Button, colors, Loading, Message, Screen } from "@/components/ui";
+import {
+  Button,
+  Choice,
+  ItemCard,
+  uiStyles,
+  Loading,
+  Message,
+  Screen,
+} from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
@@ -257,13 +265,12 @@ function AgreementRead({
               </Text>
               <View style={styles.languages}>
                 {data.languages.map((row) => (
-                  <Pressable
+                  <Choice
                     key={row.id}
-                    accessibilityRole="button"
-                    accessibilityState={{
-                      selected:
-                        row.id === (agreement.translationId ?? agreement.id),
-                    }}
+                    label={agreementLanguages[row.language]}
+                    selected={
+                      row.id === (agreement.translationId ?? agreement.id)
+                    }
                     onPress={() =>
                       setSelection({
                         ...selection,
@@ -271,17 +278,7 @@ function AgreementRead({
                         text: row.id,
                       })
                     }
-                    style={({ pressed }) => [
-                      styles.language,
-                      row.id === (agreement.translationId ?? agreement.id) &&
-                        styles.selected,
-                      pressed && styles.pressed,
-                    ]}
-                  >
-                    <Text style={styles.languageText}>
-                      {agreementLanguages[row.language]}
-                    </Text>
-                  </Pressable>
+                  />
                 ))}
               </View>
               <Text style={styles.note}>{t.verbatim}</Text>
@@ -346,17 +343,12 @@ function AgreementRead({
           </Text>
           {data.history.length ? (
             data.history.map((row) => (
-              <Pressable
+              <ItemCard
                 key={row.id}
-                accessibilityRole="button"
-                accessibilityLabel={`${versionLabel(row.version)}: ${row.title}`}
+                label={`${versionLabel(row.version)}: ${row.title}`}
                 onPress={() =>
                   setSelection({ ...selection, version: row.id, text: null })
                 }
-                style={({ pressed }) => [
-                  styles.card,
-                  pressed && styles.pressed,
-                ]}
               >
                 <Text style={styles.rowTitle}>
                   {row.title} · {versionLabel(row.version)}
@@ -367,7 +359,7 @@ function AgreementRead({
                 <Text style={styles.note}>
                   {row.source === "staff_recorded" ? t.staff : t.seller}
                 </Text>
-              </Pressable>
+              </ItemCard>
             ))
           ) : (
             <Text style={styles.text}>{t.noHistory}</Text>
@@ -430,17 +422,12 @@ function AcceptanceForm({
     .replace("{title}", title);
   return (
     <>
-      <Pressable
-        accessibilityRole="checkbox"
-        accessibilityLabel={label}
-        accessibilityState={{ checked }}
-        style={[styles.language, checked && styles.selected]}
+      <Choice
+        role="checkbox"
+        label={label}
+        selected={checked}
         onPress={() => setChecked(!checked)}
-      >
-        <Text style={styles.text}>
-          {checked ? "☑" : "☐"} {label}
-        </Text>
-      </Pressable>
+      />
       {failed ? <Message tone="error">{d.bank.storage}</Message> : null}
       <Button
         label={d.agreementAccept.accept}
@@ -458,32 +445,11 @@ function AcceptanceForm({
   );
 }
 const styles = StyleSheet.create({
-  card: {
-    padding: 16,
-    gap: 10,
-    borderRadius: 12,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-    minHeight: 48,
-  },
-  heading: { color: colors.brand, fontWeight: "700", fontSize: 22 },
-  rowTitle: { color: colors.brand, fontWeight: "600", fontSize: 17 },
-  body: { color: colors.text, fontSize: 17, lineHeight: 27 },
-  text: { color: colors.text, fontSize: 16, lineHeight: 24 },
-  note: { color: colors.muted, fontSize: 14, lineHeight: 21 },
-  languages: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  language: {
-    minHeight: 48,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.brand,
-    justifyContent: "center",
-    backgroundColor: colors.surface,
-  },
-  selected: { backgroundColor: colors.accent, borderWidth: 2 },
-  languageText: { color: colors.brand, fontSize: 16, fontWeight: "600" },
-  pressed: { opacity: 0.6 },
+  card: uiStyles.card,
+  heading: uiStyles.heading,
+  rowTitle: uiStyles.rowTitle,
+  body: { ...uiStyles.body, fontSize: 17, lineHeight: 27 },
+  text: uiStyles.body,
+  note: uiStyles.note,
+  languages: uiStyles.choices,
 });

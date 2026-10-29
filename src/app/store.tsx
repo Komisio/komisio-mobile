@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
 import { useSession, type AppStore } from "@/lib/session";
 import { LanguagePicker } from "@/components/language-picker";
-import { Button, colors, Field, Loading, Message, Screen } from "@/components/ui";
+import {
+  Button,
+  NavigationRow,
+  Field,
+  Loading,
+  Message,
+  Screen,
+} from "@/components/ui";
 
 // S01: stores that chose to appear in the app (public_app_stores).
 export default function ChooseStore() {
@@ -34,17 +41,21 @@ export default function ChooseStore() {
   );
 
   return (
-    <Screen title={d.store.title} intro={d.store.intro}>
+    <Screen brand title={d.store.title} intro={d.store.intro}>
       <LanguagePicker />
       {!supabaseConfigured ? (
         <Message tone="error">{d.notConfigured}</Message>
       ) : failed ? (
         <>
           <Message tone="error">{d.store.failed}</Message>
-          <Button label={d.retry} variant="secondary" onPress={() => {
+          <Button
+            label={d.retry}
+            variant="secondary"
+            onPress={() => {
               setFailed(false);
               setAttempt((n) => n + 1);
-            }} />
+            }}
+          />
         </>
       ) : !stores ? (
         <Loading />
@@ -60,14 +71,11 @@ export default function ChooseStore() {
           {shown.length === 0 ? <Message>{d.store.empty}</Message> : null}
           <View style={styles.list}>
             {shown.map((s) => (
-              <Pressable
+              <NavigationRow
                 key={s.id}
-                accessibilityRole="button"
+                label={s.name}
                 onPress={() => chooseStore(s)}
-                style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-              >
-                <Text style={styles.name}>{s.name}</Text>
-              </Pressable>
+              />
             ))}
           </View>
         </>
@@ -76,17 +84,4 @@ export default function ChooseStore() {
   );
 }
 
-const styles = StyleSheet.create({
-  list: { gap: 8 },
-  row: {
-    minHeight: 56,
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.line,
-    backgroundColor: colors.surface,
-  },
-  pressed: { backgroundColor: colors.accent },
-  name: { fontSize: 17, color: colors.text, fontWeight: "600" },
-});
+const styles = StyleSheet.create({ list: { gap: 8 } });
