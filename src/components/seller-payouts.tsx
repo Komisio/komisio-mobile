@@ -67,6 +67,11 @@ export function SellerPayouts({
   const data = state.data;
   return (
     <Screen title={t.title}>
+      <Button
+        label={d.statements.title}
+        variant="secondary"
+        onPress={() => router.push("/statements")}
+      />
       <View style={styles.views}>
         {(["request", "history"] as const).map((value) => (
           <Pressable

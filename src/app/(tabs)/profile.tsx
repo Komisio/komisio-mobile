@@ -18,6 +18,11 @@ export default function ProfileTab() {
       </Message>
       <LanguagePicker />
       <Button
+        label={d.statements.title}
+        variant="secondary"
+        onPress={() => router.push("/statements")}
+      />
+      <Button
         label={d.bank.title}
         variant="secondary"
         onPress={() => router.push("/bank-account")}
