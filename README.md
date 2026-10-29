@@ -5,7 +5,8 @@ platform for second-hand stores. Built with Expo and React Native.
 
 > Status: store picker, login with two-step verification, profile, and the
 > store catalogue with item detail (S10/S11), and own items (S19/S20).
-> Overview and money are still placeholders (see `docs/screens.md`).
+> The seller overview (S22) shows server balances, item counts and recent payouts.
+> Money is still a placeholder (see `docs/screens.md`).
 
 ## Direction
 
@@ -90,6 +91,22 @@ range in place. Account/store changes discard the prior view.
 Unit tests cover contract validation, amount/date presentation, 25-row paging,
 stale scopes and denied/offline refresh. Browser and native-device verification
 remain required before release; typecheck, lint and export are not UI tests.
+
+## Seller overview (S22)
+
+The Overview tab combines `my_seller_economy` with the first `expiring` page of
+`my_items_page`. It requires the expiring-filter migration in
+[platform PR #718](https://github.com/Komisio/komisio/pull/718) and own-item detail
+from [mobile PR #8](https://github.com/Komisio/komisio-mobile/pull/8).
+
+Available, reserved and paid amounts are server facts; negative available
+balances remain visible. Complete item counts are independent of the page size.
+Up to five expiring items link to their own-item detail, and up to five recent
+payout requests show recorded status and the **request date**, not a payment date.
+There is no client-side balance calculation or financial write. An incomplete
+read fails explicitly; it never turns missing financial data into a zero balance.
+Focus/retry refreshes clear the previous snapshot, and blur/account changes cancel
+late results. Native and browser navigation checks remain required before release.
 
 ## Licence
 

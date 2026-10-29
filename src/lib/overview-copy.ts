@@ -1,0 +1,61 @@
+const sv = {
+  intro: "Dina varor och utbetalningar i {store}.",
+  available: "Tillgängligt saldo",
+  reserved: "Reserverat för utbetalning",
+  paid: "Utbetalt totalt",
+  balanceNote: "Reserverade belopp ingår inte i det tillgängliga saldot.",
+  active: "Aktiva varor",
+  sold: "Sålda varor",
+  ended: "Avslutade varor",
+  expiring: "Snart utgående",
+  expiringIntro: "{count} varor närmar sig försäljningsperiodens slut.",
+  preview: "Visar {shown} av {count}. Alla varor finns under Mina varor.",
+  noExpiring: "Inga varor närmar sig försäljningsperiodens slut.",
+  myItems: "Visa mina varor",
+  recentPayouts: "Senaste utbetalningsbegäranden",
+  payoutIntro: "Upp till fem av de senast begärda utbetalningarna.",
+  noPayouts: "Det finns inga utbetalningsbegäranden ännu.",
+  requestedAt: "Begärd",
+  refresh: "Uppdatera översikten",
+  failed:
+    "Översikten kunde inte hämtas. Kontrollera anslutningen och försök igen.",
+  denied:
+    "Du har inte längre tillgång till det här säljarkontot. Välj butik igen.",
+  statuses: {
+    requested: "Begärd",
+    approved: "Godkänd, väntar på betalning",
+    paid: "Utbetald",
+    rejected: "Avslagen",
+  },
+};
+const en: typeof sv = {
+  intro: "Your items and payouts at {store}.",
+  available: "Available balance",
+  reserved: "Reserved for payout",
+  paid: "Total paid",
+  balanceNote: "Reserved amounts are not included in the available balance.",
+  active: "Active items",
+  sold: "Sold items",
+  ended: "Ended items",
+  expiring: "Expiring soon",
+  expiringIntro: "{count} items are approaching the end of their sale period.",
+  preview: "Showing {shown} of {count}. Find every item under My items.",
+  noExpiring: "No items are approaching the end of their sale period.",
+  myItems: "View my items",
+  recentPayouts: "Recent payout requests",
+  payoutIntro: "Up to five of the most recently requested payouts.",
+  noPayouts: "There are no payout requests yet.",
+  requestedAt: "Requested",
+  refresh: "Refresh overview",
+  failed:
+    "The overview could not be loaded. Check your connection and try again.",
+  denied:
+    "You no longer have access to this seller account. Choose a store again.",
+  statuses: {
+    requested: "Requested",
+    approved: "Approved, awaiting payment",
+    paid: "Paid",
+    rejected: "Rejected",
+  },
+};
+export const overviewCopy = { sv, en };
