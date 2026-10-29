@@ -52,14 +52,6 @@ export function PageHeading({
 }) {
   return (
     <View style={{ gap: 8 }}>
-      <View
-        aria-hidden
-        importantForAccessibility="no-hide-descendants"
-        style={styles.headingAccent}
-      >
-        <View style={styles.headingStroke} />
-        <View style={styles.headingDot} />
-      </View>
       <Text accessibilityRole="header" style={uiStyles.title}>
         {title}
       </Text>
@@ -341,24 +333,6 @@ export function Loading() {
 }
 
 const styles = StyleSheet.create({
-  headingAccent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    marginBottom: 2,
-  },
-  headingStroke: {
-    width: 28,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.brand,
-  },
-  headingDot: {
-    width: 8,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.highlight,
-  },
   navigationArrow: {
     width: 32,
     height: 32,

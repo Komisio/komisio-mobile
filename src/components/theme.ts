@@ -6,7 +6,6 @@ export const colors = {
   onBrand: "#ffffff",
   onBrandMuted: "#dbe8dc",
   brandDecoration: "#365e4f",
-  highlight: "#bed4aa",
   accent: "#eaf1e7",
   text: "#203d35",
   muted: "#5b6d62",

@@ -291,7 +291,7 @@ The tab bar uses a continuous sage surface through the home-indicator area,
 with a compact white highlight behind the selected icon. Its height follows measured
 label wrapping and system text size; the bottom inset is reserved once by the
 navigator. Tab content omits its own bottom safe-area padding, while standalone
-screens retain it. Shared heading accents, rounded controls and navigation
+screens retain it. Clean headings, rounded controls and navigation
 arrows complement the forest-green overview balance card. Decorative elements
 carry no financial meaning and are hidden from accessibility navigation.
 
