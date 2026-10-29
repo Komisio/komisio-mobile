@@ -38,7 +38,8 @@ export function SellerOverviewScreen({
     }, [read]),
   );
   const data = state.data;
-  const money = (ore: number) => formatPrice(ore, data!.currency, locale);
+  const money = (ore: number) =>
+    data ? formatPrice(ore, data.currency, locale) : "";
   return (
     <Screen
       title={d.tabs.overview}

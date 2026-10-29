@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
+import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
 import {
   Button,
@@ -87,6 +88,7 @@ function BankAccount({
   };
   return (
     <Screen title={t.title} intro={t.intro}>
+      {Platform.OS === "web" ? <Message>{t.webPrivacy}</Message> : null}
       <Button
         label={t.back}
         variant="secondary"
@@ -105,7 +107,9 @@ function BankAccount({
               ? t.pending
               : change.code === "success"
                 ? t.cleanupSuccess
-                : t.cleanupConflict}
+                : change.code === "rejected"
+                  ? t.rejected
+                  : t.cleanupConflict}
           </Message>
           {change.command ? (
             <View style={styles.card}>
@@ -141,6 +145,12 @@ function BankAccount({
             disabled={!bankEndpoint && change.status === "pending"}
             onPress={() => void writer.retry()}
           />
+          {change.status === "pending" && change.command ? (
+            <PendingDiscard
+              key={change.command.requestId}
+              onDiscard={() => void writer.discard()}
+            />
+          ) : null}
         </>
       ) : null}
       {change.status === "blocked" ? (
@@ -158,6 +168,14 @@ function BankAccount({
       {change.status === "success" || change.status === "conflict" ? (
         <>
           <Message>{change.status === "success" ? t.saved : t.changed}</Message>
+          <Button label={t.refresh} onPress={refresh} />
+        </>
+      ) : null}
+      {change.status === "rejected" || change.status === "discarded" ? (
+        <>
+          <Message>
+            {change.status === "rejected" ? t.rejected : t.discarded}
+          </Message>
           <Button label={t.refresh} onPress={refresh} />
         </>
       ) : null}

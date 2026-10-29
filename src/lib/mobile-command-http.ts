@@ -21,7 +21,7 @@ export async function sendMobileCommand<C extends { requestId: string }>(
   outcome: (status: number, body: unknown, requestId: string) => CommandOutcome,
 ): Promise<CommandOutcome> {
   const unknown: CommandOutcome = { kind: "unknown", code: "UNKNOWN" };
-  if (!deps.endpoint) return unknown;
+  if (!deps.endpoint) return { kind: "rejected", code: "NOT_CONFIGURED" };
   const session = await deps.session();
   if (!session || session.user !== deps.user)
     return { kind: "unknown", code: "AUTH_REQUIRED" };
@@ -41,12 +41,33 @@ export async function sendMobileCommand<C extends { requestId: string }>(
     });
     const text = await response.text();
     if (text.length > 4096) return unknown;
-    return outcome(response.status, JSON.parse(text), command.requestId);
+    const body: unknown = JSON.parse(text);
+    return (
+      commandRefusal(response.status, body) ??
+      outcome(response.status, body, command.requestId)
+    );
   } catch {
     return unknown;
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/** Only explicit API refusals, never generic proxy responses or 5xx errors.
+ * The journal controller only settles these on the first attempt. */
+export function commandRefusal(
+  status: number,
+  body: unknown,
+): CommandOutcome | null {
+  const code = (body as { error?: unknown } | null)?.error;
+  if (
+    ([400, 413, 415].includes(status) && code === "INVALID_INPUT") ||
+    (status === 403 && code === "FORBIDDEN") ||
+    (status === 404 && code === "NOT_FOUND") ||
+    (status === 409 && code === "SELLER_CLOSED")
+  )
+    return { kind: "rejected", code: String(code) };
+  return null;
 }
 
 export function mobileEndpoint(value: string | undefined): string | null {
