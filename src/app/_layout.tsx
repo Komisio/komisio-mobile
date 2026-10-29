@@ -35,6 +35,7 @@ function Routes() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="catalogue/[tenant]/[item]" />
         <Stack.Screen name="my-items/[tenant]/[item]" />
+        <Stack.Screen name="agreement" />
       </Stack.Protected>
     </Stack>
   );

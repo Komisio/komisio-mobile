@@ -1,4 +1,5 @@
 import { useI18n } from "@/lib/i18n";
+import { router } from "expo-router";
 import { useSession } from "@/lib/session";
 import { LanguagePicker } from "@/components/language-picker";
 import { Button, Message, Screen } from "@/components/ui";
@@ -16,6 +17,11 @@ export default function ProfileTab() {
         {d.profile.store}: {store?.name}
       </Message>
       <LanguagePicker />
+      <Button
+        label={d.agreement.title}
+        variant="secondary"
+        onPress={() => router.push("/agreement")}
+      />
       <Button
         label={d.login.changeStore}
         variant="secondary"
