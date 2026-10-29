@@ -63,6 +63,12 @@ app and self-service sign-up come later.
 
 Navigation and tab layout are settled in the first layout pull request.
 
+Visual direction (owner request, 2026-10-29): start from the platform identity
+and earlier-app screenshots, working in the actual screens. Product photos are
+optional: omit the image area entirely when a catalogue item has no photo, both
+in the list and detail. An existing photo that fails to load remains an error
+state, not a missing-photo state. My items currently has no photo read contract.
+
 ## Later
 
 | ID | Screen | Earlier route |

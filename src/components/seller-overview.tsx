@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
@@ -7,7 +7,15 @@ import { createScopedRead } from "@/lib/scoped-read";
 import { readSellerOverview } from "@/lib/seller-overview-api";
 import { formatPrice } from "@/lib/catalogue";
 import { formatItemDate } from "@/lib/seller-items";
-import { Button, colors, Loading, Message, Screen } from "./ui";
+import {
+  Button,
+  colors,
+  uiStyles,
+  Loading,
+  Message,
+  Screen,
+  ItemCard,
+} from "./ui";
 
 export function SellerOverviewScreen({
   tenant,
@@ -68,14 +76,20 @@ export function SellerOverviewScreen({
             <Text style={styles.amount}>
               {money(data.balance.availableOre)}
             </Text>
-            <Text style={styles.balanceLabel}>{t.reserved}</Text>
-            <Text style={styles.balanceValue}>
-              {money(data.balance.reservedOre)}
-            </Text>
-            <Text style={styles.balanceLabel}>{t.paid}</Text>
-            <Text style={styles.balanceValue}>
-              {money(data.balance.paidOre)}
-            </Text>
+            <View style={styles.balanceDetails}>
+              <View style={styles.balancePart}>
+                <Text style={styles.balanceLabel}>{t.reserved}</Text>
+                <Text style={styles.balanceValue}>
+                  {money(data.balance.reservedOre)}
+                </Text>
+              </View>
+              <View style={styles.balancePart}>
+                <Text style={styles.balanceLabel}>{t.paid}</Text>
+                <Text style={styles.balanceValue}>
+                  {money(data.balance.paidOre)}
+                </Text>
+              </View>
+            </View>
             <Text style={styles.balanceNote}>{t.balanceNote}</Text>
           </View>
           <View style={styles.counts}>
@@ -104,20 +118,15 @@ export function SellerOverviewScreen({
                 : t.noExpiring}
             </Text>
             {data.expiring.map((item) => (
-              <Pressable
+              <ItemCard
                 key={item.id}
-                accessibilityRole="button"
-                accessibilityLabel={`${item.title ?? d.items.untitled}, ${item.reference}`}
+                label={`${item.title ?? d.items.untitled}, ${item.reference}`}
                 onPress={() =>
                   router.push({
                     pathname: "/my-items/[tenant]/[item]",
                     params: { tenant, item: item.id },
                   })
                 }
-                style={({ pressed }) => [
-                  styles.item,
-                  pressed && styles.pressed,
-                ]}
               >
                 <Text style={styles.itemTitle}>
                   {item.title ?? d.items.untitled}
@@ -126,7 +135,7 @@ export function SellerOverviewScreen({
                 <Text style={styles.text}>
                   {d.items.periodEnd}: {formatItemDate(item.periodEnd, locale)}
                 </Text>
-              </Pressable>
+              </ItemCard>
             ))}
             {data.counts.expiring > data.expiring.length ? (
               <Text style={styles.note}>
@@ -170,23 +179,39 @@ export function SellerOverviewScreen({
 }
 const styles = StyleSheet.create({
   balance: {
-    backgroundColor: colors.brand,
+    backgroundColor: colors.accent,
     borderRadius: 18,
     padding: 22,
     gap: 8,
   },
-  balanceLabel: { color: "#e1eee8", fontSize: 15 },
-  amount: { color: "#fff", fontSize: 32, fontWeight: "700", marginBottom: 8 },
+  balanceLabel: { ...uiStyles.note },
+  amount: { ...uiStyles.amount, fontSize: 36, lineHeight: 44, marginBottom: 8 },
+  balanceDetails: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.control,
+    paddingTop: 16,
+  },
+  balancePart: {
+    flexGrow: 1,
+    flexBasis: 120,
+    gap: 4,
+    justifyContent: "space-between",
+  },
   balanceValue: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 21,
     fontWeight: "600",
+    fontVariant: ["tabular-nums"],
+    lineHeight: 29,
     marginBottom: 8,
   },
-  balanceNote: { color: "#e1eee8", fontSize: 14, lineHeight: 21 },
+  balanceNote: { ...uiStyles.note },
   counts: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   count: {
-    flexBasis: "45%",
+    flexBasis: 130,
     flexGrow: 1,
     padding: 16,
     gap: 8,
@@ -195,11 +220,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
   },
-  number: { color: colors.brand, fontSize: 28, fontWeight: "700" },
-  text: { color: colors.text, fontSize: 16, lineHeight: 24 },
-  note: { color: colors.muted, fontSize: 14, lineHeight: 21 },
-  heading: { color: colors.brand, fontSize: 22, fontWeight: "700" },
-  section: { gap: 12 },
+  number: { ...uiStyles.amount, fontSize: 28, lineHeight: 36 },
+  text: { ...uiStyles.body },
+  note: { ...uiStyles.note },
+  heading: { ...uiStyles.heading },
+  section: { gap: 12, marginTop: 8 },
   item: {
     padding: 16,
     gap: 6,
@@ -210,5 +235,4 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   itemTitle: { color: colors.text, fontSize: 18, fontWeight: "600" },
-  pressed: { opacity: 0.6 },
 });

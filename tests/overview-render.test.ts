@@ -91,6 +91,7 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
         Message: "p",
         Button: "button",
         colors: {},
+        uiStyles: {},
       },
     };
     const exports: { SellerOverviewScreen?: (props: unknown) => unknown } = {};

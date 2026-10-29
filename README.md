@@ -279,6 +279,26 @@ The S12 reference is in [reference PR #4](https://github.com/Komisio/komisio-mob
 Hand-in actions remain postponed. Browser navigation, large text and native
 map/phone/email hand-offs still need interactive verification before release.
 
+## Visual foundation
+
+The seller screens share the platform's forest/paper palette and Komisio mark.
+`src/components/theme.ts` owns color and text/surface/layout styles; `ui.tsx`
+owns headings, fields, buttons, filter chips, item rows and text-labelled status
+badges. System fonts respect device text scaling; there is no downloaded font.
+The five labelled tabs use one local SVG icon family.
+
+Catalogue photos are optional. A row without a photo uses its full text width,
+and a detail without photos has no gallery. Mixed catalogues keep one stable
+list layout during search and paging. Existing images retain loading/error
+handling and detail retry. My items has no image read contract. Search and
+filters scroll with the list so enlarged text does not crowd out the results.
+
+This first design pass covers Store, catalogue detail, My items and Overview.
+It preserves all existing reads and financial meanings. Browser component checks
+with synthetic read/session/image adapters do not establish native image loading,
+safe-area behavior, navigation or screen-reader support; verify those on devices
+before release. Visual direction remains subject to the owner's screen review.
+
 ## Licence
 
 Not decided yet. Until a licence is added, no rights are granted beyond

@@ -11,7 +11,14 @@ import {
 import { readCatalogueItem } from "@/lib/catalogue-api";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
-import { Button, colors, Loading, Message, Screen } from "@/components/ui";
+import {
+  Button,
+  colors,
+  uiStyles,
+  Loading,
+  Message,
+  Screen,
+} from "@/components/ui";
 import { SellerGate } from "@/components/seller-gate";
 import { CataloguePhoto } from "@/components/catalogue-photo";
 
@@ -95,11 +102,13 @@ function ItemRead({
         <Loading />
       ) : (
         <>
-          <Gallery
-            key={data.photos.map((p) => p.path).join(":")}
-            data={data}
-            tenant={tenant}
-          />
+          {data.photos.length > 0 && (
+            <Gallery
+              key={data.photos.map((p) => p.path).join(":")}
+              data={data}
+              tenant={tenant}
+            />
+          )}
           <View style={styles.summary}>
             <Text accessibilityRole="header" style={styles.title}>
               {data.title ?? t.untitled}
@@ -135,12 +144,14 @@ function Gallery({ data, tenant }: { data: CatalogueDetail; tenant: string }) {
   const [index, setIndex] = useState(0);
   return (
     <View style={styles.gallery}>
-      <CataloguePhoto
-        photo={data.photos[index] ?? null}
-        tenant={tenant}
-        label={`${data.title ?? t.photo} ${index + 1}`}
-        retryable
-      />
+      <View style={styles.galleryPhoto}>
+        <CataloguePhoto
+          photo={data.photos[index] ?? null}
+          tenant={tenant}
+          label={`${data.title ?? t.photo} ${index + 1}`}
+          retryable
+        />
+      </View>
       {data.photos.length > 1 && (
         <>
           <Text style={styles.counter}>
@@ -173,22 +184,23 @@ function Gallery({ data, tenant }: { data: CatalogueDetail; tenant: string }) {
 }
 
 const styles = StyleSheet.create({
-  gallery: { gap: 12, borderRadius: 16, overflow: "hidden" },
+  gallery: { gap: 12 },
+  galleryPhoto: { borderRadius: 16, overflow: "hidden" },
   counter: { color: colors.muted, textAlign: "center", fontSize: 14 },
   navigation: { flexDirection: "row", gap: 12 },
   control: { flex: 1 },
-  summary: { gap: 8 },
-  title: { fontSize: 24, color: colors.text, fontWeight: "700" },
-  price: { fontSize: 24, color: colors.brand, fontWeight: "700" },
-  heading: { fontSize: 19, color: colors.text, fontWeight: "600" },
-  facts: { gap: 12 },
+  summary: { gap: 8, paddingVertical: 8 },
+  title: { ...uiStyles.title },
+  price: { ...uiStyles.amount, fontSize: 28, lineHeight: 36 },
+  heading: { ...uiStyles.heading },
+  facts: { ...uiStyles.surface, paddingHorizontal: 16 },
   fact: {
     flexDirection: "row",
     gap: 16,
-    paddingBottom: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderColor: colors.line,
   },
-  label: { flex: 1, fontSize: 16, color: colors.muted },
-  value: { flex: 2, fontSize: 16, color: colors.text },
+  label: { ...uiStyles.body, flex: 1, color: colors.muted },
+  value: { ...uiStyles.body, flex: 2 },
 });
