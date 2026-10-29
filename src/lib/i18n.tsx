@@ -13,8 +13,10 @@ import { overviewCopy } from "./overview-copy";
 import { agreementCopy } from "./agreement-copy";
 import { bankCopy } from "./bank-copy";
 import { payoutCopy } from "./payout-copy";
+import { statementCopy } from "./statement-copy";
 
 const sv = {
+  statements: statementCopy.sv,
   payouts: payoutCopy.sv,
   bank: bankCopy.sv,
   agreement: agreementCopy.sv,
@@ -76,6 +78,7 @@ const sv = {
 export type Dictionary = typeof sv;
 
 const en: Dictionary = {
+  statements: statementCopy.en,
   payouts: payoutCopy.en,
   bank: bankCopy.en,
   agreement: agreementCopy.en,

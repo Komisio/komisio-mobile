@@ -191,6 +191,40 @@ This used synthetic local fixtures, Node transport and in-memory storage. Native
 network/storage recovery, browser interactions and independent Opus review remain
 required before release; JavaScript export does not verify those behaviors.
 
+## Issued statements (S54)
+
+Money and Profile link to the issued-statement archive. The list uses
+`my_seller_statements_page` from [platform PR #722](https://github.com/Komisio/komisio/pull/722)
+with 25-row pages and a complete total. Detail reads the exact selected document
+through `my_seller_statement`; a scoped list read supplies the store currency.
+There is no date-range report, issuance, editing or PDF export in this slice.
+The earlier statement screenshot informs the totals layout only; its arbitrary
+date-range controls are outside the approved v1 scope.
+
+Header totals, signed ledger lines, correction links and frozen contact details
+are displayed without recomputation or substitution from current profiles.
+Business invoices retain their recorded supplier/buyer identities, document
+language marker, currency and stored net/VAT/gross line facts. Invoice totals group
+the recorded integer amounts by stored VAT rate as in the portal; VAT is never
+recalculated from a rate or current policy. App labels follow
+the platform's Swedish/English terminology; stored text remains verbatim. The
+interactive view does not claim to reproduce the portal's downloadable legal PDF.
+
+Ledger and invoice lines are separately paged at 25 rows in the client over the
+immutable exact read. Documents over 5,000 rows in either section fail explicitly
+and direct the seller to the portal; the app never silently truncates a statement.
+The RPC still downloads the complete document before this validation. Financial
+documents are not persisted in an offline cache. Blur/account changes discard
+late reads, and missing, denied, oversized and connection failures remain distinct.
+
+An actual local RPC/parser smoke verified a signed private correction and a
+business invoice correction after the current seller name/language changed:
+original identity/language and exact negative net/VAT/gross facts were preserved.
+Synthetic engine fixtures were fully rolled back. Unit tests also cover date
+boundaries across Stockholm daylight-saving changes, exact identity, correction
+semantics, line order and resource bounds. Interactive large-text/line navigation,
+native rendering and independent Opus review remain required before release.
+
 ## Licence
 
 Not decided yet. Until a licence is added, no rights are granted beyond
