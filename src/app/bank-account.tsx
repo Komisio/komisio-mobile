@@ -18,6 +18,7 @@ import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
 import { bankEndpoint, bankWriter, readBank } from "@/lib/bank-account-api";
 import { bankCountries } from "@/lib/bank-countries";
+import { bankCountryName } from "@/lib/bank-country-names";
 import {
   normalizeBankDetails,
   type BankCommand,
@@ -210,7 +211,7 @@ function BankAccount({
 }
 
 function BankSummary({ details }: { details: BankDetails }) {
-  const { d } = useI18n(),
+  const { d, locale } = useI18n(),
     t = d.bank;
   return (
     <>
@@ -218,7 +219,7 @@ function BankSummary({ details }: { details: BankDetails }) {
         {t.holder}: {details.holder}
       </Text>
       <Text style={styles.text}>
-        {t.country}: {details.country}
+        {t.country}: {bankCountryName(details.country, locale)}
       </Text>
       <Text style={styles.text}>
         {details.kind === "iban" ? t.iban : t.local}: {details.account}
@@ -257,20 +258,15 @@ function BankForm({
   const [saveFailed, setSaveFailed] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false),
     [search, setSearch] = useState("");
-  const names = useMemo(() => {
-    try {
-      return new Intl.DisplayNames([locale], { type: "region" });
-    } catch {
-      return null;
-    }
-  }, [locale]);
   const countryName = (code: string) =>
-    code ? `${names?.of(code) ?? code} (${code})` : t.chooseCountry;
-  const countries = bankCountries.filter((code) =>
-    countryName(code)
-      .toLocaleLowerCase(locale)
-      .includes(search.trim().toLocaleLowerCase(locale)),
-  );
+    code ? bankCountryName(code, locale) : t.chooseCountry;
+  const countries = bankCountries
+    .filter((code) =>
+      countryName(code)
+        .toLocaleLowerCase(locale)
+        .includes(search.trim().toLocaleLowerCase(locale)),
+    )
+    .sort((a, b) => countryName(a).localeCompare(countryName(b), locale));
   function update(patch: Partial<BankDetails>) {
     setDetails({ ...details, ...patch });
     setInvalid(false);
