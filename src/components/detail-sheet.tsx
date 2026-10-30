@@ -1,4 +1,4 @@
-import { BottomSheet } from "@expo/ui";
+import { BottomSheet, RNHostView } from "@expo/ui";
 import {
   ScrollView,
   StyleSheet,
@@ -30,28 +30,36 @@ export function DetailSheet({
       onDismiss={onClose}
       containerColor={colors.background}
     >
-      <ScrollView
-        style={{ maxHeight: height * 0.7 }}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.header}>
-          <Text accessibilityRole="header" style={styles.title}>
-            {title}
-          </Text>
-          <Button
-            label={locale === "sv" ? "Stäng" : "Close"}
-            variant="text"
-            onPress={onClose}
-          />
+      {/* Fill the native sheet's width; only height follows Yoga content.
+          An unbridged RN ScrollView can collapse to intrinsic width on iOS. */}
+      <RNHostView matchContents={{ vertical: true }}>
+        <View style={[styles.layout, { maxHeight: height * 0.7 }]}>
+          <View style={styles.header}>
+            <Text accessibilityRole="header" style={styles.title}>
+              {title}
+            </Text>
+            <Button
+              label={locale === "sv" ? "Stäng" : "Close"}
+              variant="text"
+              onPress={onClose}
+            />
+          </View>
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+          >
+            {children}
+          </ScrollView>
         </View>
-        {children}
-      </ScrollView>
+      </RNHostView>
     </BottomSheet>
   );
 }
 const styles = StyleSheet.create({
+  layout: { width: "100%", gap: 12 },
+  scroll: { flexGrow: 0, flexShrink: 1, width: "100%" },
   content: { gap: 12, paddingBottom: 16 },
-  header: { flexDirection: "row", alignItems: "center", gap: 8 },
-  title: { ...uiStyles.heading, flex: 1 },
+  header: { flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 0 },
+  title: { ...uiStyles.heading, flex: 1, minWidth: 0 },
 });
