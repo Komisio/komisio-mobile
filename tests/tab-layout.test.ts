@@ -51,7 +51,7 @@ test("sheets inherit native width and keep dismissal outside the bounded scrolli
       useWindowDimensions: () => ({ height }),
     },
     "./ui": { Button: "Button", colors: {}, uiStyles: {} },
-    "@/lib/i18n": { useI18n: () => ({ locale: "sv" }) },
+    "@/lib/i18n": { useI18n: () => ({ locale: "sv", d: { close: "Stäng" } }) },
   });
   function render() {
     return sheet.DetailSheet({

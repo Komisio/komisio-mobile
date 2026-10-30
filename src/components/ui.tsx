@@ -236,7 +236,13 @@ export function Choice({
         disabled && styles.dimmed,
       ]}
     >
-      <Text style={[styles.chipText, selected && styles.chipSelectedText]}>
+      <Text
+        style={[
+          styles.chipText,
+          listRow && styles.choiceRowText,
+          selected && styles.chipSelectedText,
+        ]}
+      >
         {role === "checkbox" ? `${selected ? "☑" : "☐"} ` : ""}
         {label}
       </Text>
@@ -560,6 +566,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   selectedMark: { color: colors.onBrand, fontSize: 20 },
+  choiceRowText: { flex: 1, minWidth: 0 },
   chipText: { fontSize: 15, lineHeight: 23, color: colors.text },
   chipSelectedText: { color: colors.surface, fontWeight: "600" },
 });

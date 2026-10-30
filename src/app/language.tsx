@@ -1,27 +1,12 @@
-import { View } from "react-native";
-import { dictionaries, locales, useI18n } from "@/lib/i18n";
-import { Choice, Screen } from "@/components/ui";
+import { useI18n } from "@/lib/i18n";
+import { Screen } from "@/components/ui";
+import { LanguageOptions } from "@/components/language-options";
 
 export default function LanguageScreen() {
-  const { d, locale, setLocale } = useI18n();
+  const { d } = useI18n();
   return (
     <Screen title={d.language} topSafeArea={false}>
-      <View
-        accessibilityRole="radiogroup"
-        accessibilityLabel={d.language}
-        style={{ gap: 8 }}
-      >
-        {locales.map((code) => (
-          <Choice
-            key={code}
-            listRow
-            role="radio"
-            label={dictionaries[code].languageName}
-            selected={locale === code}
-            onPress={() => setLocale(code)}
-          />
-        ))}
-      </View>
+      <LanguageOptions />
     </Screen>
   );
 }

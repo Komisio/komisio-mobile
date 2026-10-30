@@ -62,6 +62,13 @@ app and self-service sign-up come later.
 
 Navigation and tab layout are settled in the first layout pull request.
 
+Owner decision, 2026-10-30: translate the full app interface into Swedish,
+English, Norwegian (Bokmål), Danish, Finnish, German, Spanish and Italian.
+Profile opens a language detail list with native language names and a saved
+selection; S01 offers the same choices in a sheet. Dates, monetary formatting
+and bank-country names follow this choice. Published store content, agreement
+text and recorded acceptance languages remain unchanged.
+
 Owner decision, 2026-10-30: remove S54 (Statements/Avräkningar) from the mobile
 app, including its list, detail and navigation entries. Payout requests and
 history under Money remain the mobile financial view. Platform documents and

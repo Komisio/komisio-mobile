@@ -2,185 +2,75 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { getLocales } from "expo-localization";
 import { secureStorage } from "./secure-storage";
-import { catalogueCopy } from "./catalogue-copy";
-import { storeInfoCopy } from "./store-info-copy";
-import { sellerItemsCopy } from "./seller-items-copy";
-import { overviewCopy } from "./overview-copy";
-import { agreementCopy } from "./agreement-copy";
-import { bankCopy } from "./bank-copy";
-import { payoutCopy } from "./payout-copy";
-import { agreementAcceptCopy } from "./agreement-accept-copy";
-
-const sv = {
-  storeInfo: storeInfoCopy.sv,
-  agreementAccept: agreementAcceptCopy.sv,
-  payouts: payoutCopy.sv,
-  bank: bankCopy.sv,
-  agreement: agreementCopy.sv,
-  overview: overviewCopy.sv,
-  items: sellerItemsCopy.sv,
-  catalogue: catalogueCopy.sv,
-  languageName: "Svenska",
-  language: "Språk",
-  loading: "Laddar…",
-  retry: "Försök igen",
-  authFailed: "Inloggningen kunde inte läsas in. Försök igen.",
-  notConfigured:
-    "Appen saknar anslutning till Komisio. Ange EXPO_PUBLIC_SUPABASE_URL och EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
-  store: {
-    title: "Välj butik",
-    intro: "Välj butiken där du lämnar in dina varor.",
-    search: "Sök butik",
-    empty: "Ingen butik matchar sökningen.",
-    failed: "Butikerna kunde inte hämtas. Kontrollera anslutningen.",
-  },
-  login: {
-    title: "Logga in",
-    email: "E-post",
-    password: "Lösenord",
-    submit: "Logga in",
-    changeStore: "Byt butik",
-    forgot: "Glömt lösenordet?",
-    failed: "Fel e-post eller lösenord.",
-    notActivated:
-      "Kontot är inte aktiverat. Öppna aktiveringslänken i mejlet från butiken och välj ett lösenord, logga sedan in här.",
-    offline: "Ingen anslutning. Försök igen.",
-    firstTime:
-      "Första gången? Aktivera kontot via länken i mejlet från butiken och välj ett lösenord. Logga sedan in här.",
-  },
-  mfa: {
-    title: "Tvåstegsverifiering",
-    intro: "Ange den sexsiffriga koden från din autentiseringsapp.",
-    code: "Kod",
-    submit: "Verifiera",
-    failed: "Koden stämmer inte. Försök igen.",
-    cancel: "Avbryt och logga ut",
-  },
-  account: {
-    missing:
-      "Du har inget säljarkonto i {store} med den här e-postadressen. Kontakta butiken eller välj en annan butik.",
-    logout: "Logga ut",
-  },
-  tabs: {
-    store: "Butiken",
-    items: "Mina varor",
-    overview: "Översikt",
-    money: "Pengar",
-    profile: "Profil",
-  },
-  soon: "Den här vyn byggs i nästa steg.",
-  profile: {
-    signedInAs: "Inloggad som",
-    store: "Butik",
-    back: "Tillbaka till profil",
-    logoutFailed: "Det gick inte att logga ut. Försök igen.",
-  },
-};
-
-export type Dictionary = typeof sv;
-
-const en: Dictionary = {
-  storeInfo: storeInfoCopy.en,
-  agreementAccept: agreementAcceptCopy.en,
-  payouts: payoutCopy.en,
-  bank: bankCopy.en,
-  agreement: agreementCopy.en,
-  overview: overviewCopy.en,
-  items: sellerItemsCopy.en,
-  catalogue: catalogueCopy.en,
-  languageName: "English",
-  language: "Language",
-  loading: "Loading…",
-  retry: "Try again",
-  authFailed: "Your sign-in could not be loaded. Try again.",
-  notConfigured:
-    "The app is not connected to Komisio. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
-  store: {
-    title: "Choose store",
-    intro: "Choose the store where you hand in your items.",
-    search: "Search store",
-    empty: "No store matches your search.",
-    failed: "The stores could not be loaded. Check your connection.",
-  },
-  login: {
-    title: "Log in",
-    email: "Email",
-    password: "Password",
-    submit: "Log in",
-    changeStore: "Change store",
-    forgot: "Forgot your password?",
-    failed: "Wrong email or password.",
-    notActivated:
-      "The account is not activated. Open the activation link in the email from the store and choose a password, then log in here.",
-    offline: "No connection. Try again.",
-    firstTime:
-      "First time? Activate the account with the link in the email from the store and choose a password. Then log in here.",
-  },
-  mfa: {
-    title: "Two-step verification",
-    intro: "Enter the six-digit code from your authenticator app.",
-    code: "Code",
-    submit: "Verify",
-    failed: "The code is not correct. Try again.",
-    cancel: "Cancel and log out",
-  },
-  account: {
-    missing:
-      "You have no seller account at {store} with this email address. Contact the store or choose another store.",
-    logout: "Log out",
-  },
-  tabs: {
-    store: "Store",
-    items: "My items",
-    overview: "Overview",
-    money: "Money",
-    profile: "Profile",
-  },
-  soon: "This view is built in the next step.",
-  profile: {
-    signedInAs: "Signed in as",
-    store: "Store",
-    back: "Back to profile",
-    logoutFailed: "Could not log out. Try again.",
-  },
-};
-
-export const dictionaries = { sv, en } as const;
-export type Locale = keyof typeof dictionaries;
-export const locales = Object.keys(dictionaries) as Locale[];
-
+import { dictionaries, type Dictionary } from "./dictionaries";
+import { matchLocale, type Locale } from "./locale";
+export { dictionaries } from "./dictionaries";
+export { locales, type Locale } from "./locale";
+export type { Dictionary } from "./dictionaries";
 const KEY = "komisio.locale";
 
 function deviceLocale(): Locale {
-  const code = getLocales()[0]?.languageCode;
-  return locales.includes(code as Locale) ? (code as Locale) : "sv";
+  return (
+    getLocales()
+      .map((item) => matchLocale(item.languageCode))
+      .find(Boolean) ?? "sv"
+  );
 }
 
 const I18n = createContext<{
   locale: Locale;
   d: Dictionary;
   setLocale: (locale: Locale) => void;
-}>({ locale: "sv", d: sv, setLocale: () => {} });
+  saveFailed: boolean;
+}>({
+  locale: "sv",
+  d: dictionaries.sv,
+  setLocale: () => {},
+  saveFailed: false,
+});
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(deviceLocale);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const revision = useRef(0);
+  const saves = useRef(Promise.resolve());
   useEffect(() => {
-    secureStorage.getItem(KEY).then((saved) => {
-      if (saved && locales.includes(saved as Locale))
-        setLocaleState(saved as Locale);
-    });
+    let active = true;
+    void secureStorage
+      .getItem(KEY)
+      .then((saved) => {
+        const restored = matchLocale(saved);
+        if (active && revision.current === 0 && restored)
+          setLocaleState(restored);
+      })
+      .catch(() => {
+        /* Device language remains usable if storage cannot be read. */
+      });
+    return () => {
+      active = false;
+    };
   }, []);
   const setLocale = (next: Locale) => {
+    const request = ++revision.current;
     setLocaleState(next);
-    void secureStorage.setItem(KEY, next);
+    setSaveFailed(false);
+    // SecureStore writes include remove/set steps; preserve selection order.
+    saves.current = saves.current
+      .then(() => secureStorage.setItem(KEY, next))
+      .catch(() => {
+        if (revision.current === request) setSaveFailed(true);
+      });
   };
   return (
-    <I18n.Provider value={{ locale, d: dictionaries[locale], setLocale }}>
+    <I18n.Provider
+      value={{ locale, d: dictionaries[locale], setLocale, saveFailed }}
+    >
       {children}
     </I18n.Provider>
   );

@@ -3,6 +3,8 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
+import { dictionaries } from "../src/lib/dictionaries.ts";
+import { locales } from "../src/lib/locale.ts";
 
 const require = createRequire(import.meta.url);
 function compile(file: string, modules: Record<string, unknown>) {
@@ -122,31 +124,36 @@ test("profile exposes one store action, language detail, financial links and log
 });
 test("language detail presents supported native names and selection dispatches the stored locale code", () => {
   const changes: string[] = [];
-  const screen = compile("../src/app/language.tsx", {
+  const screen = compile("../src/components/language-options.tsx", {
     "react-native": { View: "View" },
     "@/lib/i18n": {
-      locales: ["sv", "en"],
-      dictionaries: {
-        sv: { languageName: "Svenska" },
-        en: { languageName: "English" },
-      },
+      locales,
+      dictionaries,
       useI18n: () => ({
         d: { language: "Språk" },
         locale: "sv",
         setLocale: (code: string) => changes.push(code),
       }),
     },
-    "@/components/ui": { Choice: "Choice", Screen: "Screen" },
+    "./ui": { Choice: "Choice", Message: "Message" },
   });
-  const choices = nodes(screen.default()).filter((n) => n.type === "Choice");
+  const choices = nodes(screen.LanguageOptions()).filter(
+    (n) => n.type === "Choice",
+  );
   assert.deepEqual(
     choices.map((n) => [n.props.label, n.props.selected]),
     [
       ["Svenska", true],
       ["English", false],
+      ["Norsk", false],
+      ["Dansk", false],
+      ["Suomi", false],
+      ["Deutsch", false],
+      ["Español", false],
+      ["Italiano", false],
     ],
   );
   assert.ok(choices.every((n) => n.props.role === "radio" && n.props.listRow));
-  choices[1].props.onPress();
-  assert.deepEqual(changes, ["en"]);
+  choices.forEach((choice) => choice.props.onPress());
+  assert.deepEqual(changes, [...locales]);
 });
