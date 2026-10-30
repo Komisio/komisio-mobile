@@ -73,6 +73,11 @@ optional: omit the image area entirely when a catalogue item has no photo, both
 in the list and detail. An existing photo that fails to load remains an error
 state, not a missing-photo state. My items currently has no photo read contract.
 
+Owner design direction, 2026-10-30: compact native layouts, forest #143E34,
+lime #DCF0A4, paper #F7F8F5 and the existing Komisio mark. Prioritize balances,
+item status and necessary actions; use sheets for filters and supporting detail.
+Keep economic rules and published agreement text unchanged.
+
 ## Later
 
 | ID | Screen | Earlier route |

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, Keyboard, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
 import { createCataloguePager, formatPrice } from "@/lib/catalogue";
@@ -52,6 +52,7 @@ export function StoreCatalogue({
     }, [pager]),
   );
   const search = () => {
+    Keyboard.dismiss();
     setSubmittedQuery(query.trim());
     void pager.search(query);
   };
@@ -73,6 +74,7 @@ export function StoreCatalogue({
         <View style={styles.search}>
           <Field
             label={t.search}
+            labelHidden
             value={query}
             onChangeText={setQuery}
             maxLength={120}
@@ -92,6 +94,7 @@ export function StoreCatalogue({
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         refreshing={state.refreshing}
         onRefresh={() => void pager.revalidate()}
         ListHeaderComponent={

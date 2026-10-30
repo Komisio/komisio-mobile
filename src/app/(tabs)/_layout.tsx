@@ -29,7 +29,7 @@ export default function TabsLayout() {
         // Start with one line; grow only when the measured labels wrap.
         // The navigator applies the bottom inset as padding within this height.
         tabBarStyle: {
-          backgroundColor: colors.accent,
+          backgroundColor: colors.softAccent,
           borderTopColor: colors.line,
           // 28pt icon slot + 5pt item padding on each side + a hairline.
           height: 39 + labelHeight + bottom,
