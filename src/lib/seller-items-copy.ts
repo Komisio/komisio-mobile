@@ -1,5 +1,6 @@
 export const sellerItemsCopy = {
   sv: {
+    filter: "Visa varor",
     title: "Mina varor",
     detail: "Min vara",
     back: "Till mina varor",
@@ -54,6 +55,7 @@ export const sellerItemsCopy = {
     missingDate: "Datum saknas",
   },
   en: {
+    filter: "Show items",
     title: "My items",
     detail: "My item",
     back: "Back to my items",

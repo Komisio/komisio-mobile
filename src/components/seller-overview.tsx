@@ -8,6 +8,7 @@ import { readSellerOverview } from "@/lib/seller-overview-api";
 import { payoutBadgeTone } from "@/lib/seller-overview";
 import { formatPrice } from "@/lib/catalogue";
 import { formatItemDate } from "@/lib/seller-items";
+import { BalanceCard } from "./balance-card";
 import {
   Button,
   colors,
@@ -54,7 +55,6 @@ export function SellerOverviewScreen({
     <Screen
       bottomSafeArea={false}
       title={d.tabs.overview}
-      intro={t.intro.replace("{store}", storeName)}
       refresh={{
         refreshing: state.status === "loading",
         onRefresh: () => void read.refresh(),
@@ -79,38 +79,22 @@ export function SellerOverviewScreen({
         </>
       ) : data ? (
         <>
-          <View style={styles.balance}>
-            <View
-              pointerEvents="none"
-              aria-hidden
-              importantForAccessibility="no-hide-descendants"
-              style={styles.balanceDecoration}
-            />
-            <Text style={styles.balanceLabel}>{t.available}</Text>
-            <Text style={styles.amount}>
-              {money(data.balance.availableOre)}
-            </Text>
-            <View style={styles.balanceDetails}>
-              <View style={styles.balancePart}>
-                <Text style={styles.balanceLabel}>{t.reserved}</Text>
-                <Text style={styles.balanceValue}>
-                  {money(data.balance.reservedOre)}
-                </Text>
-              </View>
-              <View style={styles.balancePart}>
-                <Text style={styles.balanceLabel}>{t.paid}</Text>
-                <Text style={styles.balanceValue}>
-                  {money(data.balance.paidOre)}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.balanceNote}>{t.balanceNote}</Text>
-          </View>
+          <Text style={styles.store}>{storeName}</Text>
+          <BalanceCard balance={data.balance} currency={data.currency} />
           <View style={styles.counts}>
             {(["active", "sold", "expiring", "ended"] as const).map((key) => (
-              <View key={key} style={styles.count}>
-                <Text style={styles.text}>{t[key]}</Text>
+              <View
+                key={key}
+                style={[
+                  styles.count,
+                  key === "active" && styles.activeCount,
+                  key === "expiring" &&
+                    data.counts.expiring > 0 &&
+                    styles.attentionCount,
+                ]}
+              >
                 <Text style={styles.number}>{data.counts[key]}</Text>
+                <Text style={styles.countLabel}>{t[key]}</Text>
               </View>
             ))}
           </View>
@@ -182,65 +166,27 @@ export function SellerOverviewScreen({
   );
 }
 const styles = StyleSheet.create({
-  balance: {
-    backgroundColor: colors.brand,
-    borderRadius: 24,
-    overflow: "hidden",
-    padding: 22,
-    gap: 8,
-  },
-  balanceDecoration: {
-    position: "absolute",
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 28,
-    borderColor: colors.brandDecoration,
-    right: -70,
-    top: -80,
-  },
-  balanceLabel: { ...uiStyles.note, color: colors.onBrandMuted },
-  amount: {
-    ...uiStyles.amount,
-    color: colors.onBrand,
-    fontSize: 36,
-    lineHeight: 44,
-    marginBottom: 8,
-  },
-  balanceDetails: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.brandDecoration,
-    paddingTop: 16,
-  },
-  balancePart: {
-    flexGrow: 1,
-    flexBasis: 120,
-    gap: 4,
-    justifyContent: "space-between",
-  },
-  balanceValue: {
-    color: colors.onBrand,
-    fontSize: 21,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-    lineHeight: 29,
-    marginBottom: 8,
-  },
-  balanceNote: { ...uiStyles.note, color: colors.onBrandMuted },
-  counts: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  counts: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   count: {
     flexBasis: 130,
     flexGrow: 1,
     padding: 16,
     gap: 8,
-    borderRadius: 12,
+    borderRadius: 20,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.line,
   },
+  store: { ...uiStyles.note, marginTop: -8 },
+  activeCount: {
+    backgroundColor: colors.softAccent,
+    borderColor: colors.softAccent,
+  },
+  attentionCount: {
+    backgroundColor: colors.warningSurface,
+    borderColor: colors.warningSurface,
+  },
+  countLabel: uiStyles.label,
   number: { ...uiStyles.amount, fontSize: 28, lineHeight: 36 },
   text: { ...uiStyles.body },
   note: { ...uiStyles.note },
@@ -250,7 +196,7 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 6,
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.line,
     minHeight: 48,

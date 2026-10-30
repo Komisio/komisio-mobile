@@ -2,6 +2,7 @@ const sv = {
   title: "Utbetalningar",
   request: "Begär utbetalning",
   history: "Utbetalningshistorik",
+  historyShort: "Historik",
   notice:
     "Butiken granskar din begäran och hanterar bankutbetalningen. En begäran gör ingen banköverföring och reserverar inte saldot förrän den godkänns.",
   amount: "Belopp ({currency})",
@@ -11,8 +12,7 @@ const sv = {
   invalid: "Ange ett positivt belopp med högst två decimaler.",
   below: "Beloppet understiger butikens minsta utbetalning.",
   above: "Beloppet är större än ditt tillgängliga saldo.",
-  insufficient:
-    "Du kan begära utbetalning när ditt tillgängliga saldo når butikens minsta belopp.",
+  insufficient: "Ditt saldo räcker inte för att begära utbetalning ännu.",
   empty: "Du har inga utbetalningsbegäranden ännu.",
   failed: "Utbetalningarna kunde inte hämtas. Försök igen.",
   denied: "Du har inte längre tillgång till detta säljarkonto.",
@@ -43,6 +43,7 @@ const en: typeof sv = {
   title: "Payouts",
   request: "Request a payout",
   history: "Payout history",
+  historyShort: "History",
   notice:
     "The store reviews your request and handles the bank payout. A request does not transfer money or reserve the balance until approved.",
   amount: "Amount ({currency})",
@@ -52,8 +53,7 @@ const en: typeof sv = {
   invalid: "Enter a positive amount with at most two decimal places.",
   below: "The amount is below the store's minimum payout.",
   above: "The amount exceeds your available balance.",
-  insufficient:
-    "You can request a payout when your available balance reaches the store's minimum amount.",
+  insufficient: "Your available balance is not enough to request a payout yet.",
   empty: "You have no payout requests yet.",
   failed: "Payouts could not be loaded. Try again.",
   denied: "You no longer have access to this seller account.",

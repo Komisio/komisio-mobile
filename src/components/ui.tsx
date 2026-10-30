@@ -286,6 +286,7 @@ export function Screen({
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
         refreshControl={
           refresh ? (
             <RefreshControl
@@ -306,12 +307,17 @@ export function Screen({
   );
 }
 
-export function Field({ label, ...input }: TextInputProps & { label: string }) {
+export function Field({
+  label,
+  labelHidden = false,
+  ...input
+}: TextInputProps & { label: string; labelHidden?: boolean }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      {!labelHidden ? <Text style={styles.label}>{label}</Text> : null}
       <TextInput
         accessibilityLabel={label}
+        placeholder={labelHidden ? label : undefined}
         placeholderTextColor={colors.muted}
         style={styles.input}
         {...input}
@@ -455,7 +461,7 @@ const styles = StyleSheet.create({
   dimmed: { opacity: 0.6 },
   textButton: {
     backgroundColor: "transparent",
-    minHeight: 44,
+    minHeight: 48,
     paddingHorizontal: 8,
     paddingVertical: 10,
     alignSelf: "flex-start",
@@ -491,7 +497,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 16,
   },
-  itemBody: { flex: 1, minWidth: 0, gap: 6 },
+  itemBody: { flex: 1, minWidth: 0, gap: 4 },
   media: { width: 88, borderRadius: 10, overflow: "hidden" },
   compactItem: { padding: 12, gap: 12, minHeight: 76 },
   compactMedia: { width: 72 },
@@ -499,8 +505,8 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
     alignSelf: "flex-start",
     backgroundColor: colors.accent,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 12,
   },
   badgeText: {

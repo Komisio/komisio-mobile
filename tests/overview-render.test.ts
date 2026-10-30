@@ -113,6 +113,7 @@ for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
         },
       },
       "@/lib/seller-items": { formatItemDate: (value: string) => value },
+      "./balance-card": { BalanceCard: "balance-card" },
       "./ui": {
         Screen: "main",
         Loading: "progress",
@@ -138,10 +139,7 @@ for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
       storeName: "Synthetic store",
     });
     assert.ok(element);
-    assert.deepEqual(
-      values,
-      status === "ready" ? [36000, 0, 10000, ...(populated ? [5000] : [])] : [],
-    );
+    assert.deepEqual(values, populated ? [5000] : []);
     const nodes: any[] = [];
     function visit(node: any) {
       if (Array.isArray(node)) return node.forEach(visit);
@@ -150,6 +148,12 @@ for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
       visit(node.props?.children);
     }
     visit(element);
+    const balanceCard = nodes.find((node) => node.type === "balance-card");
+    assert.equal(Boolean(balanceCard), status === "ready");
+    if (balanceCard) {
+      assert.equal(balanceCard.props.balance, data!.balance);
+      assert.equal(balanceCard.props.currency, "SEK");
+    }
     const headings = nodes
       .filter((node) => node.props?.accessibilityRole === "header")
       .map((node) => node.props.children);

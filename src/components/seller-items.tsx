@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, Keyboard, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
 import { createCataloguePager, formatPrice } from "@/lib/catalogue";
@@ -15,6 +15,7 @@ import {
 } from "@/lib/seller-items";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
+import { DetailSheet } from "./detail-sheet";
 import {
   Button,
   colors,
@@ -41,6 +42,7 @@ export function SellerItems({
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [filter, setFilter] = useState<ItemFilter>("active");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const pager = useMemo(
     () =>
       createCataloguePager<SellerItem>(
@@ -62,6 +64,7 @@ export function SellerItems({
     }, [pager]),
   );
   const search = () => {
+    Keyboard.dismiss();
     if (query.trim() === submittedQuery) void pager.refresh();
     else setSubmittedQuery(query.trim());
   };
@@ -72,6 +75,7 @@ export function SellerItems({
         <View style={styles.search}>
           <Field
             label={t.search}
+            labelHidden
             value={query}
             onChangeText={setQuery}
             maxLength={120}
@@ -82,15 +86,19 @@ export function SellerItems({
         </View>
         <Button label={t.searchButton} onPress={search} />
       </View>
-      <View style={styles.filters}>
-        {itemFilters.map((value) => (
-          <FilterChip
-            key={value}
-            label={t.filters[value]}
-            selected={filter === value}
-            onPress={() => setFilter(value)}
-          />
-        ))}
+      <View style={styles.filterRow}>
+        <Button
+          variant="secondary"
+          label={`${t.filters[filter]} ▾`}
+          accessibilityLabel={`${t.filter}: ${t.filters[filter]}`}
+          expanded={filtersOpen}
+          onPress={() => setFiltersOpen(true)}
+        />
+        {state.status === "ready" ? (
+          <StatusBadge tone="neutral" live>
+            {t.count.replace("{count}", String(state.total))}
+          </StatusBadge>
+        ) : null}
       </View>
     </View>
   );
@@ -102,16 +110,14 @@ export function SellerItems({
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         refreshing={state.refreshing}
         onRefresh={() => void pager.revalidate()}
         ListHeaderComponent={
           <>
             {header}
-            {state.status === "ready" && (
+            {state.status === "ready" && submittedQuery ? (
               <View style={styles.resultRow}>
-                <StatusBadge tone="neutral" live>
-                  {t.count.replace("{count}", String(state.total))}
-                </StatusBadge>
                 {submittedQuery ? (
                   <Button
                     variant="text"
@@ -123,16 +129,20 @@ export function SellerItems({
                   />
                 ) : null}
               </View>
-            )}
+            ) : null}
           </>
         }
         renderItem={({ item }) => {
           const price = sellerItemPrice(item),
             date = sellerItemDate(item);
+          const displayedPrice =
+            price === null
+              ? t.unavailablePrice
+              : formatPrice(price, state.currency, locale);
           return (
             <ItemCard
               compact
-              label={`${item.title ?? t.untitled}, ${t.statuses[sellerItemStatus(item)]}`}
+              label={`${item.title ?? t.untitled}, ${displayedPrice}, ${t.statuses[sellerItemStatus(item)]}`}
               onPress={() =>
                 router.push({
                   pathname: "/my-items/[tenant]/[item]",
@@ -140,31 +150,33 @@ export function SellerItems({
                 })
               }
             >
-              <Text style={styles.itemTitle}>{item.title ?? t.untitled}</Text>
+              <View style={styles.itemTop}>
+                <Text style={[styles.itemTitle, styles.itemName]}>
+                  {item.title ?? t.untitled}
+                </Text>
+                <Text style={styles.price}>{displayedPrice}</Text>
+              </View>
               <Text style={styles.reference}>
                 {item.reference}
                 {item.category ? ` · ${item.category}` : ""}
               </Text>
-              <Text style={styles.price}>
-                {price === null
-                  ? t.unavailablePrice
-                  : formatPrice(price, state.currency, locale)}
-              </Text>
-              <StatusBadge
-                tone={item.stage === "sold" ? "positive" : "neutral"}
-                attention={
-                  item.stage === "period_ending" ||
-                  item.stage === "period_ended"
-                }
-              >
-                {t.statuses[sellerItemStatus(item)]}
-              </StatusBadge>
-              <Text style={styles.date}>
-                {t[date.label]}:{" "}
-                {date.value
-                  ? formatItemDate(date.value, locale)
-                  : t.missingDate}
-              </Text>
+              <View style={styles.itemMeta}>
+                <StatusBadge
+                  tone={item.stage === "sold" ? "positive" : "neutral"}
+                  attention={
+                    item.stage === "period_ending" ||
+                    item.stage === "period_ended"
+                  }
+                >
+                  {t.statuses[sellerItemStatus(item)]}
+                </StatusBadge>
+                <Text style={styles.date}>
+                  {t[date.label]}:{" "}
+                  {date.value
+                    ? formatItemDate(date.value, locale)
+                    : t.missingDate}
+                </Text>
+              </View>
             </ItemCard>
           );
         }}
@@ -214,13 +226,30 @@ export function SellerItems({
           ) : undefined
         }
       />
+      <DetailSheet
+        title={t.filter}
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+      >
+        {itemFilters.map((value) => (
+          <FilterChip
+            key={value}
+            label={t.filters[value]}
+            selected={filter === value}
+            onPress={() => {
+              setFilter(value);
+              setFiltersOpen(false);
+            }}
+          />
+        ))}
+      </DetailSheet>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  header: { gap: 16, marginBottom: 16 },
+  header: { gap: 12, marginBottom: 8 },
   searchRow: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -228,7 +257,27 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   search: { flexGrow: 1, flexBasis: 180, minWidth: 0 },
-  filters: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
+  filterRow: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  itemTop: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    alignItems: "baseline",
+  },
+  itemName: { flexGrow: 1, flexBasis: 140 },
+  itemMeta: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    alignItems: "center",
+    marginTop: 4,
+  },
   message: { ...uiStyles.content },
   list: { ...uiStyles.content, gap: 12 },
   resultRow: {

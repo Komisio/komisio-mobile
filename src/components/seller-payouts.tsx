@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "./pending-discard";
+import { BalanceCard } from "./balance-card";
 import {
   Button,
   Choice,
@@ -43,6 +44,7 @@ export function SellerPayouts({
   const { chooseStore, signOut, refreshAssurance } = useSession();
   const [page, setPage] = useState(0),
     [view, setView] = useState<"request" | "history">("request");
+  const [amount, setAmount] = useState("");
   const read = useMemo(
     () =>
       createScopedRead((signal) =>
@@ -64,6 +66,13 @@ export function SellerPayouts({
     writer.getState,
     writer.getState,
   );
+  // Keep a draft through reads/tab changes; clear only after confirmed registration.
+  if (
+    amount &&
+    (change.status === "success" ||
+      (change.status === "cleanup" && change.code === "success"))
+  )
+    setAmount("");
   useFocusEffect(
     useCallback(() => {
       void read.refresh();
@@ -77,17 +86,15 @@ export function SellerPayouts({
   };
   const data = state.data;
   return (
-    <Screen title={t.title} bottomSafeArea={false}>
-      <View style={styles.views}>
-        {(["request", "history"] as const).map((value) => (
-          <Choice
-            key={value}
-            label={t[value]}
-            selected={value === view}
-            onPress={() => setView(value)}
-          />
-        ))}
-      </View>
+    <Screen
+      title={d.tabs.money}
+      bottomSafeArea={false}
+      refresh={{
+        refreshing: state.status === "loading",
+        onRefresh: () => void read.refresh(),
+        label: t.refresh,
+      }}
+    >
       {!payoutEndpoint ? <Message>{t.notConfigured}</Message> : null}
       {change.status === "busy" || change.status === "idle" ? (
         <Loading />
@@ -189,31 +196,24 @@ export function SellerPayouts({
         </>
       ) : data ? (
         <>
-          <View style={styles.card}>
-            <Text style={styles.label}>{d.overview.available}</Text>
-            <Text style={styles.amount}>
-              {formatPrice(data.balance.availableOre, data.currency, locale)}
-            </Text>
-            <Text style={styles.text}>
-              {d.overview.reserved}:{" "}
-              {formatPrice(data.balance.reservedOre, data.currency, locale)}
-            </Text>
-            <Text style={styles.text}>
-              {d.overview.paid}:{" "}
-              {formatPrice(data.balance.paidOre, data.currency, locale)}
-            </Text>
-            <Text style={styles.note}>{d.overview.balanceNote}</Text>
-            <Text style={styles.text}>
-              {t.threshold}:{" "}
-              {formatPrice(data.thresholdOre, data.currency, locale)}
-            </Text>
+          <BalanceCard balance={data.balance} currency={data.currency} />
+          <View style={styles.views}>
+            {(["request", "history"] as const).map((value) => (
+              <Choice
+                key={value}
+                label={value === "request" ? t.request : t.historyShort}
+                selected={value === view}
+                onPress={() => setView(value)}
+              />
+            ))}
           </View>
           {view === "request" ? (
             <>
-              <Message>{t.notice}</Message>
               {change.status === "ready" ? (
                 <PayoutForm
                   data={data}
+                  amount={amount}
+                  setAmount={setAmount}
                   enabled={Boolean(payoutEndpoint)}
                   onSubmit={(amountOre) => {
                     void writer.submit({
@@ -232,9 +232,6 @@ export function SellerPayouts({
             </>
           ) : (
             <>
-              <Text style={styles.heading} accessibilityRole="header">
-                {t.history}
-              </Text>
               {!data.payouts.length ? (
                 <Message>{data.total === 0 ? t.empty : t.pastEnd}</Message>
               ) : (
@@ -286,11 +283,6 @@ export function SellerPayouts({
               ) : null}
             </>
           )}
-          <Button
-            label={t.refresh}
-            variant="text"
-            onPress={() => void read.refresh()}
-          />
         </>
       ) : null}
       <View style={{ gap: 8 }}>
@@ -307,28 +299,38 @@ function PayoutForm({
   data,
   enabled,
   onSubmit,
+  amount,
+  setAmount,
 }: {
   data: PayoutPage;
   enabled: boolean;
   onSubmit: (amount: number) => void;
+  amount: string;
+  setAmount: (amount: string) => void;
 }) {
-  const { d } = useI18n(),
+  const { d, locale } = useI18n(),
     t = d.payouts;
-  const [amount, setAmount] = useState(""),
-    [error, setError] = useState<
-      "invalid" | "below" | "above" | "storage" | null
-    >(null);
+  const [error, setError] = useState<
+    "invalid" | "below" | "above" | "storage" | null
+  >(null);
   const canRequest =
     data.balance.availableOre > 0 &&
     data.balance.availableOre >= data.thresholdOre;
   if (!canRequest)
     return (
       <View style={styles.card}>
-        <Message>{t.insufficient}</Message>
+        <Text style={styles.label}>{t.threshold}</Text>
+        <Text style={styles.amount}>
+          {formatPrice(data.thresholdOre, data.currency, locale)}
+        </Text>
+        <Text style={styles.note}>{t.insufficient}</Text>
       </View>
     );
   return (
     <View style={styles.card}>
+      <Text style={styles.note}>
+        {t.threshold}: {formatPrice(data.thresholdOre, data.currency, locale)}
+      </Text>
       <Field
         label={t.amount.replace("{currency}", data.currency)}
         value={amount}
@@ -357,6 +359,7 @@ function PayoutForm({
           {error === "storage" ? d.bank.storage : t[error]}
         </Message>
       ) : null}
+      <Text style={styles.note}>{t.notice}</Text>
       <Button
         label={t.submit}
         disabled={!enabled || !canRequest}

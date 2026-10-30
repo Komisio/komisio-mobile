@@ -69,7 +69,7 @@ test("tabs reserve the home inset once and grow/shrink with measured labels", ()
         },
       }),
     },
-    "@/components/ui": { colors: { surface: "white", accent: "sage" } },
+    "@/components/ui": { colors: { surface: "white", softAccent: "sage" } },
     "@/components/brand": { TabIcon: "Icon" },
   });
   const options = () => tabs.default().props.screenOptions;
@@ -105,6 +105,7 @@ test("tab screens omit the second bottom inset; standalone screens retain it", (
       StyleSheet: { create: (value: unknown) => value },
       View: "View",
       ScrollView: "ScrollView",
+      Platform: { OS: "ios" },
     },
     "react-native-safe-area-context": { SafeAreaView: "SafeAreaView" },
     "./theme": { colors: {}, uiStyles: {} },

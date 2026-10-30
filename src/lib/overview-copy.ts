@@ -1,6 +1,8 @@
 const sv = {
   intro: "Dina varor och utbetalningar i {store}.",
   available: "Tillgängligt saldo",
+  balanceDetails: "Om saldot",
+  reservedShort: "Reserverat",
   reserved: "Reserverat för utbetalning",
   paid: "Utbetalt totalt",
   balanceNote: "Reserverade belopp ingår inte i det tillgängliga saldot.",
@@ -27,6 +29,8 @@ const sv = {
 const en: typeof sv = {
   intro: "Your items and payouts at {store}.",
   available: "Available balance",
+  balanceDetails: "About your balance",
+  reservedShort: "Reserved",
   reserved: "Reserved for payout",
   paid: "Total paid",
   balanceNote: "Reserved amounts are not included in the available balance.",
