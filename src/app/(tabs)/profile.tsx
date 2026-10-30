@@ -28,10 +28,6 @@ export default function ProfileTab() {
       </View>
       <View style={{ gap: 8 }}>
         <NavigationRow
-          label={d.statements.title}
-          onPress={() => router.push("/statements")}
-        />
-        <NavigationRow
           label={d.bank.title}
           onPress={() => router.push("/bank-account")}
         />

@@ -162,7 +162,7 @@ test("native back is preserved with history; direct links retain an accessible e
   assert.deepEqual(actions, ["/(tabs)/profile", "back"]);
 });
 
-test("all seven detail routes configure back navigation with their own fallback", () => {
+test("all five detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
     "expo-router": {
       Stack: Object.assign(() => null, { Screen: "Route", Protected: "Guard" }),
@@ -172,14 +172,9 @@ test("all seven detail routes configure back navigation with their own fallback"
       I18nProvider: "I18nProvider",
       useI18n: () => ({
         d: Object.fromEntries(
-          [
-            "catalogue",
-            "storeInfo",
-            "items",
-            "agreement",
-            "bank",
-            "statements",
-          ].map((key) => [key, { back: "Back" }]),
+          ["catalogue", "storeInfo", "items", "agreement", "bank"].map(
+            (key) => [key, { back: "Back" }],
+          ),
         ),
       }),
     },
@@ -214,10 +209,8 @@ test("all seven detail routes configure back navigation with their own fallback"
     "my-items/[tenant]/[item]": "/(tabs)/items",
     agreement: "/(tabs)/profile",
     "bank-account": "/(tabs)/profile",
-    "statements/index": "/(tabs)/money",
-    "statements/[tenant]/[statement]": "/statements",
   };
-  assert.equal(screens.length, 8);
+  assert.equal(screens.length, 6);
   for (const screen of screens.slice(1)) {
     for (const canGoBack of [true, false]) {
       const options = screen.props.options({
