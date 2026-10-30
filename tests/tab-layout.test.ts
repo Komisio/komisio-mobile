@@ -38,6 +38,52 @@ function compile(file: string, modules: Record<string, unknown>) {
 }
 
 // Compiled component contract checks, not a native layout engine/device test.
+test("sheets inherit native width and keep dismissal outside the bounded scrolling body", () => {
+  let height = 852;
+  let closed = 0;
+  const sheet = compile("../src/components/detail-sheet.tsx", {
+    "@expo/ui": { BottomSheet: "BottomSheet", RNHostView: "RNHostView" },
+    "react-native": {
+      StyleSheet: { create: (value: unknown) => value },
+      View: "View",
+      Text: "Text",
+      ScrollView: "ScrollView",
+      useWindowDimensions: () => ({ height }),
+    },
+    "./ui": { Button: "Button", colors: {}, uiStyles: {} },
+    "@/lib/i18n": { useI18n: () => ({ locale: "sv" }) },
+  });
+  function render() {
+    return sheet.DetailSheet({
+      title: "Visa varor",
+      open: true,
+      onClose: () => {
+        closed++;
+      },
+      children: "choices",
+    });
+  }
+  const root = render();
+  const bridge = root.props.children;
+  assert.equal(bridge.type, "RNHostView");
+  assert.equal(bridge.props.matchContents.vertical, true);
+  assert.notEqual(bridge.props.matchContents.horizontal, true);
+  const container = bridge.props.children;
+  assert.equal(container.props.style[0].width, "100%");
+  assert.equal(container.props.style[1].maxHeight, 852 * 0.7);
+  const [header, scroll] = container.props.children;
+  assert.equal(scroll.type, "ScrollView");
+  assert.equal(scroll.props.children, "choices");
+  assert.equal(scroll.props.style.flexShrink, 1);
+  assert.equal(header.props.style.flexShrink, 0);
+  header.props.children[1].props.onPress();
+  root.props.onDismiss();
+  assert.equal(closed, 2);
+  height = 393;
+  const rotated = render().props.children;
+  assert.equal(rotated.props.children.props.style[1].maxHeight, 393 * 0.7);
+});
+
 test("tabs reserve the home inset once and grow/shrink with measured labels", () => {
   let bottom = 34;
   let dimensions = { width: 390, fontScale: 1 };
