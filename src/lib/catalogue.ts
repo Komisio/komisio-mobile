@@ -1,3 +1,4 @@
+import { formattingLocale } from "./locale.ts";
 // Reviewed read contract: Komisio/komisio#715. No seller or financial history.
 export type Photo = {
   id: string;
@@ -194,7 +195,7 @@ export function catalogueSummary(item: CatalogueItem) {
 }
 
 export function formatPrice(ore: number, code: string, locale: string): string {
-  return new Intl.NumberFormat(locale === "sv" ? "sv-SE" : "en-GB", {
+  return new Intl.NumberFormat(formattingLocale(locale), {
     style: "currency",
     currency: code,
   }).format(ore / 100);

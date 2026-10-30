@@ -51,7 +51,7 @@ test("sheets inherit native width and keep dismissal outside the bounded scrolli
       useWindowDimensions: () => ({ height }),
     },
     "./ui": { Button: "Button", colors: {}, uiStyles: {} },
-    "@/lib/i18n": { useI18n: () => ({ locale: "sv" }) },
+    "@/lib/i18n": { useI18n: () => ({ locale: "sv", d: { close: "Stäng" } }) },
   });
   function render() {
     return sheet.DetailSheet({
@@ -209,7 +209,7 @@ test("native back is preserved with history; direct links retain an accessible e
   assert.deepEqual(actions, ["/(tabs)/profile", "back"]);
 });
 
-test("all five detail routes configure back navigation with their own fallback", () => {
+test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
     "expo-router": {
       Stack: Object.assign(() => null, { Screen: "Route", Protected: "Guard" }),
@@ -219,9 +219,14 @@ test("all five detail routes configure back navigation with their own fallback",
       I18nProvider: "I18nProvider",
       useI18n: () => ({
         d: Object.fromEntries(
-          ["catalogue", "storeInfo", "items", "agreement", "bank"].map(
-            (key) => [key, { back: "Back" }],
-          ),
+          [
+            "catalogue",
+            "storeInfo",
+            "items",
+            "agreement",
+            "bank",
+            "profile",
+          ].map((key) => [key, { back: "Back" }]),
         ),
       }),
     },
@@ -254,10 +259,11 @@ test("all five detail routes configure back navigation with their own fallback",
     "catalogue/[tenant]/[item]": "/(tabs)",
     "store-info": "/(tabs)",
     "my-items/[tenant]/[item]": "/(tabs)/items",
+    language: "/(tabs)/profile",
     agreement: "/(tabs)/profile",
     "bank-account": "/(tabs)/profile",
   };
-  assert.equal(screens.length, 6);
+  assert.equal(screens.length, 7);
   for (const screen of screens.slice(1)) {
     for (const canGoBack of [true, false]) {
       const options = screen.props.options({

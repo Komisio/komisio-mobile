@@ -58,9 +58,16 @@ app and self-service sign-up come later.
 | S22 + S51 | Overview | `/settings/sales-overview`, `/portal` | Keep. Owner update 2026-10-30: items ending soon, compact active/sold totals and five latest non-returned sales by sale date. Label sale prices explicitly. Balance and payout history live under Money. |
 | S23 + S24 + S53 | Payouts | `/settings/payout`, `/settings/payout/history`, `/portal/payouts` | Keep. Request a payout and see payout history in one place. No Swish. |
 | S25 | Payout account | `/settings/payout/account` | Keep. Same fields as the seller portal in Komisio. |
-| S21 | Profile | `/settings` | Keep. A dark theme is optional and only if it fits the visual identity. Translate all labels. |
+| S21 | Profile | `/settings` | Keep. Current store and language are tappable settings rows; language opens a detail list. Compact account identity with logout. Translate all labels. |
 
 Navigation and tab layout are settled in the first layout pull request.
+
+Owner decision, 2026-10-30: translate the full app interface into Swedish,
+English, Norwegian (Bokmål), Danish, Finnish, German, Spanish and Italian.
+Profile opens a language detail list with native language names and a saved
+selection; S01 offers the same choices in a sheet. Dates, monetary formatting
+and bank-country names follow this choice. Published store content, agreement
+text and recorded acceptance languages remain unchanged.
 
 Owner decision, 2026-10-30: remove S54 (Statements/Avräkningar) from the mobile
 app, including its list, detail and navigation entries. Payout requests and

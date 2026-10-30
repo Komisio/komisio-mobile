@@ -23,7 +23,7 @@ export function DetailSheet({
   children: ReactNode;
 }) {
   const { height } = useWindowDimensions();
-  const { locale } = useI18n();
+  const { d } = useI18n();
   return (
     <BottomSheet
       isPresented={open}
@@ -38,11 +38,7 @@ export function DetailSheet({
             <Text accessibilityRole="header" style={styles.title}>
               {title}
             </Text>
-            <Button
-              label={locale === "sv" ? "Stäng" : "Close"}
-              variant="text"
-              onPress={onClose}
-            />
+            <Button label={d.close} variant="text" onPress={onClose} />
           </View>
           <ScrollView
             style={styles.scroll}
