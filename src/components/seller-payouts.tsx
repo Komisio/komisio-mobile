@@ -298,10 +298,6 @@ export function SellerPayouts({
           label={d.bank.title}
           onPress={() => router.push("/bank-account")}
         />
-        <NavigationRow
-          label={d.statements.title}
-          onPress={() => router.push("/statements")}
-        />
       </View>
     </Screen>
   );

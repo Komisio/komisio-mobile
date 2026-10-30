@@ -84,26 +84,6 @@ function Routes() {
             )
           }
         />
-        <Stack.Screen
-          name="statements/index"
-          options={({ navigation }) =>
-            detailHeaderOptions(
-              "/(tabs)/money",
-              d.statements.back,
-              navigation.canGoBack(),
-            )
-          }
-        />
-        <Stack.Screen
-          name="statements/[tenant]/[statement]"
-          options={({ navigation }) =>
-            detailHeaderOptions(
-              "/statements",
-              d.statements.back,
-              navigation.canGoBack(),
-            )
-          }
-        />
       </Stack.Protected>
     </Stack>
   );

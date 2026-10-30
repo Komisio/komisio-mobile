@@ -57,11 +57,15 @@ app and self-service sign-up come later.
 | S20 | My item: detail | `/my-items/[id]` | Keep. |
 | S22 + S51 | Overview | `/settings/sales-overview`, `/portal` | Keep. One overview with balance, sold items, items expiring soon and recent payouts. |
 | S23 + S24 + S53 | Payouts | `/settings/payout`, `/settings/payout/history`, `/portal/payouts` | Keep. Request a payout and see payout history in one place. No Swish. |
-| S54 | Statements | `/portal/statement` | New in the app. Shows the platform's issued settlement statements, list and detail, as in the web seller portal (`my_seller_statement`). A running account overview for any chosen date range is not part of version 1, because it needs a different data contract. |
 | S25 | Payout account | `/settings/payout/account` | Keep. Same fields as the seller portal in Komisio. |
 | S21 | Profile | `/settings` | Keep. A dark theme is optional and only if it fits the visual identity. Translate all labels. |
 
 Navigation and tab layout are settled in the first layout pull request.
+
+Owner decision, 2026-10-30: remove S54 (Statements/Avräkningar) from the mobile
+app, including its list, detail and navigation entries. Payout requests and
+history under Money remain the mobile financial view. Platform documents and
+their storage are unaffected.
 
 Visual direction (owner request, 2026-10-29): start from the platform identity
 and earlier-app screenshots, working in the actual screens. Product photos are

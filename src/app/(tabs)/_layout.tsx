@@ -7,7 +7,7 @@ import { colors } from "@/components/ui";
 import { TabIcon } from "@/components/brand";
 
 // Version 1 seller tabs (docs/screens.md): the store (S10–S12), my items
-// (S19, S20), overview (S22 + S51), money (payouts and statements) and
+// (S19, S20), overview (S22 + S51), money (payouts) and
 // profile (S21, S25).
 export default function TabsLayout() {
   const { d, locale } = useI18n();
