@@ -5,10 +5,8 @@ import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
 import { readSellerOverview } from "@/lib/seller-overview-api";
-import { payoutBadgeTone } from "@/lib/seller-overview";
 import { formatPrice } from "@/lib/catalogue";
 import { formatItemDate } from "@/lib/seller-items";
-import { BalanceCard } from "./balance-card";
 import {
   Button,
   colors,
@@ -17,7 +15,7 @@ import {
   Message,
   Screen,
   ItemCard,
-  StatusBadge,
+  NavigationRow,
 } from "./ui";
 
 export function SellerOverviewScreen({
@@ -49,8 +47,6 @@ export function SellerOverviewScreen({
     }, [read]),
   );
   const data = state.data;
-  const money = (ore: number) =>
-    data ? formatPrice(ore, data.currency, locale) : "";
   return (
     <Screen
       bottomSafeArea={false}
@@ -80,126 +76,115 @@ export function SellerOverviewScreen({
       ) : data ? (
         <>
           <Text style={styles.store}>{storeName}</Text>
-          <BalanceCard balance={data.balance} currency={data.currency} />
+          {data.counts.expiring > 0 ? (
+            <NavigationRow
+              label={
+                data.counts.expiring === 1
+                  ? t.attentionOne
+                  : t.attentionCount.replace(
+                      "{count}",
+                      String(data.counts.expiring),
+                    )
+              }
+              onPress={() =>
+                router.navigate({
+                  pathname: "/(tabs)/items",
+                  params: { filter: "expiring" },
+                })
+              }
+            />
+          ) : null}
           <View style={styles.counts}>
-            {(["active", "sold", "expiring", "ended"] as const).map((key) => (
-              <View
-                key={key}
-                style={[
-                  styles.count,
-                  key === "active" && styles.activeCount,
-                  key === "expiring" &&
-                    data.counts.expiring > 0 &&
-                    styles.attentionCount,
-                ]}
-              >
+            {(["active", "sold"] as const).map((key) => (
+              <View key={key} style={styles.count}>
                 <Text style={styles.number}>{data.counts[key]}</Text>
-                <Text style={styles.countLabel}>{t[key]}</Text>
+                <Text style={styles.countLabel}>
+                  {key === "active"
+                    ? d.items.filters.active
+                    : d.items.filters.sold}
+                </Text>
               </View>
             ))}
           </View>
-          {data.counts.expiring > 0 ? (
-            <View style={styles.section}>
-              <Text style={styles.heading} accessibilityRole="header">
-                {t.expiring}
-              </Text>
-              {data.expiring.map((item) => (
+          <View style={styles.section}>
+            <Text style={uiStyles.heading} accessibilityRole="header">
+              {t.recentSales}
+            </Text>
+            {data.recentSales === null ? (
+              <>
+                <Message tone="error">{t.salesFailed}</Message>
+                <Button
+                  label={d.retry}
+                  variant="secondary"
+                  onPress={() => void read.refresh()}
+                />
+              </>
+            ) : data.recentSales.length === 0 ? (
+              <Text style={uiStyles.note}>{t.noSales}</Text>
+            ) : (
+              data.recentSales.map((sale) => (
                 <ItemCard
                   compact
-                  key={item.id}
-                  label={`${item.title ?? d.items.untitled}, ${item.reference}`}
+                  key={sale.id}
+                  label={`${sale.title ?? d.items.untitled}, ${formatItemDate(sale.soldAt, locale)}, ${t.salePrice}: ${formatPrice(sale.soldPriceOre, data.currency, locale)}`}
                   onPress={() =>
                     router.push({
                       pathname: "/my-items/[tenant]/[item]",
-                      params: { tenant, item: item.id },
+                      params: { tenant, item: sale.id },
                     })
                   }
                 >
-                  <Text style={styles.itemTitle}>
-                    {item.title ?? d.items.untitled}
-                  </Text>
-                  <Text style={styles.note}>{item.reference}</Text>
-                  <Text style={styles.text}>
-                    {d.items.periodEnd}:{" "}
-                    {formatItemDate(item.periodEnd, locale)}
-                  </Text>
+                  <View style={styles.sale}>
+                    <View style={styles.description}>
+                      <Text style={uiStyles.itemName}>
+                        {sale.title ?? d.items.untitled}
+                      </Text>
+                      <Text style={uiStyles.note}>
+                        {formatItemDate(sale.soldAt, locale)}
+                      </Text>
+                    </View>
+                    <View style={styles.price}>
+                      <Text style={uiStyles.note}>{t.salePrice}</Text>
+                      <Text style={uiStyles.itemPrice}>
+                        {formatPrice(sale.soldPriceOre, data.currency, locale)}
+                      </Text>
+                    </View>
+                  </View>
                 </ItemCard>
-              ))}
-              {data.counts.expiring > data.expiring.length ? (
-                <Text style={styles.note}>
-                  {t.preview
-                    .replace("{shown}", String(data.expiring.length))
-                    .replace("{count}", String(data.counts.expiring))}
-                </Text>
-              ) : null}
-            </View>
-          ) : null}
-          {data.payouts.length > 0 ? (
-            <View style={styles.section}>
-              <Text style={styles.heading} accessibilityRole="header">
-                {t.recentPayouts}
-              </Text>
-              {data.payouts.map((payout) => (
-                <View key={payout.id} style={styles.item}>
-                  <Text style={styles.itemTitle}>
-                    {money(payout.amountOre)}
-                  </Text>
-                  <StatusBadge tone={payoutBadgeTone(payout.status)}>
-                    {t.statuses[payout.status]}
-                  </StatusBadge>
-                  <Text style={styles.note}>
-                    {t.requestedAt}:{" "}
-                    {formatItemDate(payout.requestedAt, locale)}
-                  </Text>
-                </View>
-              ))}
-              <Button
-                label={t.allPayouts}
-                variant="text"
-                onPress={() => router.navigate("/(tabs)/money")}
-              />
-            </View>
-          ) : null}
+              ))
+            )}
+          </View>
         </>
       ) : null}
     </Screen>
   );
 }
 const styles = StyleSheet.create({
-  counts: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  count: {
-    flexBasis: 130,
-    flexGrow: 1,
-    padding: 16,
-    gap: 8,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
   store: { ...uiStyles.note, marginTop: -8 },
-  activeCount: {
-    backgroundColor: colors.softAccent,
-    borderColor: colors.softAccent,
-  },
-  attentionCount: {
-    backgroundColor: colors.warningSurface,
-    borderColor: colors.warningSurface,
-  },
-  countLabel: uiStyles.label,
-  number: { ...uiStyles.amount, fontSize: 28, lineHeight: 36 },
-  text: { ...uiStyles.body },
-  note: { ...uiStyles.note },
-  heading: { ...uiStyles.heading },
-  section: { gap: 12, marginTop: 8 },
-  item: {
+  counts: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
     padding: 16,
-    gap: 6,
-    backgroundColor: colors.surface,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.line,
-    minHeight: 48,
+    borderCurve: "continuous",
+    backgroundColor: colors.brand,
   },
-  itemTitle: { color: colors.text, fontSize: 18, fontWeight: "600" },
+  count: { flex: 1, flexBasis: 100, gap: 4 },
+  number: {
+    ...uiStyles.amount,
+    color: colors.onBrand,
+    fontSize: 28,
+    lineHeight: 36,
+  },
+  countLabel: { ...uiStyles.label, color: colors.accent },
+  section: { gap: 12 },
+  sale: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    alignItems: "center",
+  },
+  description: { flex: 1, flexBasis: 140, gap: 4 },
+  price: { maxWidth: "100%", gap: 4 },
 });

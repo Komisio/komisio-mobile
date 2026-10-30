@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { FlatList, Keyboard, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { createCataloguePager, formatPrice } from "@/lib/catalogue";
 import { readSellerItems } from "@/lib/seller-items-api";
 import {
@@ -39,6 +39,9 @@ export function SellerItems({
   const { d, locale } = useI18n();
   const { chooseStore } = useSession();
   const t = d.items;
+  const { filter: requestedFilter } = useLocalSearchParams<{
+    filter?: string;
+  }>();
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [filter, setFilter] = useState<ItemFilter>("active");
@@ -59,9 +62,20 @@ export function SellerItems({
   );
   useFocusEffect(
     useCallback(() => {
+      if (
+        typeof requestedFilter === "string" &&
+        itemFilters.includes(requestedFilter as ItemFilter)
+      ) {
+        // An overview link starts a complete group, not a previous search.
+        setQuery("");
+        setSubmittedQuery("");
+        setFilter(requestedFilter as ItemFilter);
+        router.setParams({ filter: undefined });
+        return;
+      }
       void pager.revalidate();
       return pager.cancel;
-    }, [pager]),
+    }, [pager, requestedFilter]),
   );
   const search = () => {
     Keyboard.dismiss();
