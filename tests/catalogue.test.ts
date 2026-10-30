@@ -18,6 +18,7 @@ const row = {
   category: "Coats",
   priceOre: 12550,
   photo: null,
+  facts: [],
 };
 const page = (offset = 0): CataloguePage => ({
   currency: "SEK",

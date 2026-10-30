@@ -100,12 +100,16 @@ export function ItemCard({
   label,
   onPress,
   compact = false,
+  dense = false,
+  trailing,
 }: {
   children: ReactNode;
   media?: ReactNode;
   label: string;
   onPress: () => void;
   compact?: boolean;
+  dense?: boolean;
+  trailing?: ReactNode;
 }) {
   const { focused, focusProps } = useControlFocus();
   return (
@@ -117,16 +121,24 @@ export function ItemCard({
       style={({ pressed }) => [
         styles.itemCard,
         compact && styles.compactItem,
+        dense && styles.denseItem,
         focused && styles.focused,
         pressed && styles.pressed,
       ]}
     >
       {media ? (
-        <View style={[styles.media, compact && styles.compactMedia]}>
+        <View
+          style={[
+            styles.media,
+            compact && styles.compactMedia,
+            dense && styles.denseMedia,
+          ]}
+        >
           {media}
         </View>
       ) : null}
       <View style={styles.itemBody}>{children}</View>
+      {trailing}
     </Pressable>
   );
 }
@@ -501,6 +513,8 @@ const styles = StyleSheet.create({
   media: { width: 88, borderRadius: 10, overflow: "hidden" },
   compactItem: { padding: 12, gap: 12, minHeight: 76 },
   compactMedia: { width: 72 },
+  denseItem: { padding: 10, gap: 10, minHeight: 84, alignItems: "center" },
+  denseMedia: { width: 64, borderRadius: 12 },
   badge: {
     maxWidth: "100%",
     alignSelf: "flex-start",

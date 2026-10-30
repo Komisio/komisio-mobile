@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { FlatList, Keyboard, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
-import { createCataloguePager, formatPrice } from "@/lib/catalogue";
+import { createCataloguePager } from "@/lib/catalogue";
 import { readCatalogue } from "@/lib/catalogue-api";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
@@ -14,12 +14,11 @@ import {
   Loading,
   Message,
   PageHeading,
-  ItemCard,
   StatusBadge,
   IconButton,
 } from "./ui";
 import { InfoIcon } from "./brand";
-import { CataloguePhoto } from "./catalogue-photo";
+import { CatalogueRow } from "./catalogue-row";
 
 export function StoreCatalogue({
   tenant,
@@ -28,7 +27,7 @@ export function StoreCatalogue({
   tenant: string;
   name: string;
 }) {
-  const { d, locale } = useI18n();
+  const { d } = useI18n();
   const { chooseStore } = useSession();
   const t = d.catalogue;
   const [query, setQuery] = useState("");
@@ -121,33 +120,17 @@ export function StoreCatalogue({
           </>
         }
         renderItem={({ item }) => (
-          <ItemCard
-            compact
-            label={`${item.title ?? t.untitled}, ${formatPrice(item.priceOre, state.currency, locale)}`}
-            media={
-              item.photo ? (
-                <CataloguePhoto
-                  photo={item.photo}
-                  tenant={tenant}
-                  label={item.title ?? t.photo}
-                />
-              ) : undefined
-            }
+          <CatalogueRow
+            item={item}
+            tenant={tenant}
+            currency={state.currency}
             onPress={() =>
               router.push({
                 pathname: "/catalogue/[tenant]/[item]",
                 params: { tenant, item: item.id },
               })
             }
-          >
-            <Text style={styles.itemTitle}>{item.title ?? t.untitled}</Text>
-            {item.category ? (
-              <StatusBadge tone="neutral">{item.category}</StatusBadge>
-            ) : null}
-            <Text style={styles.price}>
-              {formatPrice(item.priceOre, state.currency, locale)}
-            </Text>
-          </ItemCard>
+          />
         )}
         ListEmptyComponent={
           state.status === "loading" ? (
@@ -223,8 +206,6 @@ const styles = StyleSheet.create({
   },
   search: { flexGrow: 1, flexBasis: 180, minWidth: 0 },
   message: { ...uiStyles.content },
-  list: { ...uiStyles.content, gap: 12 },
-  itemTitle: uiStyles.itemName,
-  price: uiStyles.itemPrice,
+  list: { ...uiStyles.content, gap: 8 },
   footer: { paddingVertical: 16, gap: 12 },
 });
