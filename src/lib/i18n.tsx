@@ -74,7 +74,12 @@ const sv = {
     profile: "Profil",
   },
   soon: "Den här vyn byggs i nästa steg.",
-  profile: { signedInAs: "Inloggad som", store: "Butik" },
+  profile: {
+    signedInAs: "Inloggad som",
+    store: "Butik",
+    back: "Tillbaka till profil",
+    logoutFailed: "Det gick inte att logga ut. Försök igen.",
+  },
 };
 
 export type Dictionary = typeof sv;
@@ -137,7 +142,12 @@ const en: Dictionary = {
     profile: "Profile",
   },
   soon: "This view is built in the next step.",
-  profile: { signedInAs: "Signed in as", store: "Store" },
+  profile: {
+    signedInAs: "Signed in as",
+    store: "Store",
+    back: "Back to profile",
+    logoutFailed: "Could not log out. Try again.",
+  },
 };
 
 export const dictionaries = { sv, en } as const;

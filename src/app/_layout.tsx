@@ -35,6 +35,16 @@ function Routes() {
       <Stack.Protected guard={Boolean(store) && signedIn}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
+          name="language"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/profile",
+              d.profile.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
+        <Stack.Screen
           name="catalogue/[tenant]/[item]"
           options={({ navigation }) =>
             detailHeaderOptions(

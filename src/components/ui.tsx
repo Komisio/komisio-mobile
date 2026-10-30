@@ -188,12 +188,14 @@ export function Choice({
   onPress,
   disabled = false,
   role = "button",
+  listRow = false,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
   disabled?: boolean;
   role?: "button" | "radio" | "checkbox";
+  listRow?: boolean;
 }) {
   const { focused, focusProps } = useControlFocus();
   return (
@@ -227,6 +229,7 @@ export function Choice({
       onPress={onPress}
       style={({ pressed }) => [
         styles.chip,
+        listRow && styles.choiceRow,
         selected && styles.chipSelected,
         focused && styles.focused,
         pressed && styles.dimmed,
@@ -237,6 +240,11 @@ export function Choice({
         {role === "checkbox" ? `${selected ? "☑" : "☐"} ` : ""}
         {label}
       </Text>
+      {listRow && selected ? (
+        <Text accessible={false} aria-hidden style={styles.selectedMark}>
+          ✓
+        </Text>
+      ) : null}
     </Pressable>
   );
 }
@@ -543,6 +551,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   chipSelected: { backgroundColor: colors.brand, borderColor: colors.brand },
+  choiceRow: {
+    borderRadius: 16,
+    minHeight: 56,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  selectedMark: { color: colors.onBrand, fontSize: 20 },
   chipText: { fontSize: 15, lineHeight: 23, color: colors.text },
   chipSelectedText: { color: colors.surface, fontWeight: "600" },
 });
