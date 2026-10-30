@@ -21,6 +21,7 @@ export const catalogueCopy = {
     next: "Nästa bild",
     imageCount: "Bild {current} av {total}",
     untitled: "Vara",
+    openItem: "Visa vara",
     detail: "Varudetaljer",
     facts: "Om varan",
     factLabels: {
@@ -54,6 +55,7 @@ export const catalogueCopy = {
     next: "Next photo",
     imageCount: "Photo {current} of {total}",
     untitled: "Item",
+    openItem: "View item",
     detail: "Item details",
     facts: "About this item",
     factLabels: {

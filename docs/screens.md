@@ -50,7 +50,7 @@ app and self-service sign-up come later.
 | S06 | Email sent | `/mail-sent` | Keep. |
 | S07 | Reset password | `/reset-password` | Keep, completed on the web in version 1 (see prerequisites). |
 | S08 | Seller agreement | `/agreement` | Keep. Use the platform's versioned seller agreements and their language versions. |
-| S10 | Store: all items | `/browse` | Keep. Requires the store catalogue read model above. |
+| S10 | Store: all items | `/browse` | Keep. Compact rows with photo or branded placeholder, up to three public facts and a full-row detail action (owner decision 2026-10-30). |
 | S11 | Item detail | `/browse/[id]` | Keep. Requires the store catalogue read model above. |
 | S12 | Store info and directions | `/submitinfoscreen` | Keep as store information with map and the store's own texts. The links to handing in items (S13, S14) are postponed with those screens. |
 | S19 + S52 | My items | `/my-items`, `/portal/items` | Keep. One screen that combines the app list with the portal's filters (active, expiring soon, sold) and return dates. Statuses follow the new platform's item statuses. |
