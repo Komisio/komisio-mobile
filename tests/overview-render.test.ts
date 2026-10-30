@@ -28,16 +28,22 @@ const compiled = transformSync(source, {
 }).code;
 assert.match(compiled, /react\/compiler-runtime/);
 
-for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
+for (const scenario of [
+  "idle",
+  "loading",
+  "failed",
+  "ready",
+  "populated",
+  "unavailable",
+]) {
   test(`compiled overview renders ${scenario} without accessing absent data or hiding activity`, () => {
     const populated = scenario === "populated";
-    const status = populated ? "ready" : scenario;
+    const status = populated || scenario === "unavailable" ? "ready" : scenario;
     const values: number[] = [];
     const data =
       status === "ready"
         ? {
             currency: "SEK",
-            balance: { availableOre: 36000, reservedOre: 0, paidOre: 10000 },
             counts: {
               active: 2,
               sold: 3,
@@ -54,16 +60,18 @@ for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
                   },
                 ]
               : [],
-            payouts: populated
-              ? [
-                  {
-                    id: "payout",
-                    amountOre: 5000,
-                    status: "requested",
-                    requestedAt: "2026-10-29",
-                  },
-                ]
-              : [],
+            recentSales:
+              scenario === "unavailable"
+                ? null
+                : populated
+                  ? Array.from({ length: 5 }, (_, i) => ({
+                      id: `sale-${i}`,
+                      title: `Synthetic sale ${i}`,
+                      reference: `S-${i}`,
+                      soldPriceOre: 5000,
+                      soldAt: "2026-10-29T10:00:00Z",
+                    }))
+                  : [],
           }
         : null;
     const state = { status, data, failure: "denied" };
@@ -92,7 +100,11 @@ for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
             overview: overviewCopy.sv,
             tabs: { overview: "Översikt" },
             login: { changeStore: "Byt butik" },
-            items: { untitled: "Untitled", periodEnd: "Period end" },
+            items: {
+              untitled: "Untitled",
+              periodEnd: "Period end",
+              filters: { active: "Till salu", sold: "Sålda" },
+            },
           },
         }),
       },
@@ -120,6 +132,7 @@ for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
         Message: "p",
         Button: "button",
         ItemCard: "article",
+        NavigationRow: "nav",
         StatusBadge: "badge",
         colors: {},
         uiStyles: {},
@@ -139,7 +152,11 @@ for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
       storeName: "Synthetic store",
     });
     assert.ok(element);
-    assert.deepEqual(values, populated ? [5000] : []);
+    assert.ok(
+      populated
+        ? values.length > 0 && values.every((value) => value === 5000)
+        : values.length === 0,
+    );
     const nodes: any[] = [];
     function visit(node: any) {
       if (Array.isArray(node)) return node.forEach(visit);
@@ -149,27 +166,36 @@ for (const scenario of ["idle", "loading", "failed", "ready", "populated"]) {
     }
     visit(element);
     const balanceCard = nodes.find((node) => node.type === "balance-card");
-    assert.equal(Boolean(balanceCard), status === "ready");
-    if (balanceCard) {
-      assert.equal(balanceCard.props.balance, data!.balance);
-      assert.equal(balanceCard.props.currency, "SEK");
-    }
+    assert.equal(balanceCard, undefined);
     const headings = nodes
       .filter((node) => node.props?.accessibilityRole === "header")
       .map((node) => node.props.children);
-    assert.equal(headings.includes(overviewCopy.sv.expiring), populated);
-    assert.equal(headings.includes(overviewCopy.sv.recentPayouts), populated);
+    assert.equal(
+      headings.includes(overviewCopy.sv.recentSales),
+      status === "ready",
+    );
+    assert.equal(headings.includes(overviewCopy.sv.recentPayouts), false);
+    assert.equal(
+      nodes.some((node) => node.props?.children === overviewCopy.sv.noSales),
+      scenario === "ready",
+    );
+    assert.equal(
+      nodes.some(
+        (node) => node.props?.children === overviewCopy.sv.salesFailed,
+      ),
+      scenario === "unavailable",
+    );
+    assert.equal(
+      nodes.some((node) => node.type === "nav"),
+      populated,
+    );
     if (populated) {
-      assert.ok(nodes.some((node) => node.type === "article"));
-      assert.ok(
-        nodes.some(
-          (node) =>
-            node.type === "badge" &&
-            node.props.children === overviewCopy.sv.statuses.requested,
-        ),
-      );
-      assert.ok(
-        nodes.some((node) => node.props?.label === overviewCopy.sv.allPayouts),
+      assert.equal(nodes.filter((node) => node.type === "article").length, 5);
+      assert.equal(
+        nodes.filter(
+          (node) => node.props?.children === overviewCopy.sv.salePrice,
+        ).length,
+        5,
       );
     }
   });

@@ -1,4 +1,10 @@
 const sv = {
+  attentionCount: "{count} varor slutar snart",
+  attentionOne: "1 vara slutar snart",
+  recentSales: "Senaste försäljningarna",
+  salePrice: "Försäljningspris",
+  noSales: "Inga försäljningar ännu.",
+  salesFailed: "Senaste försäljningarna kunde inte hämtas.",
   intro: "Dina varor och utbetalningar i {store}.",
   available: "Tillgängligt saldo",
   balanceDetails: "Om saldot",
@@ -27,6 +33,12 @@ const sv = {
   },
 };
 const en: typeof sv = {
+  attentionCount: "{count} items ending soon",
+  attentionOne: "1 item ending soon",
+  recentSales: "Recent sales",
+  salePrice: "Sale price",
+  noSales: "No sales yet.",
+  salesFailed: "Recent sales could not be loaded.",
   intro: "Your items and payouts at {store}.",
   available: "Available balance",
   balanceDetails: "About your balance",

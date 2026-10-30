@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   parseOverview,
   parseEconomyPreview,
+  parseRecentSales,
   signedOre,
 } from "../src/lib/seller-overview.ts";
 import { createScopedRead } from "../src/lib/scoped-read.ts";
@@ -58,9 +59,23 @@ function expiring() {
   };
 }
 
-test("overview uses complete counts and signed server balances, never sums a history page", () => {
-  const result = parseOverview(economy(), expiring(), seller);
-  assert.deepEqual(result.balance, {
+function recentSales() {
+  return {
+    sellerId: seller,
+    currency: "SEK",
+    limit: 5,
+    items: Array.from({ length: 5 }, (_, i) => ({
+      id: id(i + 200),
+      reference: `I-${i}`,
+      title: "Synthetic sale",
+      soldAt: `2026-10-${String(29 - i).padStart(2, "0")}T10:00:00Z`,
+      soldPriceOre: 9000 + i,
+    })),
+  };
+}
+test("overview uses complete item counts and server-ordered sales without exposing balances", () => {
+  const result = parseOverview(expiring(), recentSales(), seller);
+  assert.deepEqual(parseEconomyPreview(economy(), seller).balance, {
     availableOre: -12345,
     reservedOre: 25000,
     paidOre: 135000,
@@ -72,9 +87,10 @@ test("overview uses complete counts and signed server balances, never sums a his
     expiring: 43,
   });
   assert.equal(result.expiring.length, 5);
-  assert.equal(result.payouts.length, 5);
-  assert.equal(result.payouts[0].status, "requested");
-  assert.equal(result.payouts[0].amountOre, 10000);
+  assert.equal(result.recentSales?.length, 5);
+  assert.equal(result.recentSales?.[0].soldPriceOre, 9000);
+  assert.equal("balance" in result, false);
+  assert.equal("payouts" in result, false);
   assert.equal("messages" in result, false);
   assert.equal("ledger" in result, false);
 });
@@ -88,23 +104,25 @@ test("empty accounts are real zero states, absent facts are failures", () => {
   p.items = [];
   p.total = 0;
   p.counts = { active: 0, sold: 0, ended: 0 };
-  const result = parseOverview(e, p, seller);
-  assert.equal(result.payouts.length, 0);
+  const result = parseOverview(p, { ...recentSales(), items: [] }, seller);
+  assert.equal(result.recentSales?.length, 0);
   assert.equal(result.counts.expiring, 0);
-  assert.throws(() => parseOverview(e, { ...p, counts: undefined }, seller));
-  assert.throws(() => parseOverview({ ...e, balance: undefined }, p, seller));
+  assert.throws(() =>
+    parseOverview({ ...p, counts: undefined }, recentSales(), seller),
+  );
+  assert.equal(parseOverview(p, null, seller).recentSales, null);
 });
 test("reject foreign identities, partial/wrong item groups and malformed financial facts", () => {
-  assert.throws(() => parseOverview(economy(), expiring(), id(2)));
+  assert.throws(() => parseOverview(expiring(), recentSales(), id(2)));
   assert.throws(() =>
-    parseOverview(economy(), { ...expiring(), offset: 25 }, seller),
+    parseOverview({ ...expiring(), offset: 25 }, recentSales(), seller),
   );
   assert.throws(() =>
-    parseOverview(economy(), { ...expiring(), total: 74 }, seller),
+    parseOverview({ ...expiring(), total: 74 }, recentSales(), seller),
   );
   const wrongStage = expiring();
   wrongStage.items[0].stage = "sold";
-  assert.throws(() => parseOverview(economy(), wrongStage, seller));
+  assert.throws(() => parseOverview(wrongStage, recentSales(), seller));
   for (const amount of [
     1.25,
     NaN,
@@ -146,6 +164,39 @@ test("unknown payout status, invalid date, duplicate payout and excess history f
   );
   assert.match(overviewCopy.en.statuses.approved, /awaiting payment/);
   assert.equal(overviewCopy.sv.requestedAt, "Begärd");
+});
+test("recent sales reject wrong scope, prices, duplicates and acceptance-ordered results", () => {
+  const page = recentSales();
+  for (const change of [
+    { sellerId: id(9) },
+    { currency: "NOK" },
+    { limit: 25 },
+    { items: [...page.items, page.items[0]] },
+    { items: [...page.items].reverse() },
+    { items: [page.items[0], page.items[0]] },
+  ])
+    assert.throws(() =>
+      parseRecentSales({ ...page, ...change }, seller, "SEK"),
+    );
+  for (const change of [
+    { id: "bad" },
+    { soldAt: "not-a-date" },
+    { soldPriceOre: 0 },
+    { soldPriceOre: -1 },
+    { soldPriceOre: 1.1 },
+    { soldPriceOre: Number.MAX_SAFE_INTEGER + 1 },
+  ])
+    assert.throws(() =>
+      parseRecentSales(
+        { ...page, items: [{ ...page.items[0], ...change }] },
+        seller,
+        "SEK",
+      ),
+    );
+  assert.deepEqual(
+    parseRecentSales(page, seller, "SEK").map((sale) => sale.id),
+    page.items.map((sale) => sale.id),
+  );
 });
 function deferred<T>() {
   let resolve!: (value: T) => void;

@@ -1,14 +1,15 @@
 import { supabase } from "./supabase";
 import { parseOverview } from "./seller-overview";
+import { readFailure } from "./catalogue";
 
 export async function readSellerOverview(
   tenant: string,
   seller: string,
   signal: AbortSignal,
 ) {
-  const [economy, items] = await Promise.all([
+  const [sales, items] = await Promise.all([
     supabase
-      .rpc("my_seller_economy", { p_tenant: tenant, p_seller: seller })
+      .rpc("my_recent_sales", { p_tenant: tenant, p_seller: seller })
       .abortSignal(signal),
     supabase
       .rpc("my_items_page", {
@@ -20,7 +21,9 @@ export async function readSellerOverview(
       })
       .abortSignal(signal),
   ]);
-  if (economy.error) throw economy.error;
   if (items.error) throw items.error;
-  return parseOverview(economy.data, items.data, seller);
+  // Missing during staged rollout or temporarily offline is not "no sales".
+  // An identity/access refusal still clears the whole account-scoped view.
+  if (sales.error && readFailure(sales.error) === "denied") throw sales.error;
+  return parseOverview(items.data, sales.error ? null : sales.data, seller);
 }

@@ -55,7 +55,7 @@ app and self-service sign-up come later.
 | S12 | Store info and directions | `/submitinfoscreen` | Keep as store information with map and the store's own texts. The links to handing in items (S13, S14) are postponed with those screens. |
 | S19 + S52 | My items | `/my-items`, `/portal/items` | Keep. One screen that combines the app list with the portal's filters (active, expiring soon, sold) and return dates. Statuses follow the new platform's item statuses. |
 | S20 | My item: detail | `/my-items/[id]` | Keep. |
-| S22 + S51 | Overview | `/settings/sales-overview`, `/portal` | Keep. One overview with balance, sold items, items expiring soon and recent payouts. |
+| S22 + S51 | Overview | `/settings/sales-overview`, `/portal` | Keep. Owner update 2026-10-30: items ending soon, compact active/sold totals and five latest non-returned sales by sale date. Label sale prices explicitly. Balance and payout history live under Money. |
 | S23 + S24 + S53 | Payouts | `/settings/payout`, `/settings/payout/history`, `/portal/payouts` | Keep. Request a payout and see payout history in one place. No Swish. |
 | S25 | Payout account | `/settings/payout/account` | Keep. Same fields as the seller portal in Komisio. |
 | S21 | Profile | `/settings` | Keep. A dark theme is optional and only if it fits the visual identity. Translate all labels. |
