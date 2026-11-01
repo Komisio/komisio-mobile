@@ -55,7 +55,21 @@ by this change.
    counter. Inspect existing distribution certificate and provisioning profile
    validity. Do not delete or regenerate signing credentials as a shortcut.
 5. Verify production Supabase Auth, app-visible stores and the mobile API using
-   read-only requests. Financial acceptance tests use synthetic fixtures.
+   read-only requests. The deployed portal requires both
+   `KOMISIO_MOBILE_API_ENABLED=true` and `KOMISIO_INTAKE_ENABLED=true`.
+   Environment changes require a deployment through the platform release process;
+   setting a variable alone does not update an existing deployment. Check the
+   production database includes the follow-up migrations for `my_item_detail`,
+   `my_seller_payouts_page` and catalogue photo derivatives. Financial acceptance
+   tests use synthetic fixtures. Native requests have no Origin; do not widen
+   the browser origin allowlist to make native requests work.
+6. Verify export compliance before TestFlight, not only before App Review.
+   `ios.config.usesNonExemptEncryption=false` declares the current app uses no
+   non-exempt encryption: transport uses HTTPS, SecureStore uses iOS Keychain,
+   and Expo Crypto is used for UUID generation (its native implementation uses
+   Apple's system libraries). Reassess this declaration if cryptographic
+   dependencies or uses change. Confirm the generated native Info.plist contains
+   `ITSAppUsesNonExemptEncryption=false` and inspect processing in App Store Connect.
 
 After these checks and approval for the build/upload:
 
@@ -128,3 +142,4 @@ started. Payouts are handled according to the store's terms.
 - [EAS environments](https://docs.expo.dev/eas/environment-variables/usage/)
 - [EAS upload exclusions](https://docs.expo.dev/build-reference/easignore/)
 - [Submitting to Apple](https://docs.expo.dev/submit/ios/)
+- [SecureStore export compliance](https://docs.expo.dev/versions/v58.0.0/sdk/securestore/#exempting-encryption-prompt)

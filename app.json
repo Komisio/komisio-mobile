@@ -11,6 +11,9 @@
     "ios": {
       "bundleIdentifier": "com.inority.komisio",
       "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "icon": "./assets/expo.icon"
     },
     "extra": {
