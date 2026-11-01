@@ -5,7 +5,7 @@ decided per screen what to keep, change, remove or postpone. This file is the
 result and the basis for building version 1. Screen IDs (S01, S02, …) are the
 ones used in that review, so each screen here can be traced back to the
 earlier app. Reference screenshots of the earlier app, taken with test data
-only, are kept with the project files and are not stored in this repository.
+only, are in [`old-app/`](old-app/README.md), indexed by screen ID.
 
 Version 1 is an app for **sellers**. Staff screens, handing in items from the
 app and self-service sign-up come later.
