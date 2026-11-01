@@ -5,6 +5,7 @@ import { locales, matchLocale, formattingLocale } from "../src/lib/locale.ts";
 import { bankCountries } from "../src/lib/bank-countries.ts";
 import { bankCountryName } from "../src/lib/bank-country-names.ts";
 import { formatPrice } from "../src/lib/catalogue.ts";
+import { payoutPageLabel } from "../src/lib/seller-payouts.ts";
 import { formatItemDate } from "../src/lib/seller-items.ts";
 import {
   formatAgreementTime,
@@ -21,6 +22,34 @@ function flatten(value: unknown, prefix = ""): Record<string, string> {
     }),
   );
 }
+test("payout count uses the singular only for one request in every language", () => {
+  const singular = [
+    "begäran",
+    "request",
+    "forespørsel",
+    "anmodning",
+    "pyyntö",
+    "Antrag",
+    "solicitud",
+    "richiesta",
+  ];
+  locales.forEach((locale, index) => {
+    const copy = dictionaries[locale].payouts;
+    assert.ok(
+      payoutPageLabel(copy, 0, 1).endsWith(`1 ${singular[index]}`),
+      locale,
+    );
+    for (const total of [0, 2, 26]) {
+      assert.equal(
+        payoutPageLabel(copy, 0, total),
+        copy.page
+          .replace("{page}", "1")
+          .replace("{pages}", total === 26 ? "2" : "1")
+          .replace("{total}", String(total)),
+      );
+    }
+  });
+});
 test("all eight dictionaries cover every UI key and preserve interpolated facts", () => {
   assert.deepEqual(locales, ["sv", "en", "no", "da", "fi", "de", "es", "it"]);
   assert.deepEqual(Object.keys(dictionaries), [...locales]);

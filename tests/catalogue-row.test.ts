@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
 import {
   parsePage,
+  parseDetail,
   catalogueSummary,
   formatPrice,
   type CatalogueItem,
@@ -31,7 +32,7 @@ test("list facts remain backward compatible and reject non-public or malformed f
   for (const facts of [
     null,
     {},
-    [{ slug: "seller", value: "private" }],
+    [{ slug: null, value: "invalid" }],
     [{ slug: "size", value: 5 }],
     [
       { slug: "size", value: "M" },
@@ -52,6 +53,38 @@ test("list facts remain backward compatible and reject non-public or malformed f
       tenant,
     ).items[0].facts,
     [{ slug: "size", value: "M" }],
+  );
+});
+test("unknown facts never break the list/detail or appear in their public summary", () => {
+  const facts = [
+    { slug: "size", value: "M" },
+    { slug: "future_attribute", value: { newFormat: true } },
+    { slug: "seller", value: "must not be displayed" },
+  ];
+  const expected = [{ slug: "size", value: "M" }];
+  assert.deepEqual(
+    parsePage(page({ ...item, facts }), tenant).items[0].facts,
+    expected,
+  );
+  assert.deepEqual(
+    parseDetail(
+      { ...item, currency: "SEK", facts, photos: [] },
+      tenant,
+      item.id,
+    ).facts,
+    expected,
+  );
+  assert.throws(() =>
+    parsePage(page({ ...item, facts: [...facts, facts[1]] }), tenant),
+  );
+  assert.throws(() =>
+    parsePage(
+      page({
+        ...item,
+        facts: Array.from({ length: 33 }, (_, i) => ({ slug: `future_${i}` })),
+      }),
+      tenant,
+    ),
   );
 });
 test("summary prioritizes recorded brand, size and colour, bounds and deduplicates it", () => {

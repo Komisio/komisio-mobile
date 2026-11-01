@@ -96,6 +96,7 @@ export default {
       "Dieser Browser kann Auszahlungsanträge nicht sicher speichern. Nutze das Verkäuferportal.",
     previous: "Vorherige Seite",
     next: "Nächste Seite",
+    pageOne: "Seite {page} von {pages} · {total} Antrag",
     page: "Seite {page} von {pages} · {total} Anträge",
     first: "Zur ersten Seite",
     pastEnd: "Auf dieser Seite gibt es keine Anträge.",
@@ -120,10 +121,13 @@ export default {
     noCountries: "Keine Länder entsprechen der Suche.",
     moreCountries: "Suche, um die Liste einzugrenzen.",
     kind: "Kontotyp",
-    countryMissing: "Das Geschäft muss sein Land angeben, bevor du ein Konto speichern kannst. Kontaktiere das Geschäft.",
-    countryFailed: "Das Land des Geschäfts konnte nicht geladen werden. Versuche es erneut.",
+    countryMissing:
+      "Das Geschäft muss sein Land angeben, bevor du ein Konto speichern kannst. Kontaktiere das Geschäft.",
+    countryFailed:
+      "Das Land des Geschäfts konnte nicht geladen werden. Versuche es erneut.",
     currentAccount: "Aktuelles Konto",
-    replaceLocal: "Dieses Konto bleibt erhalten, bis du ein neues speicherst. Gib Bankleitzahl und Kontonummer ein, um es durch ein lokales Konto im Land des Geschäfts zu ersetzen.",
+    replaceLocal:
+      "Dieses Konto bleibt erhalten, bis du ein neues speicherst. Gib Bankleitzahl und Kontonummer ein, um es durch ein lokales Konto im Land des Geschäfts zu ersetzen.",
     iban: "IBAN",
     local: "Lokales Bankkonto",
     account: "Kontonummer",

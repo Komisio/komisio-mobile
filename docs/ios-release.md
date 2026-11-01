@@ -4,13 +4,13 @@
 
 Use the existing **Komisio** App Store record, not **Komisio (Dev)**:
 
-| Setting | Value |
-| --- | --- |
-| Apple app ID | `6753813071` |
-| Bundle identifier | `com.inority.komisio` |
-| EAS owner / slug | `chrillenilsson` / `komisio` |
-| EAS project ID | `aa98c8e5-440a-4860-92e1-829f6b3bc1a1` |
-| Restart version | `2.0.0` |
+| Setting           | Value                                  |
+| ----------------- | -------------------------------------- |
+| Apple app ID      | `6753813071`                           |
+| Bundle identifier | `com.inority.komisio`                  |
+| EAS owner / slug  | `chrillenilsson` / `komisio`           |
+| EAS project ID    | `aa98c8e5-440a-4860-92e1-829f6b3bc1a1` |
+| Restart version   | `2.0.0`                                |
 
 The npm package and GitHub repository remain `komisio-mobile`. The Expo slug
 identifies the existing publishing project, not the source repository.
@@ -48,7 +48,11 @@ by this change.
 1. Integrate reviewed feature PRs into the intended release revision. Build from
    a clean, committed worktree; this configuration requires a commit. Obtain the
    agreed independent review of new changes.
-2. Replace the scaffold Expo icon and splash with approved Komisio assets.
+2. Verify the Komisio icon and splash on the signed build. The exported assets
+   use the existing `assets/brand/mark.svg` geometry, forest green and lime;
+   the app icon is an opaque 1024px square, with separate adaptive foreground
+   and monochrome assets for Android. Export sources are in `assets/brand/`.
+   The UI currently supports light appearance only, with dark status-bar text.
 3. Resolve SDK compatibility warnings using `npx expo install --check`; run
    lint, typecheck, tests and the iOS export on the resulting revision.
 4. Check EAS project identity, production environment and remote iOS build
@@ -60,7 +64,11 @@ by this change.
    Environment changes require a deployment through the platform release process;
    setting a variable alone does not update an existing deployment. Check the
    production database includes the follow-up migrations for `my_item_detail`,
-   `my_seller_payouts_page` and catalogue photo derivatives. Financial acceptance
+   `my_seller_payouts_page`, catalogue photo derivatives, `my_recent_sales`
+   (`20261030090000_my_recent_sales`) and the public facts in `store_catalogue`
+   (platform #731). Check that every app-visible store has a supported country
+   in its published store profile; the local bank form deliberately does not
+   guess a country when it is missing. Financial acceptance
    tests use synthetic fixtures. Native requests have no Origin; do not widen
    the browser origin allowlist to make native requests work.
 6. Verify export compliance before TestFlight, not only before App Review.

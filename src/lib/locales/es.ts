@@ -93,6 +93,7 @@ export default {
       "Este navegador no puede guardar solicitudes de pago de forma segura. Usa el portal de vendedores.",
     previous: "Página anterior",
     next: "Página siguiente",
+    pageOne: "Página {page} de {pages} · {total} solicitud",
     page: "Página {page} de {pages} · {total} solicitudes",
     first: "Ir a la primera página",
     pastEnd: "No hay solicitudes en esta página.",
@@ -117,10 +118,13 @@ export default {
     noCountries: "Ningún país coincide con la búsqueda.",
     moreCountries: "Busca para reducir la lista.",
     kind: "Tipo de cuenta",
-    countryMissing: "La tienda debe indicar su país antes de que puedas guardar una cuenta. Contacta con la tienda.",
-    countryFailed: "No se pudo cargar el país de la tienda. Inténtalo de nuevo.",
+    countryMissing:
+      "La tienda debe indicar su país antes de que puedas guardar una cuenta. Contacta con la tienda.",
+    countryFailed:
+      "No se pudo cargar el país de la tienda. Inténtalo de nuevo.",
     currentAccount: "Cuenta actual",
-    replaceLocal: "Esta cuenta se conserva hasta que guardes una nueva. Introduce el código bancario y el número de cuenta para sustituirla por una cuenta local en el país de la tienda.",
+    replaceLocal:
+      "Esta cuenta se conserva hasta que guardes una nueva. Introduce el código bancario y el número de cuenta para sustituirla por una cuenta local en el país de la tienda.",
     iban: "IBAN",
     local: "Cuenta bancaria local",
     account: "Número de cuenta",

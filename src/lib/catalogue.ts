@@ -156,16 +156,19 @@ export function parseDetail(
 }
 
 function parseFacts(value: unknown): { slug: FactKey; value: string }[] {
-  const facts = array(value).map((value) => {
+  const rows = array(value);
+  // Bound the wire response independently of the keys this installed app knows.
+  if (rows.length > 32) invalid();
+  const seen = new Set<string>();
+  const facts = rows.flatMap((value) => {
     const f = object(value);
-    if (!factKeys.includes(f.slug as FactKey)) invalid();
-    return { slug: f.slug as FactKey, value: text(f.value).trim() };
+    const slug = text(f.slug);
+    if (!slug || slug.length > 64 || seen.has(slug)) invalid();
+    seen.add(slug);
+    // Future fields must neither break older binaries nor leak unrecognized data.
+    if (!factKeys.includes(slug as FactKey)) return [];
+    return [{ slug: slug as FactKey, value: text(f.value).trim() }];
   });
-  if (
-    facts.length > factKeys.length ||
-    new Set(facts.map((f) => f.slug)).size !== facts.length
-  )
-    invalid();
   return facts.filter((f) => f.value.length > 0);
 }
 

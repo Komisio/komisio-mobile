@@ -92,6 +92,7 @@ export default {
       "Tämä selain ei voi tallentaa tilityspyyntöjä turvallisesti. Käytä myyjäportaalia.",
     previous: "Edellinen sivu",
     next: "Seuraava sivu",
+    pageOne: "Sivu {page}/{pages} · {total} pyyntö",
     page: "Sivu {page}/{pages} · {total} pyyntöä",
     first: "Ensimmäiselle sivulle",
     pastEnd: "Tällä sivulla ei ole pyyntöjä.",
@@ -116,10 +117,12 @@ export default {
     noCountries: "Hakua vastaavia maita ei löytynyt.",
     moreCountries: "Rajaa luetteloa hakemalla.",
     kind: "Tilin tyyppi",
-    countryMissing: "Myymälän on määritettävä maansa, ennen kuin voit tallentaa tilin. Ota yhteyttä myymälään.",
+    countryMissing:
+      "Myymälän on määritettävä maansa, ennen kuin voit tallentaa tilin. Ota yhteyttä myymälään.",
     countryFailed: "Myymälän maata ei voitu ladata. Yritä uudelleen.",
     currentAccount: "Nykyinen tili",
-    replaceLocal: "Tämä tili säilyy, kunnes tallennat uuden. Anna pankkikoodi ja tilinumero korvataksesi sen paikallisella tilillä myymälän maassa.",
+    replaceLocal:
+      "Tämä tili säilyy, kunnes tallennat uuden. Anna pankkikoodi ja tilinumero korvataksesi sen paikallisella tilillä myymälän maassa.",
     iban: "IBAN",
     local: "Paikallinen pankkitili",
     account: "Tilinumero",

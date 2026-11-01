@@ -93,6 +93,7 @@ export default {
       "Denne nettleseren kan ikke lagre utbetalingsforespørsler sikkert. Bruk selgerportalen.",
     previous: "Forrige side",
     next: "Neste side",
+    pageOne: "Side {page} av {pages} · {total} forespørsel",
     page: "Side {page} av {pages} · {total} forespørsler",
     first: "Til første side",
     pastEnd: "Det finnes ingen forespørsler på denne siden.",
@@ -117,10 +118,12 @@ export default {
     noCountries: "Ingen land samsvarer med søket.",
     moreCountries: "Søk for å begrense listen.",
     kind: "Kontotype",
-    countryMissing: "Butikken må angi landet sitt før du kan lagre en konto. Kontakt butikken.",
+    countryMissing:
+      "Butikken må angi landet sitt før du kan lagre en konto. Kontakt butikken.",
     countryFailed: "Butikkens land kunne ikke lastes. Prøv igjen.",
     currentAccount: "Nåværende konto",
-    replaceLocal: "Denne kontoen beholdes til du lagrer en ny. Fyll inn bankkode og kontonummer for å erstatte den med en lokal konto i butikkens land.",
+    replaceLocal:
+      "Denne kontoen beholdes til du lagrer en ny. Fyll inn bankkode og kontonummer for å erstatte den med en lokal konto i butikkens land.",
     iban: "IBAN",
     local: "Lokal bankkonto",
     account: "Kontonummer",

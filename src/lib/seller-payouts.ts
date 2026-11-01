@@ -42,6 +42,16 @@ export function payoutOffset(page: number) {
     ? page * 25
     : invalid();
 }
+export function payoutPageLabel(
+  copy: { page: string; pageOne: string },
+  page: number,
+  total: number,
+) {
+  return (total === 1 ? copy.pageOne : copy.page)
+    .replace("{page}", String(page + 1))
+    .replace("{pages}", String(Math.max(1, Math.ceil(total / 25))))
+    .replace("{total}", String(total));
+}
 export function parsePayoutPage(
   value: unknown,
   tenant: string,

@@ -305,7 +305,9 @@ function BankForm({
           <Message>{t.replaceLocal}</Message>
         </View>
       ) : null}
-      <Text style={styles.text}>{t.country}: {bankCountryName(country, locale)}</Text>
+      <Text style={styles.text}>
+        {t.country}: {bankCountryName(country, locale)}
+      </Text>
       <Field
         label={t.holder}
         value={details.holder}

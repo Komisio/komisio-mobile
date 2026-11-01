@@ -211,6 +211,7 @@ test("native back is preserved with history; direct links retain an accessible e
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
+    "expo-status-bar": { StatusBar: "StatusBar" },
     "expo-router": {
       Stack: Object.assign(() => null, { Screen: "Route", Protected: "Guard" }),
     },
@@ -248,8 +249,10 @@ test("all detail routes configure back navigation with their own fallback", () =
       ) => ({ fallback, label, canGoBack }),
     },
   });
-  const routesElement =
-    layout.default().props.children.props.children.props.children;
+  const [statusBar, i18n] = layout.default().props.children;
+  assert.equal(statusBar.type, "StatusBar");
+  assert.equal(statusBar.props.style, "dark");
+  const routesElement = i18n.props.children.props.children;
   const stack = routesElement.type();
   assert.equal(stack.props.screenOptions.headerShown, false);
   const screens = stack.props.children.at(-1).props.children;

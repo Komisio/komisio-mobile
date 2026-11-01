@@ -27,6 +27,7 @@ import {
   payoutAmountInput,
   payoutLimitError,
   payoutOffset,
+  payoutPageLabel,
   type PayoutPage,
 } from "@/lib/seller-payouts";
 
@@ -252,10 +253,7 @@ export function SellerPayouts({
               )}
               {data.total > 0 ? (
                 <Text style={styles.note}>
-                  {t.page
-                    .replace("{page}", String(page + 1))
-                    .replace("{pages}", String(Math.ceil(data.total / 25)))
-                    .replace("{total}", String(data.total))}
+                  {payoutPageLabel(t, page, data.total)}
                 </Text>
               ) : null}
               {page > 0 ? (

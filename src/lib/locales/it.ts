@@ -92,6 +92,7 @@ export default {
       "Questo browser non può salvare le richieste di pagamento in modo sicuro. Usa il portale venditori.",
     previous: "Pagina precedente",
     next: "Pagina successiva",
+    pageOne: "Pagina {page} di {pages} · {total} richiesta",
     page: "Pagina {page} di {pages} · {total} richieste",
     first: "Vai alla prima pagina",
     pastEnd: "Non ci sono richieste in questa pagina.",
@@ -116,10 +117,12 @@ export default {
     noCountries: "Nessun paese corrisponde alla ricerca.",
     moreCountries: "Cerca per restringere l'elenco.",
     kind: "Tipo di conto",
-    countryMissing: "Il negozio deve indicare il proprio paese prima che tu possa salvare un conto. Contatta il negozio.",
+    countryMissing:
+      "Il negozio deve indicare il proprio paese prima che tu possa salvare un conto. Contatta il negozio.",
     countryFailed: "Impossibile caricare il paese del negozio. Riprova.",
     currentAccount: "Conto attuale",
-    replaceLocal: "Questo conto viene mantenuto finché non ne salvi uno nuovo. Inserisci il codice bancario e il numero di conto per sostituirlo con un conto locale nel paese del negozio.",
+    replaceLocal:
+      "Questo conto viene mantenuto finché non ne salvi uno nuovo. Inserisci il codice bancario e il numero di conto per sostituirlo con un conto locale nel paese del negozio.",
     iban: "IBAN",
     local: "Conto bancario locale",
     account: "Numero di conto",

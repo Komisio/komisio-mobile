@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
 import * as bank from "../src/lib/bank-account.ts";
 import { bankCopy } from "../src/lib/bank-copy.ts";
+import { bankCountryName } from "../src/lib/bank-country-names.ts";
 
 const require = createRequire(import.meta.url);
 const { transformSync } = require("@babel/core");
@@ -69,7 +70,10 @@ function harness(
       uiStyles: {},
     },
     "@/lib/i18n": {
-      useI18n: () => ({ d: { bank: bankCopy.sv, retry: "Retry" } }),
+      useI18n: () => ({
+        locale: "sv",
+        d: { bank: bankCopy.sv, retry: "Retry" },
+      }),
     },
     "@/lib/session": { useSession: () => ({}) },
     "@/lib/scoped-read": {
@@ -79,6 +83,7 @@ function harness(
       },
     },
     "@/lib/bank-account": bank,
+    "@/lib/bank-country-names": { bankCountryName },
     "@/lib/bank-account-api": {
       bankEndpoint: "https://example.test",
       bankWriter: () => ({
@@ -134,8 +139,15 @@ test("compiled bank form exposes exactly the three local fields and saves store 
   );
   assert.deepEqual(
     tree.filter((e) => e.type === "Field").map((e) => e.props.label),
-    ["Kontohavare", "Clearingnummer", "Kontonummer"],
+    ["Kontohavare", "Clearingnummer (om det behövs)", "Kontonummer"],
   );
+  const text = tree
+    .filter((e) => e.type === "Text")
+    .map((e) => e.props.children)
+    .flat()
+    .join("");
+  assert.match(text, /Danmark/);
+  assert.doesNotMatch(text, /\bDK\b/);
   tree
     .find((e) => e.type === "Button" && e.props.label === "Spara konto")!
     .props.onPress();

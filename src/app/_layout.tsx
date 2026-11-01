@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { SessionProvider, useSession } from "@/lib/session";
@@ -102,6 +103,7 @@ function Routes() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
+      <StatusBar style="dark" />
       <I18nProvider>
         <SessionProvider>
           <Routes />

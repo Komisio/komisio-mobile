@@ -93,6 +93,7 @@ export default {
       "Denne browser kan ikke gemme udbetalingsanmodninger sikkert. Brug sælgerportalen.",
     previous: "Forrige side",
     next: "Næste side",
+    pageOne: "Side {page} af {pages} · {total} anmodning",
     page: "Side {page} af {pages} · {total} anmodninger",
     first: "Til første side",
     pastEnd: "Der er ingen anmodninger på denne side.",
@@ -117,10 +118,12 @@ export default {
     noCountries: "Ingen lande matcher søgningen.",
     moreCountries: "Søg for at begrænse listen.",
     kind: "Kontotype",
-    countryMissing: "Butikken skal angive sit land, før du kan gemme en konto. Kontakt butikken.",
+    countryMissing:
+      "Butikken skal angive sit land, før du kan gemme en konto. Kontakt butikken.",
     countryFailed: "Butikkens land kunne ikke hentes. Prøv igen.",
     currentAccount: "Nuværende konto",
-    replaceLocal: "Denne konto beholdes, indtil du gemmer en ny. Indtast registreringsnummer og kontonummer for at erstatte den med en lokal konto i butikkens land.",
+    replaceLocal:
+      "Denne konto beholdes, indtil du gemmer en ny. Indtast registreringsnummer og kontonummer for at erstatte den med en lokal konto i butikkens land.",
     iban: "IBAN",
     local: "Lokal bankkonto",
     account: "Kontonummer",
