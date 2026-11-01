@@ -13,6 +13,44 @@ export type BankVersion = {
   details: BankDetails;
   createdAt: string;
 };
+export type LocalBankFields = Pick<
+  BankDetails,
+  "holder" | "routing" | "account"
+>;
+
+export function storeBankCountry(value: unknown, slug: string): string | null {
+  if (value === null) return null;
+  const row = object(value);
+  if (row.slug !== slug) invalid();
+  const address = object(object(row.profile).address);
+  if (address.country === undefined || address.country === "") return null;
+  if (
+    typeof address.country !== "string" ||
+    !bankCountries.includes(address.country as (typeof bankCountries)[number])
+  )
+    invalid();
+  return address.country;
+}
+
+export function localBankFields(
+  current: BankVersion | null,
+  country: string,
+): LocalBankFields {
+  const compatible =
+    current?.details.kind === "local" && current.details.country === country;
+  return {
+    holder: current?.details.holder ?? "",
+    routing: compatible ? current.details.routing : "",
+    account: compatible ? current.details.account : "",
+  };
+}
+
+export function localBankDetails(
+  fields: LocalBankFields,
+  country: string,
+): BankDetails {
+  return normalizeBankDetails({ ...fields, country, kind: "local" });
+}
 export type BankCommand = {
   action: "saveBank";
   tenantId: string;
