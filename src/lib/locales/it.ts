@@ -122,7 +122,7 @@ export default {
     countryFailed: "Impossibile caricare il paese del negozio. Riprova.",
     currentAccount: "Conto attuale",
     replaceLocal:
-      "Questo conto viene mantenuto finché non ne salvi uno nuovo. Inserisci il codice bancario e il numero di conto per sostituirlo con un conto locale nel paese del negozio.",
+      "Questo conto viene mantenuto finché non ne salvi uno nuovo. Inserisci il numero di conto e, se necessario, il codice bancario per sostituirlo con un conto locale nel paese del negozio.",
     iban: "IBAN",
     local: "Conto bancario locale",
     account: "Numero di conto",
@@ -247,6 +247,7 @@ export default {
       sold: "Venduto",
     },
     count: "{count} articoli",
+    countOne: "{count} articolo",
     empty: "Non hai articoli in questo gruppo.",
     noMatches: "Nessun articolo corrisponde alla ricerca.",
     failed:
@@ -285,6 +286,7 @@ export default {
     clear: "Cancella ricerca",
     loaded: "Mostrati {shown} di {total} articoli",
     count: "{count} articoli",
+    countOne: "{count} articolo",
     empty: "Non ci sono articoli da mostrare al momento.",
     noMatches: "Nessun articolo corrisponde alla ricerca.",
     failed:

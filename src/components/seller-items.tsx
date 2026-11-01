@@ -110,7 +110,10 @@ export function SellerItems({
         />
         {state.status === "ready" ? (
           <StatusBadge tone="neutral" live>
-            {t.count.replace("{count}", String(state.total))}
+            {(state.total === 1 ? t.countOne : t.count).replace(
+              "{count}",
+              String(state.total),
+            )}
           </StatusBadge>
         ) : null}
       </View>

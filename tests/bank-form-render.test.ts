@@ -148,6 +148,11 @@ test("compiled bank form exposes exactly the three local fields and saves store 
     .join("");
   assert.match(text, /Danmark/);
   assert.doesNotMatch(text, /\bDK\b/);
+  assert.equal(
+    tree.find((e) => e.type === "Field" && e.props.label === "Kontohavare")!
+      .props.autoCorrect,
+    false,
+  );
   tree
     .find((e) => e.type === "Button" && e.props.label === "Spara konto")!
     .props.onPress();

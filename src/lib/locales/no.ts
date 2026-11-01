@@ -123,7 +123,7 @@ export default {
     countryFailed: "Butikkens land kunne ikke lastes. Prøv igjen.",
     currentAccount: "Nåværende konto",
     replaceLocal:
-      "Denne kontoen beholdes til du lagrer en ny. Fyll inn bankkode og kontonummer for å erstatte den med en lokal konto i butikkens land.",
+      "Denne kontoen beholdes til du lagrer en ny. Oppgi kontonummer og, om nødvendig, bankkode for å erstatte den med en lokal konto i butikkens land.",
     iban: "IBAN",
     local: "Lokal bankkonto",
     account: "Kontonummer",
@@ -247,6 +247,7 @@ export default {
       sold: "Solgt",
     },
     count: "{count} varer",
+    countOne: "{count} vare",
     empty: "Du har ingen varer i denne gruppen.",
     noMatches: "Ingen varer samsvarer med søket.",
     failed:
@@ -285,6 +286,7 @@ export default {
     clear: "Tøm søket",
     loaded: "Viser {shown} av {total} varer",
     count: "{count} varer",
+    countOne: "{count} vare",
     empty: "Det er ingen varer å vise akkurat nå.",
     noMatches: "Ingen varer samsvarer med søket.",
     failed: "Varene kunne ikke lastes. Kontroller tilkoblingen og prøv igjen.",

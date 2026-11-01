@@ -127,7 +127,7 @@ export default {
       "Das Land des Geschäfts konnte nicht geladen werden. Versuche es erneut.",
     currentAccount: "Aktuelles Konto",
     replaceLocal:
-      "Dieses Konto bleibt erhalten, bis du ein neues speicherst. Gib Bankleitzahl und Kontonummer ein, um es durch ein lokales Konto im Land des Geschäfts zu ersetzen.",
+      "Dieses Konto bleibt erhalten, bis du ein neues speicherst. Gib Kontonummer und, falls erforderlich, Bankleitzahl ein, um es durch ein lokales Konto im Land des Geschäfts zu ersetzen.",
     iban: "IBAN",
     local: "Lokales Bankkonto",
     account: "Kontonummer",
@@ -254,6 +254,7 @@ export default {
       sold: "Verkauft",
     },
     count: "{count} Artikel",
+    countOne: "{count} Artikel",
     empty: "Du hast keine Artikel in dieser Gruppe.",
     noMatches: "Keine Artikel entsprechen der Suche.",
     failed:
@@ -292,6 +293,7 @@ export default {
     clear: "Suche löschen",
     loaded: "{shown} von {total} Artikeln angezeigt",
     count: "{count} Artikel",
+    countOne: "{count} Artikel",
     empty: "Zurzeit gibt es keine Artikel.",
     noMatches: "Keine Artikel entsprechen der Suche.",
     failed:

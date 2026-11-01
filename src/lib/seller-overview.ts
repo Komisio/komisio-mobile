@@ -146,6 +146,7 @@ export function parseOverview(
   salesPage: unknown | null,
   seller: string,
 ): SellerOverview {
+  if (!isId(seller)) throw new Error("INVALID_OVERVIEW");
   const page = parseSellerItemsPage(expiringPage);
   const counts = object(object(expiringPage).counts);
   const active = count(counts.active),
@@ -158,13 +159,20 @@ export function parseOverview(
     page.items.some((item) => item.stage !== "period_ending")
   )
     throw new Error("INVALID_OVERVIEW");
+  let recentSales: RecentSale[] | null = null;
+  if (salesPage !== null) {
+    try {
+      recentSales = parseRecentSales(salesPage, seller, page.currency);
+    } catch {
+      // Discard the entire invalid sales section, including wrong-scope data.
+      // Independently validated item totals remain useful; never show zero sales.
+      recentSales = null;
+    }
+  }
   return {
     currency: page.currency,
     counts: { active, sold, ended, expiring: page.total },
     expiring: page.items.slice(0, 5),
-    recentSales:
-      salesPage === null
-        ? null
-        : parseRecentSales(salesPage, seller, page.currency),
+    recentSales,
   };
 }

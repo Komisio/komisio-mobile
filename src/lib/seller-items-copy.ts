@@ -23,6 +23,7 @@ export const sellerItemsCopy = {
       sold: "Såld",
     },
     count: "{count} varor",
+    countOne: "{count} vara",
     empty: "Du har inga varor i den här gruppen.",
     noMatches: "Inga varor matchar sökningen.",
     failed:
@@ -78,6 +79,7 @@ export const sellerItemsCopy = {
       sold: "Sold",
     },
     count: "{count} items",
+    countOne: "{count} item",
     empty: "You have no items in this group.",
     noMatches: "No items match your search.",
     failed:

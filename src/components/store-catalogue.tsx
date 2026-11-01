@@ -102,7 +102,10 @@ export function StoreCatalogue({
             {state.status === "ready" && (
               <View style={styles.resultRow}>
                 <StatusBadge tone="neutral" live>
-                  {t.count.replace("{count}", String(state.total))}
+                  {(state.total === 1 ? t.countOne : t.count).replace(
+                    "{count}",
+                    String(state.total),
+                  )}
                 </StatusBadge>
                 {submittedQuery ? (
                   <Button

@@ -98,6 +98,15 @@ Supabase sessions. Verify no previous account/store data is shown after switchin
 
 ## Before App Review and public availability
 
+Resolve the local-account/IBAN input ambiguity before broader use: the current
+three-field form saves local details and does not validate IBAN-looking input
+as IBAN. Internal TestFlight bank/payout testing must use synthetic accounts and
+must not result in actual bank payments. Keep the existing staff destination
+review; do not infer new country-specific account rules in the app.
+
+Verify Postgres timestamps (including fractional seconds) in the signed Hermes
+build when checking recent sales and payout history on an iPhone.
+
 Update screenshots, privacy/support URLs and App Privacy answers to match the
 new seller app. Resolve the account-deletion requirements for the actual account
 lifecycle and review the encryption declaration and age-rating questions.

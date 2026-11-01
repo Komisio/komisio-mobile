@@ -310,6 +310,7 @@ function BankForm({
       </Text>
       <Field
         label={t.holder}
+        autoCorrect={false}
         value={details.holder}
         onChangeText={(holder) => update({ holder })}
         maxLength={160}

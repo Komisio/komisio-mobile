@@ -5,6 +5,7 @@ export const catalogueCopy = {
     clear: "Rensa sökning",
     loaded: "Visar {shown} av {total} varor",
     count: "{count} varor",
+    countOne: "{count} vara",
     empty: "Det finns inga varor att visa just nu.",
     noMatches: "Inga varor matchar sökningen.",
     failed:
@@ -39,6 +40,7 @@ export const catalogueCopy = {
     clear: "Clear search",
     loaded: "Showing {shown} of {total} items",
     count: "{count} items",
+    countOne: "{count} item",
     empty: "There are no items to show right now.",
     noMatches: "No items match your search.",
     failed:

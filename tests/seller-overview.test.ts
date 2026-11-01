@@ -112,8 +112,8 @@ test("empty accounts are real zero states, absent facts are failures", () => {
   );
   assert.equal(parseOverview(p, null, seller).recentSales, null);
 });
-test("reject foreign identities, partial/wrong item groups and malformed financial facts", () => {
-  assert.throws(() => parseOverview(expiring(), recentSales(), id(2)));
+test("reject invalid identities, partial/wrong item groups and malformed financial facts", () => {
+  assert.throws(() => parseOverview(expiring(), recentSales(), "invalid"));
   assert.throws(() =>
     parseOverview({ ...expiring(), offset: 25 }, recentSales(), seller),
   );
@@ -136,6 +136,31 @@ test("reject foreign identities, partial/wrong item groups and malformed financi
     assert.throws(() => signedOre(amount));
   assert.equal(signedOre("-123"), -123);
   assert.equal(signedOre(0), 0);
+});
+test("malformed or foreign sales are unavailable without hiding independently validated item counts", () => {
+  for (const sales of [
+    {},
+    { ...recentSales(), sellerId: id(2) },
+    { ...recentSales(), currency: "NOK" },
+    {
+      ...recentSales(),
+      items: [{ ...recentSales().items[0], soldPriceOre: "invalid" }],
+    },
+    {
+      ...recentSales(),
+      items: [{ ...recentSales().items[0], soldAt: "invalid" }],
+    },
+  ]) {
+    const result = parseOverview(expiring(), sales, seller);
+    assert.equal(result.recentSales, null);
+    assert.deepEqual(result.counts, {
+      active: 73,
+      sold: 400,
+      ended: 140,
+      expiring: 43,
+    });
+    assert.equal(result.expiring.length, 5);
+  }
 });
 test("unknown payout status, invalid date, duplicate payout and excess history fail explicitly", () => {
   const e = economy();

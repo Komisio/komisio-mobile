@@ -24,7 +24,7 @@ export const bankCopy = {
     countryFailed: "Butikens land kunde inte hämtas. Försök igen.",
     currentAccount: "Nuvarande konto",
     replaceLocal:
-      "Detta konto behålls tills du sparar ett nytt. Fyll i clearingnummer och kontonummer för att ersätta det med ett lokalt konto i butikens land.",
+      "Detta konto behålls tills du sparar ett nytt. Fyll i kontonummer och, om det behövs, clearingnummer för att ersätta det med ett lokalt konto i butikens land.",
     iban: "IBAN",
     local: "Lokalt bankkonto",
     account: "Kontonummer",
@@ -85,7 +85,7 @@ export const bankCopy = {
     countryFailed: "The store country could not be loaded. Try again.",
     currentAccount: "Current account",
     replaceLocal:
-      "This account is kept until you save a new one. Enter a routing number and account number to replace it with a local account in the store's country.",
+      "This account is kept until you save a new one. Enter an account number and, if needed, a routing number to replace it with a local account in the store's country.",
     iban: "IBAN",
     local: "Local bank account",
     account: "Account number",
