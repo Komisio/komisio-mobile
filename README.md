@@ -45,6 +45,13 @@ npm test           # unit tests (node:test)
 Routes live in `src/app/`; keep components, hooks and utilities outside it.
 See `AGENTS.md` for Expo conventions.
 
+## iOS distribution
+
+The restart reuses the existing Komisio App Store and EAS production identities.
+See [iOS release and TestFlight](docs/ios-release.md) for environment setup,
+build/submission commands, proposed store copy and the remaining release gates.
+This configuration alone does not make the app release-ready.
+
 ## Store catalogue (S10/S11)
 
 The Store tab uses the reviewed `store_catalogue` and `store_catalogue_item`

@@ -1,14 +1,22 @@
 {
   "expo": {
     "name": "Komisio",
-    "slug": "komisio-mobile",
-    "version": "1.0.0",
+    "slug": "komisio",
+    "owner": "chrillenilsson",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "komisio",
+    "scheme": ["komisio", "komisioapp"],
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.inority.komisio",
+      "supportsTablet": true,
       "icon": "./assets/expo.icon"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "aa98c8e5-440a-4860-92e1-829f6b3bc1a1"
+      }
     },
     "android": {
       "adaptiveIcon": {

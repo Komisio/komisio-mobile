@@ -48,7 +48,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.ts"
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "verify:production": "node scripts/verify-production-build.mjs",
+    "eas-build-pre-install": "node scripts/verify-production-build.mjs"
   },
   "private": true
 }
