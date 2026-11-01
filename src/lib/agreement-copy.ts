@@ -5,6 +5,7 @@ const sv = {
   historical: "Tidigare avtalsversion",
   version: "Version {version}",
   language: "Avtalets språk",
+  asPublished: "Avtalstexten visas som butiken har publicerat den.",
   verbatim:
     "Avtalstexten visas som butiken har publicerat den. Språkvalet ändrar inte ditt registrerade godkännande.",
   accepted: "Registrerat godkännande",
@@ -32,6 +33,7 @@ const en: typeof sv = {
   historical: "Earlier agreement version",
   version: "Version {version}",
   language: "Agreement language",
+  asPublished: "The agreement is shown as published by the store.",
   verbatim:
     "The agreement is shown as published by the store. Choosing a language does not change your recorded acceptance.",
   accepted: "Recorded acceptance",

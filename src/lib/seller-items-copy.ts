@@ -1,5 +1,6 @@
 export const sellerItemsCopy = {
   sv: {
+    filter: "Visa varor",
     title: "Mina varor",
     detail: "Min vara",
     back: "Till mina varor",
@@ -22,6 +23,7 @@ export const sellerItemsCopy = {
       sold: "Såld",
     },
     count: "{count} varor",
+    countOne: "{count} vara",
     empty: "Du har inga varor i den här gruppen.",
     noMatches: "Inga varor matchar sökningen.",
     failed:
@@ -54,6 +56,7 @@ export const sellerItemsCopy = {
     missingDate: "Datum saknas",
   },
   en: {
+    filter: "Show items",
     title: "My items",
     detail: "My item",
     back: "Back to my items",
@@ -76,6 +79,7 @@ export const sellerItemsCopy = {
       sold: "Sold",
     },
     count: "{count} items",
+    countOne: "{count} item",
     empty: "You have no items in this group.",
     noMatches: "No items match your search.",
     failed:

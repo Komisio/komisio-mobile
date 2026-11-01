@@ -2,7 +2,10 @@ export const catalogueCopy = {
   sv: {
     search: "Sök bland butikens varor",
     searchButton: "Sök",
+    clear: "Rensa sökning",
+    loaded: "Visar {shown} av {total} varor",
     count: "{count} varor",
+    countOne: "{count} vara",
     empty: "Det finns inga varor att visa just nu.",
     noMatches: "Inga varor matchar sökningen.",
     failed:
@@ -19,9 +22,9 @@ export const catalogueCopy = {
     next: "Nästa bild",
     imageCount: "Bild {current} av {total}",
     untitled: "Vara",
+    openItem: "Visa vara",
     detail: "Varudetaljer",
     facts: "Om varan",
-    noFacts: "Inga fler uppgifter om varan.",
     factLabels: {
       category: "Kategori",
       brand: "Märke",
@@ -34,7 +37,10 @@ export const catalogueCopy = {
   en: {
     search: "Search the store's items",
     searchButton: "Search",
+    clear: "Clear search",
+    loaded: "Showing {shown} of {total} items",
     count: "{count} items",
+    countOne: "{count} item",
     empty: "There are no items to show right now.",
     noMatches: "No items match your search.",
     failed:
@@ -51,9 +57,9 @@ export const catalogueCopy = {
     next: "Next photo",
     imageCount: "Photo {current} of {total}",
     untitled: "Item",
+    openItem: "View item",
     detail: "Item details",
     facts: "About this item",
-    noFacts: "No further item details.",
     factLabels: {
       category: "Category",
       brand: "Brand",

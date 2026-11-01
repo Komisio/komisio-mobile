@@ -1,23 +1,25 @@
-import { View } from "react-native";
-import { dictionaries, locales, useI18n } from "@/lib/i18n";
-import { Choice, uiStyles } from "./ui";
+import { useState } from "react";
+import { useI18n } from "@/lib/i18n";
+import { NavigationRow } from "./ui";
+import { DetailSheet } from "./detail-sheet";
+import { LanguageOptions } from "./language-options";
+
 export function LanguagePicker() {
-  const { d, locale, setLocale } = useI18n();
+  const { d } = useI18n();
+  const [open, setOpen] = useState(false);
   return (
-    <View
-      accessibilityRole="radiogroup"
-      accessibilityLabel={d.language}
-      style={uiStyles.choices}
-    >
-      {locales.map((l) => (
-        <Choice
-          key={l}
-          role="radio"
-          label={dictionaries[l].languageName}
-          selected={l === locale}
-          onPress={() => setLocale(l)}
-        />
-      ))}
-    </View>
+    <>
+      <NavigationRow
+        label={`${d.language}: ${d.languageName}`}
+        onPress={() => setOpen(true)}
+      />
+      <DetailSheet
+        title={d.language}
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <LanguageOptions />
+      </DetailSheet>
+    </>
   );
 }

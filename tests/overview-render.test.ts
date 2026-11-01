@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
 import { overviewCopy } from "../src/lib/overview-copy.ts";
+import { payoutBadgeTone } from "../src/lib/seller-overview.ts";
 
 const require = createRequire(import.meta.url);
 const { transformSync } = require("@babel/core");
@@ -27,17 +28,50 @@ const compiled = transformSync(source, {
 }).code;
 assert.match(compiled, /react\/compiler-runtime/);
 
-for (const status of ["idle", "loading", "failed", "ready"]) {
-  test(`compiled overview renders ${status} without accessing absent data`, () => {
+for (const scenario of [
+  "idle",
+  "loading",
+  "failed",
+  "ready",
+  "populated",
+  "unavailable",
+]) {
+  test(`compiled overview renders ${scenario} without accessing absent data or hiding activity`, () => {
+    const populated = scenario === "populated";
+    const status = populated || scenario === "unavailable" ? "ready" : scenario;
     const values: number[] = [];
     const data =
       status === "ready"
         ? {
             currency: "SEK",
-            balance: { availableOre: 36000, reservedOre: 0, paidOre: 10000 },
-            counts: { active: 2, sold: 3, expiring: 0, ended: 0 },
-            expiring: [],
-            payouts: [],
+            counts: {
+              active: 2,
+              sold: 3,
+              expiring: populated ? 1 : 0,
+              ended: 0,
+            },
+            expiring: populated
+              ? [
+                  {
+                    id: "item",
+                    title: "Synthetic item",
+                    reference: "S-1",
+                    periodEnd: "2026-10-31",
+                  },
+                ]
+              : [],
+            recentSales:
+              scenario === "unavailable"
+                ? null
+                : populated
+                  ? Array.from({ length: 5 }, (_, i) => ({
+                      id: `sale-${i}`,
+                      title: `Synthetic sale ${i}`,
+                      reference: `S-${i}`,
+                      soldPriceOre: 5000,
+                      soldAt: "2026-10-29T10:00:00Z",
+                    }))
+                  : [],
           }
         : null;
     const state = { status, data, failure: "denied" };
@@ -66,6 +100,11 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
             overview: overviewCopy.sv,
             tabs: { overview: "Översikt" },
             login: { changeStore: "Byt butik" },
+            items: {
+              untitled: "Untitled",
+              periodEnd: "Period end",
+              filters: { active: "Till salu", sold: "Sålda" },
+            },
           },
         }),
       },
@@ -77,6 +116,7 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
         }),
       },
       "@/lib/seller-overview-api": {},
+      "@/lib/seller-overview": { payoutBadgeTone },
       "@/lib/catalogue": {
         formatPrice: (ore: number, currency: string) => {
           assert.equal(currency, "SEK");
@@ -84,12 +124,16 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
           return String(ore);
         },
       },
-      "@/lib/seller-items": {},
+      "@/lib/seller-items": { formatItemDate: (value: string) => value },
+      "./balance-card": { BalanceCard: "balance-card" },
       "./ui": {
         Screen: "main",
         Loading: "progress",
         Message: "p",
         Button: "button",
+        ItemCard: "article",
+        NavigationRow: "nav",
+        StatusBadge: "badge",
         colors: {},
         uiStyles: {},
       },
@@ -108,6 +152,51 @@ for (const status of ["idle", "loading", "failed", "ready"]) {
       storeName: "Synthetic store",
     });
     assert.ok(element);
-    assert.deepEqual(values, status === "ready" ? [36000, 0, 10000] : []);
+    assert.ok(
+      populated
+        ? values.length > 0 && values.every((value) => value === 5000)
+        : values.length === 0,
+    );
+    const nodes: any[] = [];
+    function visit(node: any) {
+      if (Array.isArray(node)) return node.forEach(visit);
+      if (!node || typeof node !== "object") return;
+      nodes.push(node);
+      visit(node.props?.children);
+    }
+    visit(element);
+    const balanceCard = nodes.find((node) => node.type === "balance-card");
+    assert.equal(balanceCard, undefined);
+    const headings = nodes
+      .filter((node) => node.props?.accessibilityRole === "header")
+      .map((node) => node.props.children);
+    assert.equal(
+      headings.includes(overviewCopy.sv.recentSales),
+      status === "ready",
+    );
+    assert.equal(headings.includes(overviewCopy.sv.recentPayouts), false);
+    assert.equal(
+      nodes.some((node) => node.props?.children === overviewCopy.sv.noSales),
+      scenario === "ready",
+    );
+    assert.equal(
+      nodes.some(
+        (node) => node.props?.children === overviewCopy.sv.salesFailed,
+      ),
+      scenario === "unavailable",
+    );
+    assert.equal(
+      nodes.some((node) => node.type === "nav"),
+      populated,
+    );
+    if (populated) {
+      assert.equal(nodes.filter((node) => node.type === "article").length, 5);
+      assert.equal(
+        nodes.filter(
+          (node) => node.props?.children === overviewCopy.sv.salePrice,
+        ).length,
+        5,
+      );
+    }
   });
 }

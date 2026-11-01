@@ -1,8 +1,10 @@
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { SessionProvider, useSession } from "@/lib/session";
 import { Button, Loading, Message, Screen } from "@/components/ui";
+import { detailHeaderOptions } from "@/components/detail-navigation";
 
 function Routes() {
   const { d } = useI18n();
@@ -33,13 +35,66 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={Boolean(store) && signedIn}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="catalogue/[tenant]/[item]" />
-        <Stack.Screen name="store-info" />
-        <Stack.Screen name="my-items/[tenant]/[item]" />
-        <Stack.Screen name="agreement" />
-        <Stack.Screen name="bank-account" />
-        <Stack.Screen name="statements/index" />
-        <Stack.Screen name="statements/[tenant]/[statement]" />
+        <Stack.Screen
+          name="language"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/profile",
+              d.profile.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
+        <Stack.Screen
+          name="catalogue/[tenant]/[item]"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)",
+              d.catalogue.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
+        <Stack.Screen
+          name="store-info"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)",
+              d.storeInfo.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
+        <Stack.Screen
+          name="my-items/[tenant]/[item]"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/items",
+              d.items.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
+        <Stack.Screen
+          name="agreement"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/profile",
+              d.agreement.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
+        <Stack.Screen
+          name="bank-account"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/profile",
+              d.bank.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
       </Stack.Protected>
     </Stack>
   );
@@ -48,6 +103,7 @@ function Routes() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
+      <StatusBar style="dark" />
       <I18nProvider>
         <SessionProvider>
           <Routes />

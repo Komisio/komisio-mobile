@@ -6,6 +6,7 @@ import { fetch } from "expo/fetch";
 import {
   parseBankCommand,
   parseBankVersion,
+  storeBankCountry,
   type BankCommand,
 } from "./bank-account";
 import { mobileEndpoint, sendBankCommand } from "./mobile-command-http";
@@ -13,6 +14,13 @@ import { mobileEndpoint, sendBankCommand } from "./mobile-command-http";
 export const bankEndpoint = mobileEndpoint(
   process.env.EXPO_PUBLIC_KOMISIO_WEB_URL,
 );
+export async function readBankCountry(slug: string, signal: AbortSignal) {
+  const { data, error } = await supabase
+    .rpc("public_store_profile", { p_slug: slug })
+    .abortSignal(signal);
+  if (error) throw error;
+  return storeBankCountry(data, slug);
+}
 export async function readBank(
   tenant: string,
   seller: string,

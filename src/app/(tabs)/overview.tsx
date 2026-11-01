@@ -7,7 +7,7 @@ export default function OverviewTab() {
   const { d } = useI18n();
   const { account, session, store } = useSession();
   return (
-    <SellerGate title={d.tabs.overview}>
+    <SellerGate bottomSafeArea={false} title={d.tabs.overview}>
       {account &&
       account !== "failed" &&
       session &&

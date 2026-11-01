@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, Keyboard, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
-import { createCataloguePager, formatPrice } from "@/lib/catalogue";
+import { createCataloguePager } from "@/lib/catalogue";
 import { readCatalogue } from "@/lib/catalogue-api";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
@@ -14,10 +14,11 @@ import {
   Loading,
   Message,
   PageHeading,
-  ItemCard,
+  StatusBadge,
+  IconButton,
 } from "./ui";
-import { Brand } from "./brand";
-import { CataloguePhoto } from "./catalogue-photo";
+import { InfoIcon } from "./brand";
+import { CatalogueRow } from "./catalogue-row";
 
 export function StoreCatalogue({
   tenant,
@@ -26,7 +27,7 @@ export function StoreCatalogue({
   tenant: string;
   name: string;
 }) {
-  const { d, locale } = useI18n();
+  const { d } = useI18n();
   const { chooseStore } = useSession();
   const t = d.catalogue;
   const [query, setQuery] = useState("");
@@ -50,23 +51,29 @@ export function StoreCatalogue({
     }, [pager]),
   );
   const search = () => {
+    Keyboard.dismiss();
     setSubmittedQuery(query.trim());
     void pager.search(query);
   };
   const failure = state.failure ? t[state.failure] : null;
   const header = (
     <View style={styles.header}>
-      <Brand />
-      <PageHeading title={name} />
-      <Button
-        label={d.storeInfo.title}
-        variant="secondary"
-        onPress={() => router.push("/store-info")}
-      />
+      <View style={styles.titleRow}>
+        <View style={{ flex: 1 }}>
+          <PageHeading title={name} />
+        </View>
+        <IconButton
+          label={d.storeInfo.title}
+          onPress={() => router.push("/store-info")}
+        >
+          <InfoIcon />
+        </IconButton>
+      </View>
       <View style={styles.searchRow}>
         <View style={styles.search}>
           <Field
             label={t.search}
+            labelHidden
             value={query}
             onChangeText={setQuery}
             maxLength={120}
@@ -86,43 +93,47 @@ export function StoreCatalogue({
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        refreshing={state.refreshing}
+        onRefresh={() => void pager.revalidate()}
         ListHeaderComponent={
           <>
             {header}
             {state.status === "ready" && (
-              <Text style={styles.count}>
-                {t.count.replace("{count}", String(state.total))}
-              </Text>
+              <View style={styles.resultRow}>
+                <StatusBadge tone="neutral" live>
+                  {(state.total === 1 ? t.countOne : t.count).replace(
+                    "{count}",
+                    String(state.total),
+                  )}
+                </StatusBadge>
+                {submittedQuery ? (
+                  <Button
+                    variant="text"
+                    label={t.clear}
+                    onPress={() => {
+                      setQuery("");
+                      setSubmittedQuery("");
+                      void pager.search("");
+                    }}
+                  />
+                ) : null}
+              </View>
             )}
           </>
         }
         renderItem={({ item }) => (
-          <ItemCard
-            label={`${item.title ?? t.untitled}, ${formatPrice(item.priceOre, state.currency, locale)}`}
-            media={
-              item.photo ? (
-                <CataloguePhoto
-                  photo={item.photo}
-                  tenant={tenant}
-                  label={item.title ?? t.photo}
-                />
-              ) : undefined
-            }
+          <CatalogueRow
+            item={item}
+            tenant={tenant}
+            currency={state.currency}
             onPress={() =>
               router.push({
                 pathname: "/catalogue/[tenant]/[item]",
                 params: { tenant, item: item.id },
               })
             }
-          >
-            <Text style={styles.itemTitle}>{item.title ?? t.untitled}</Text>
-            {item.category ? (
-              <Text style={styles.category}>{item.category}</Text>
-            ) : null}
-            <Text style={styles.price}>
-              {formatPrice(item.priceOre, state.currency, locale)}
-            </Text>
-          </ItemCard>
+          />
         )}
         ListEmptyComponent={
           state.status === "loading" ? (
@@ -147,6 +158,13 @@ export function StoreCatalogue({
           state.status === "ready" ? (
             <View style={styles.footer}>
               {failure && <Message tone="error">{failure}</Message>}
+              {state.offset < state.total ? (
+                <Text style={uiStyles.note}>
+                  {t.loaded
+                    .replace("{shown}", String(state.items.length))
+                    .replace("{total}", String(state.total))}
+                </Text>
+              ) : null}
               {state.offset < state.total && (
                 <Button
                   label={state.failure ? d.retry : t.more}
@@ -155,13 +173,15 @@ export function StoreCatalogue({
                   onPress={() => void pager.more()}
                 />
               )}
-              <Button
-                label={t.refresh}
-                variant="secondary"
-                disabled={state.more}
-                busy={state.refreshing}
-                onPress={() => void pager.revalidate()}
-              />
+              {state.failure && state.offset >= state.total ? (
+                <Button
+                  label={t.refresh}
+                  variant="text"
+                  disabled={state.more}
+                  busy={state.refreshing}
+                  onPress={() => void pager.revalidate()}
+                />
+              ) : null}
             </View>
           ) : undefined
         }
@@ -172,7 +192,15 @@ export function StoreCatalogue({
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  header: { gap: 16, marginBottom: 16 },
+  header: { gap: 14, marginBottom: 12 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  resultRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
   searchRow: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -181,10 +209,6 @@ const styles = StyleSheet.create({
   },
   search: { flexGrow: 1, flexBasis: 180, minWidth: 0 },
   message: { ...uiStyles.content },
-  list: { ...uiStyles.content, gap: 12 },
-  count: { ...uiStyles.note, marginBottom: 4 },
-  itemTitle: { ...uiStyles.body, fontWeight: "600" },
-  category: { ...uiStyles.note },
-  price: { ...uiStyles.amount },
+  list: { ...uiStyles.content, gap: 8 },
   footer: { paddingVertical: 16, gap: 12 },
 });

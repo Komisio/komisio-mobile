@@ -15,6 +15,7 @@ import {
   Message,
   Screen,
   ItemCard,
+  NavigationRow,
 } from "./ui";
 
 export function SellerOverviewScreen({
@@ -46,12 +47,15 @@ export function SellerOverviewScreen({
     }, [read]),
   );
   const data = state.data;
-  const money = (ore: number) =>
-    data ? formatPrice(ore, data.currency, locale) : "";
   return (
     <Screen
+      bottomSafeArea={false}
       title={d.tabs.overview}
-      intro={t.intro.replace("{store}", storeName)}
+      refresh={{
+        refreshing: state.status === "loading",
+        onRefresh: () => void read.refresh(),
+        label: t.refresh,
+      }}
     >
       {state.status === "idle" || state.status === "loading" ? (
         <Loading />
@@ -71,168 +75,116 @@ export function SellerOverviewScreen({
         </>
       ) : data ? (
         <>
-          <View style={styles.balance}>
-            <Text style={styles.balanceLabel}>{t.available}</Text>
-            <Text style={styles.amount}>
-              {money(data.balance.availableOre)}
-            </Text>
-            <View style={styles.balanceDetails}>
-              <View style={styles.balancePart}>
-                <Text style={styles.balanceLabel}>{t.reserved}</Text>
-                <Text style={styles.balanceValue}>
-                  {money(data.balance.reservedOre)}
-                </Text>
-              </View>
-              <View style={styles.balancePart}>
-                <Text style={styles.balanceLabel}>{t.paid}</Text>
-                <Text style={styles.balanceValue}>
-                  {money(data.balance.paidOre)}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.balanceNote}>{t.balanceNote}</Text>
-          </View>
+          <Text style={styles.store}>{storeName}</Text>
+          {data.counts.expiring > 0 ? (
+            <NavigationRow
+              label={
+                data.counts.expiring === 1
+                  ? t.attentionOne
+                  : t.attentionCount.replace(
+                      "{count}",
+                      String(data.counts.expiring),
+                    )
+              }
+              onPress={() =>
+                router.navigate({
+                  pathname: "/(tabs)/items",
+                  params: { filter: "expiring" },
+                })
+              }
+            />
+          ) : null}
           <View style={styles.counts}>
-            {(["active", "sold", "expiring", "ended"] as const).map((key) => (
+            {(["active", "sold"] as const).map((key) => (
               <View key={key} style={styles.count}>
-                <Text style={styles.text}>{t[key]}</Text>
                 <Text style={styles.number}>{data.counts[key]}</Text>
+                <Text style={styles.countLabel}>
+                  {key === "active"
+                    ? d.items.filters.active
+                    : d.items.filters.sold}
+                </Text>
               </View>
             ))}
           </View>
-          <Button
-            label={t.myItems}
-            variant="secondary"
-            onPress={() => router.navigate("/(tabs)/items")}
-          />
           <View style={styles.section}>
-            <Text style={styles.heading} accessibilityRole="header">
-              {t.expiring}
+            <Text style={uiStyles.heading} accessibilityRole="header">
+              {t.recentSales}
             </Text>
-            <Text style={styles.text}>
-              {data.counts.expiring
-                ? t.expiringIntro.replace(
-                    "{count}",
-                    String(data.counts.expiring),
-                  )
-                : t.noExpiring}
-            </Text>
-            {data.expiring.map((item) => (
-              <ItemCard
-                key={item.id}
-                label={`${item.title ?? d.items.untitled}, ${item.reference}`}
-                onPress={() =>
-                  router.push({
-                    pathname: "/my-items/[tenant]/[item]",
-                    params: { tenant, item: item.id },
-                  })
-                }
-              >
-                <Text style={styles.itemTitle}>
-                  {item.title ?? d.items.untitled}
-                </Text>
-                <Text style={styles.note}>{item.reference}</Text>
-                <Text style={styles.text}>
-                  {d.items.periodEnd}: {formatItemDate(item.periodEnd, locale)}
-                </Text>
-              </ItemCard>
-            ))}
-            {data.counts.expiring > data.expiring.length ? (
-              <Text style={styles.note}>
-                {t.preview
-                  .replace("{shown}", String(data.expiring.length))
-                  .replace("{count}", String(data.counts.expiring))}
-              </Text>
-            ) : null}
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.heading} accessibilityRole="header">
-              {t.recentPayouts}
-            </Text>
-            <Text style={styles.note}>{t.payoutIntro}</Text>
-            {data.payouts.length ? (
-              data.payouts.map((payout) => (
-                <View key={payout.id} style={styles.item}>
-                  <Text style={styles.itemTitle}>
-                    {money(payout.amountOre)}
-                  </Text>
-                  <Text style={styles.text}>{t.statuses[payout.status]}</Text>
-                  <Text style={styles.note}>
-                    {t.requestedAt}:{" "}
-                    {formatItemDate(payout.requestedAt, locale)}
-                  </Text>
-                </View>
-              ))
+            {data.recentSales === null ? (
+              <>
+                <Message tone="error">{t.salesFailed}</Message>
+                <Button
+                  label={d.retry}
+                  variant="secondary"
+                  onPress={() => void read.refresh()}
+                />
+              </>
+            ) : data.recentSales.length === 0 ? (
+              <Text style={uiStyles.note}>{t.noSales}</Text>
             ) : (
-              <Text style={styles.text}>{t.noPayouts}</Text>
+              data.recentSales.map((sale) => (
+                <ItemCard
+                  compact
+                  key={sale.id}
+                  label={`${sale.title ?? d.items.untitled}, ${formatItemDate(sale.soldAt, locale)}, ${t.salePrice}: ${formatPrice(sale.soldPriceOre, data.currency, locale)}`}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/my-items/[tenant]/[item]",
+                      params: { tenant, item: sale.id },
+                    })
+                  }
+                >
+                  <View style={styles.sale}>
+                    <View style={styles.description}>
+                      <Text style={uiStyles.itemName}>
+                        {sale.title ?? d.items.untitled}
+                      </Text>
+                      <Text style={uiStyles.note}>
+                        {formatItemDate(sale.soldAt, locale)}
+                      </Text>
+                    </View>
+                    <View style={styles.price}>
+                      <Text style={uiStyles.note}>{t.salePrice}</Text>
+                      <Text style={uiStyles.itemPrice}>
+                        {formatPrice(sale.soldPriceOre, data.currency, locale)}
+                      </Text>
+                    </View>
+                  </View>
+                </ItemCard>
+              ))
             )}
           </View>
-          <Button
-            label={t.refresh}
-            variant="secondary"
-            onPress={() => void read.refresh()}
-          />
         </>
       ) : null}
     </Screen>
   );
 }
 const styles = StyleSheet.create({
-  balance: {
-    backgroundColor: colors.accent,
-    borderRadius: 18,
-    padding: 22,
-    gap: 8,
-  },
-  balanceLabel: { ...uiStyles.note },
-  amount: { ...uiStyles.amount, fontSize: 36, lineHeight: 44, marginBottom: 8 },
-  balanceDetails: {
+  store: { ...uiStyles.note, marginTop: -8 },
+  counts: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.control,
-    paddingTop: 16,
-  },
-  balancePart: {
-    flexGrow: 1,
-    flexBasis: 120,
-    gap: 4,
-    justifyContent: "space-between",
-  },
-  balanceValue: {
-    color: colors.text,
-    fontSize: 21,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-    lineHeight: 29,
-    marginBottom: 8,
-  },
-  balanceNote: { ...uiStyles.note },
-  counts: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  count: {
-    flexBasis: 130,
-    flexGrow: 1,
     padding: 16,
-    gap: 8,
-    borderRadius: 12,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
+    borderRadius: 20,
+    borderCurve: "continuous",
+    backgroundColor: colors.brand,
   },
-  number: { ...uiStyles.amount, fontSize: 28, lineHeight: 36 },
-  text: { ...uiStyles.body },
-  note: { ...uiStyles.note },
-  heading: { ...uiStyles.heading },
-  section: { gap: 12, marginTop: 8 },
-  item: {
-    padding: 16,
-    gap: 6,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.line,
-    minHeight: 48,
+  count: { flex: 1, flexBasis: 100, gap: 4 },
+  number: {
+    ...uiStyles.amount,
+    color: colors.onBrand,
+    fontSize: 28,
+    lineHeight: 36,
   },
-  itemTitle: { color: colors.text, fontSize: 18, fontWeight: "600" },
+  countLabel: { ...uiStyles.label, color: colors.accent },
+  section: { gap: 12 },
+  sale: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    alignItems: "center",
+  },
+  description: { flex: 1, flexBasis: 140, gap: 4 },
+  price: { maxWidth: "100%", gap: 4 },
 });

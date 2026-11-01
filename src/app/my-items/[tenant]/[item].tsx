@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   formatPrice,
   isId,
@@ -29,9 +29,6 @@ import {
 } from "@/components/ui";
 import { SellerGate } from "@/components/seller-gate";
 
-const back = () =>
-  router.canGoBack() ? router.back() : router.replace("/(tabs)/items");
-
 export default function MyItemScreen() {
   const { tenant, item } = useLocalSearchParams<{
     tenant: string;
@@ -41,13 +38,12 @@ export default function MyItemScreen() {
   const { d } = useI18n();
   if (!store || store.id !== tenant || !isId(item))
     return (
-      <Screen title={d.items.detail}>
+      <Screen topSafeArea={false} title={d.items.detail}>
         <Message>{d.items.missing}</Message>
-        <Button label={d.items.back} onPress={back} />
       </Screen>
     );
   return (
-    <SellerGate title={d.items.detail}>
+    <SellerGate topSafeArea={false} title={d.items.detail}>
       {account &&
         account !== "failed" &&
         account.tenantId === tenant &&
@@ -103,8 +99,7 @@ function ItemRead({
     next = item ? plannedMarkdown(item) : null,
     collection = item ? collectionDate(item) : null;
   return (
-    <Screen title={t.detail}>
-      <Button label={t.back} variant="secondary" onPress={back} />
+    <Screen topSafeArea={false} title={item ? undefined : t.detail}>
       {failure ? (
         <>
           <Message tone="error">{t[failure]}</Message>
@@ -119,6 +114,7 @@ function ItemRead({
           </Text>
           {item.category && <Text style={styles.muted}>{item.category}</Text>}
           <StatusBadge
+            tone={item.stage === "sold" ? "positive" : "neutral"}
             attention={
               item.stage === "period_ending" || item.stage === "period_ended"
             }
@@ -191,7 +187,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   title: uiStyles.title,
   muted: uiStyles.note,
-  price: { ...uiStyles.amount, fontSize: 30, lineHeight: 38 },
+  price: { ...uiStyles.amount, fontSize: 24, lineHeight: 32 },
   facts: uiStyles.card,
   fact: { gap: 4 },
   value: uiStyles.body,

@@ -1,3 +1,4 @@
+import { formattingLocale } from "./locale.ts";
 import { isId, type ReadPage } from "./catalogue.ts";
 
 export const itemFilters = [
@@ -174,7 +175,7 @@ export function collectionDate(item: SellerItem) {
   return item.collectionDeadline;
 }
 export function formatItemDate(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale === "sv" ? "sv-SE" : "en-GB", {
+  return new Intl.DateTimeFormat(formattingLocale(locale), {
     year: "numeric",
     month: "short",
     day: "numeric",

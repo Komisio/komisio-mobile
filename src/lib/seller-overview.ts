@@ -13,12 +13,25 @@ export type PayoutSummary = {
   status: (typeof payoutStatuses)[number];
   requestedAt: string;
 };
+export function payoutBadgeTone(status: PayoutSummary["status"]) {
+  return status === "paid"
+    ? ("positive" as const)
+    : status === "requested" || status === "rejected"
+      ? ("warning" as const)
+      : ("neutral" as const);
+}
 export type SellerOverview = {
   currency: string;
-  balance: { availableOre: number; reservedOre: number; paidOre: number };
   counts: { active: number; sold: number; ended: number; expiring: number };
   expiring: SellerItem[];
-  payouts: PayoutSummary[];
+  recentSales: RecentSale[] | null;
+};
+export type RecentSale = {
+  id: string;
+  reference: string;
+  title: string | null;
+  soldAt: string;
+  soldPriceOre: number;
 };
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
@@ -78,13 +91,62 @@ export function parseEconomyPreview(value: unknown, seller: string) {
     payouts,
   };
 }
-/** Both reads must succeed; counts and amounts are complete server facts. */
+export function parseRecentSales(
+  value: unknown,
+  seller: string,
+  currency: string,
+): RecentSale[] {
+  const page = object(value);
+  if (
+    !isId(seller) ||
+    page.sellerId !== seller ||
+    page.currency !== currency ||
+    page.limit !== 5 ||
+    !Array.isArray(page.items) ||
+    page.items.length > 5
+  )
+    throw new Error("INVALID_OVERVIEW");
+  const sales: RecentSale[] = page.items.map((value) => {
+    const sale = object(value);
+    const price = signedOre(sale.soldPriceOre);
+    if (
+      !isId(sale.id) ||
+      typeof sale.reference !== "string" ||
+      !sale.reference.trim() ||
+      (sale.title !== null && typeof sale.title !== "string") ||
+      typeof sale.soldAt !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}T/.test(sale.soldAt) ||
+      !Number.isFinite(Date.parse(sale.soldAt)) ||
+      price <= 0
+    )
+      throw new Error("INVALID_OVERVIEW");
+    return {
+      id: sale.id,
+      reference: sale.reference,
+      title: sale.title,
+      soldAt: sale.soldAt,
+      soldPriceOre: price,
+    };
+  });
+  if (
+    new Set(sales.map((sale) => sale.id)).size !== sales.length ||
+    sales.some(
+      (sale, index) =>
+        index > 0 &&
+        Date.parse(sale.soldAt) > Date.parse(sales[index - 1].soldAt),
+    )
+  )
+    throw new Error("INVALID_OVERVIEW");
+  return sales;
+}
+
+/** Totals are server facts; null sales means unavailable, never an empty history. */
 export function parseOverview(
-  economy: unknown,
   expiringPage: unknown,
+  salesPage: unknown | null,
   seller: string,
 ): SellerOverview {
-  const e = parseEconomyPreview(economy, seller);
+  if (!isId(seller)) throw new Error("INVALID_OVERVIEW");
   const page = parseSellerItemsPage(expiringPage);
   const counts = object(object(expiringPage).counts);
   const active = count(counts.active),
@@ -97,11 +159,20 @@ export function parseOverview(
     page.items.some((item) => item.stage !== "period_ending")
   )
     throw new Error("INVALID_OVERVIEW");
+  let recentSales: RecentSale[] | null = null;
+  if (salesPage !== null) {
+    try {
+      recentSales = parseRecentSales(salesPage, seller, page.currency);
+    } catch {
+      // Discard the entire invalid sales section, including wrong-scope data.
+      // Independently validated item totals remain useful; never show zero sales.
+      recentSales = null;
+    }
+  }
   return {
     currency: page.currency,
-    balance: e.balance,
     counts: { active, sold, ended, expiring: page.total },
     expiring: page.items.slice(0, 5),
-    payouts: e.payouts.slice(0, 5),
+    recentSales,
   };
 }

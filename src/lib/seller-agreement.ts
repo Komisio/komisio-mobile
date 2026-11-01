@@ -1,3 +1,4 @@
+import { formattingLocale } from "./locale.ts";
 import { isId } from "./catalogue.ts";
 
 export const agreementLanguages = {
@@ -173,7 +174,7 @@ export function parseAgreementArchive(
   };
 }
 export function formatAgreementTime(value: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale === "sv" ? "sv-SE" : "en-GB", {
+  return new Intl.DateTimeFormat(formattingLocale(locale), {
     year: "numeric",
     month: "short",
     day: "numeric",

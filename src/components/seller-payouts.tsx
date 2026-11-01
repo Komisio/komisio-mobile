@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "./pending-discard";
+import { BalanceCard } from "./balance-card";
 import {
   Button,
   Choice,
@@ -12,11 +13,13 @@ import {
   Loading,
   Message,
   Screen,
+  NavigationRow,
 } from "./ui";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
 import { formatPrice } from "@/lib/catalogue";
+import { payoutBadgeTone } from "@/lib/seller-overview";
 import { formatAgreementTime } from "@/lib/seller-agreement";
 import { payoutEndpoint, payoutWriter, readPayouts } from "@/lib/payout-api";
 import {
@@ -24,6 +27,7 @@ import {
   payoutAmountInput,
   payoutLimitError,
   payoutOffset,
+  payoutPageLabel,
   type PayoutPage,
 } from "@/lib/seller-payouts";
 
@@ -41,6 +45,7 @@ export function SellerPayouts({
   const { chooseStore, signOut, refreshAssurance } = useSession();
   const [page, setPage] = useState(0),
     [view, setView] = useState<"request" | "history">("request");
+  const [amount, setAmount] = useState("");
   const read = useMemo(
     () =>
       createScopedRead((signal) =>
@@ -62,6 +67,13 @@ export function SellerPayouts({
     writer.getState,
     writer.getState,
   );
+  // Keep a draft through reads/tab changes; clear only after confirmed registration.
+  if (
+    amount &&
+    (change.status === "success" ||
+      (change.status === "cleanup" && change.code === "success"))
+  )
+    setAmount("");
   useFocusEffect(
     useCallback(() => {
       void read.refresh();
@@ -75,27 +87,15 @@ export function SellerPayouts({
   };
   const data = state.data;
   return (
-    <Screen title={t.title}>
-      <Button
-        label={d.statements.title}
-        variant="secondary"
-        onPress={() => router.push("/statements")}
-      />
-      <View style={styles.views}>
-        {(["request", "history"] as const).map((value) => (
-          <Choice
-            key={value}
-            label={t[value]}
-            selected={value === view}
-            onPress={() => setView(value)}
-          />
-        ))}
-      </View>
-      <Button
-        label={d.bank.title}
-        variant="secondary"
-        onPress={() => router.push("/bank-account")}
-      />
+    <Screen
+      title={d.tabs.money}
+      bottomSafeArea={false}
+      refresh={{
+        refreshing: state.status === "loading",
+        onRefresh: () => void read.refresh(),
+        label: t.refresh,
+      }}
+    >
       {!payoutEndpoint ? <Message>{t.notConfigured}</Message> : null}
       {change.status === "busy" || change.status === "idle" ? (
         <Loading />
@@ -197,31 +197,24 @@ export function SellerPayouts({
         </>
       ) : data ? (
         <>
-          <View style={styles.card}>
-            <Text style={styles.label}>{d.overview.available}</Text>
-            <Text style={styles.amount}>
-              {formatPrice(data.balance.availableOre, data.currency, locale)}
-            </Text>
-            <Text style={styles.text}>
-              {d.overview.reserved}:{" "}
-              {formatPrice(data.balance.reservedOre, data.currency, locale)}
-            </Text>
-            <Text style={styles.text}>
-              {d.overview.paid}:{" "}
-              {formatPrice(data.balance.paidOre, data.currency, locale)}
-            </Text>
-            <Text style={styles.note}>{d.overview.balanceNote}</Text>
-            <Text style={styles.text}>
-              {t.threshold}:{" "}
-              {formatPrice(data.thresholdOre, data.currency, locale)}
-            </Text>
+          <BalanceCard balance={data.balance} currency={data.currency} />
+          <View style={styles.views}>
+            {(["request", "history"] as const).map((value) => (
+              <Choice
+                key={value}
+                label={value === "request" ? t.request : t.historyShort}
+                selected={value === view}
+                onPress={() => setView(value)}
+              />
+            ))}
           </View>
           {view === "request" ? (
             <>
-              <Message>{t.notice}</Message>
               {change.status === "ready" ? (
                 <PayoutForm
                   data={data}
+                  amount={amount}
+                  setAmount={setAmount}
                   enabled={Boolean(payoutEndpoint)}
                   onSubmit={(amountOre) => {
                     void writer.submit({
@@ -240,9 +233,6 @@ export function SellerPayouts({
             </>
           ) : (
             <>
-              <Text style={styles.heading} accessibilityRole="header">
-                {t.history}
-              </Text>
               {!data.payouts.length ? (
                 <Message>{data.total === 0 ? t.empty : t.pastEnd}</Message>
               ) : (
@@ -251,7 +241,7 @@ export function SellerPayouts({
                     <Text style={styles.heading}>
                       {formatPrice(payout.amountOre, data.currency, locale)}
                     </Text>
-                    <StatusBadge>
+                    <StatusBadge tone={payoutBadgeTone(payout.status)}>
                       {d.overview.statuses[payout.status]}
                     </StatusBadge>
                     <Text style={styles.note}>
@@ -263,10 +253,7 @@ export function SellerPayouts({
               )}
               {data.total > 0 ? (
                 <Text style={styles.note}>
-                  {t.page
-                    .replace("{page}", String(page + 1))
-                    .replace("{pages}", String(Math.ceil(data.total / 25)))
-                    .replace("{total}", String(data.total))}
+                  {payoutPageLabel(t, page, data.total)}
                 </Text>
               ) : null}
               {page > 0 ? (
@@ -276,27 +263,32 @@ export function SellerPayouts({
                   onPress={() => setPage(0)}
                 />
               ) : null}
-              <Button
-                label={t.previous}
-                variant="secondary"
-                disabled={page === 0}
-                onPress={() => setPage(page - 1)}
-              />
-              <Button
-                label={t.next}
-                variant="secondary"
-                disabled={(page + 1) * 25 >= data.total || page >= 100000}
-                onPress={() => setPage(page + 1)}
-              />
+              {data.total > 25 || page > 0 ? (
+                <>
+                  <Button
+                    label={t.previous}
+                    variant="secondary"
+                    disabled={page === 0}
+                    onPress={() => setPage(page - 1)}
+                  />
+                  <Button
+                    label={t.next}
+                    variant="secondary"
+                    disabled={(page + 1) * 25 >= data.total || page >= 100000}
+                    onPress={() => setPage(page + 1)}
+                  />
+                </>
+              ) : null}
             </>
           )}
-          <Button
-            label={t.refresh}
-            variant="secondary"
-            onPress={() => void read.refresh()}
-          />
         </>
       ) : null}
+      <View style={{ gap: 8 }}>
+        <NavigationRow
+          label={d.bank.title}
+          onPress={() => router.push("/bank-account")}
+        />
+      </View>
     </Screen>
   );
 }
@@ -305,23 +297,38 @@ function PayoutForm({
   data,
   enabled,
   onSubmit,
+  amount,
+  setAmount,
 }: {
   data: PayoutPage;
   enabled: boolean;
   onSubmit: (amount: number) => void;
+  amount: string;
+  setAmount: (amount: string) => void;
 }) {
-  const { d } = useI18n(),
+  const { d, locale } = useI18n(),
     t = d.payouts;
-  const [amount, setAmount] = useState(""),
-    [error, setError] = useState<
-      "invalid" | "below" | "above" | "storage" | null
-    >(null);
+  const [error, setError] = useState<
+    "invalid" | "below" | "above" | "storage" | null
+  >(null);
   const canRequest =
     data.balance.availableOre > 0 &&
     data.balance.availableOre >= data.thresholdOre;
+  if (!canRequest)
+    return (
+      <View style={styles.card}>
+        <Text style={styles.label}>{t.threshold}</Text>
+        <Text style={styles.amount}>
+          {formatPrice(data.thresholdOre, data.currency, locale)}
+        </Text>
+        <Text style={styles.note}>{t.insufficient}</Text>
+      </View>
+    );
   return (
     <View style={styles.card}>
-      {!canRequest ? <Message>{t.insufficient}</Message> : null}
+      <Text style={styles.note}>
+        {t.threshold}: {formatPrice(data.thresholdOre, data.currency, locale)}
+      </Text>
       <Field
         label={t.amount.replace("{currency}", data.currency)}
         value={amount}
@@ -350,6 +357,7 @@ function PayoutForm({
           {error === "storage" ? d.bank.storage : t[error]}
         </Message>
       ) : null}
+      <Text style={styles.note}>{t.notice}</Text>
       <Button
         label={t.submit}
         disabled={!enabled || !canRequest}

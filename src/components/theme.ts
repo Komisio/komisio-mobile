@@ -2,8 +2,12 @@ import { StyleSheet } from "react-native";
 
 // Shared with the portal's forest/paper identity; system type follows device settings.
 export const colors = {
-  brand: "#234e40",
-  accent: "#eaf1e7",
+  brand: "#143e34",
+  onBrand: "#ffffff",
+  onBrandMuted: "#dbe8dc",
+  brandDecoration: "#285044",
+  accent: "#dcf0a4",
+  softAccent: "#eaf1e7",
   text: "#203d35",
   muted: "#5b6d62",
   line: "#e3e9e2",
@@ -14,6 +18,7 @@ export const colors = {
   dangerSurface: "#fff0ed",
   warning: "#745018",
   warningSurface: "#fbf1dc",
+  neutralSurface: "#eef0ed",
 };
 
 export const uiStyles = StyleSheet.create({
@@ -21,13 +26,13 @@ export const uiStyles = StyleSheet.create({
     width: "100%",
     maxWidth: 680,
     alignSelf: "center",
-    padding: 20,
-    gap: 20,
+    padding: 16,
+    gap: 16,
   },
   title: {
-    fontSize: 30,
-    lineHeight: 38,
-    fontWeight: "600",
+    fontSize: 26,
+    lineHeight: 34,
+    fontWeight: "700",
     color: colors.text,
   },
   heading: {
@@ -58,18 +63,33 @@ export const uiStyles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
     color: colors.brand,
   },
+  itemName: {
+    fontSize: 17,
+    lineHeight: 23,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  itemPrice: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: "600",
+    fontVariant: ["tabular-nums"],
+    color: colors.brand,
+  },
   surface: {
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
+    borderCurve: "continuous",
     borderWidth: 1,
     borderColor: colors.line,
   },
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
+    borderCurve: "continuous",
     borderWidth: 1,
     borderColor: colors.line,
     padding: 16,
-    gap: 16,
+    gap: 12,
   },
 });

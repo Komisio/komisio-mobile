@@ -7,7 +7,7 @@ export default function StoreTab() {
   const { d } = useI18n();
   const { store, session } = useSession();
   return (
-    <SellerGate title={d.tabs.store}>
+    <SellerGate bottomSafeArea={false} title={d.tabs.store}>
       {store && session && (
         <StoreCatalogue
           key={`${session.user.id}:${store.id}`}

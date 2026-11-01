@@ -1,3 +1,4 @@
+import { formattingLocale } from "./locale.ts";
 // Reviewed read contract: Komisio/komisio#715. No seller or financial history.
 export type Photo = {
   id: string;
@@ -10,6 +11,7 @@ export type CatalogueItem = {
   category: string | null;
   priceOre: number;
   photo: Photo | null;
+  facts?: { slug: FactKey; value: string }[];
 };
 export type ReadPage<T> = {
   currency: string;
@@ -120,6 +122,8 @@ export function parsePage(value: unknown, tenant: string): CataloguePage {
       category: optionalText(i.category),
       priceOre: integer(i.priceOre),
       photo: i.photo === null ? null : photo(i.photo, tenant),
+      // Older hosted catalogues have not yet added the safe detail facts.
+      facts: i.facts === undefined ? [] : parseFacts(i.facts),
     };
   });
   if (items.length > 30) invalid();
@@ -138,11 +142,7 @@ export function parseDetail(
 ): CatalogueDetail {
   const p = object(value);
   if (id(p.id) !== itemId) invalid();
-  const facts = array(p.facts).map((value) => {
-    const f = object(value);
-    if (!factKeys.includes(f.slug as FactKey)) invalid();
-    return { slug: f.slug as FactKey, value: text(f.value) };
-  });
+  const facts = parseFacts(p.facts);
   const photos = array(p.photos).map((p) => photo(p, tenant));
   if (photos.length > 20 || facts.length > factKeys.length) invalid();
   return {
@@ -155,8 +155,50 @@ export function parseDetail(
   };
 }
 
+function parseFacts(value: unknown): { slug: FactKey; value: string }[] {
+  const rows = array(value);
+  // Bound the wire response independently of the keys this installed app knows.
+  if (rows.length > 32) invalid();
+  const seen = new Set<string>();
+  const facts = rows.flatMap((value) => {
+    const f = object(value);
+    const slug = text(f.slug);
+    if (!slug || slug.length > 64 || seen.has(slug)) invalid();
+    seen.add(slug);
+    // Future fields must neither break older binaries nor leak unrecognized data.
+    if (!factKeys.includes(slug as FactKey)) return [];
+    return [{ slug: slug as FactKey, value: text(f.value).trim() }];
+  });
+  return facts.filter((f) => f.value.length > 0);
+}
+
+/** A small, stable summary of recorded facts; never infer attributes from titles. */
+export function catalogueSummary(item: CatalogueItem) {
+  const facts = [...(item.facts ?? [])];
+  if (item.category?.trim() && !facts.some((f) => f.slug === "category"))
+    facts.push({ slug: "category", value: item.category.trim() });
+  const priority: FactKey[] = [
+    "brand",
+    "size",
+    "color",
+    "material",
+    "category",
+    "condition",
+  ];
+  const seen = new Set<string>();
+  return priority
+    .flatMap((slug) => {
+      const fact = facts.find((f) => f.slug === slug);
+      const normalized = fact?.value.trim().toLocaleLowerCase();
+      if (!fact || !normalized || seen.has(normalized)) return [];
+      seen.add(normalized);
+      return [fact];
+    })
+    .slice(0, 3);
+}
+
 export function formatPrice(ore: number, code: string, locale: string): string {
-  return new Intl.NumberFormat(locale === "sv" ? "sv-SE" : "en-GB", {
+  return new Intl.NumberFormat(formattingLocale(locale), {
     style: "currency",
     currency: code,
   }).format(ore / 100);

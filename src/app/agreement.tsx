@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
@@ -34,7 +34,7 @@ export default function AgreementScreen() {
   const { account, session, store } = useSession();
   const { d } = useI18n();
   return (
-    <SellerGate title={d.agreement.title}>
+    <SellerGate topSafeArea={false} title={d.agreement.title}>
       {account &&
       account !== "failed" &&
       session &&
@@ -112,19 +112,14 @@ function AgreementRead({
   const versionLabel = (version: number) =>
     t.version.replace("{version}", String(version));
   return (
-    <Screen title={t.title}>
-      <Button
-        label={t.back}
-        variant="secondary"
-        onPress={() =>
-          router.canGoBack() ? router.back() : router.replace("/(tabs)/profile")
-        }
-      />
-      <Button
-        label={t.current}
-        variant="secondary"
-        onPress={() => setSelection({ version: null, text: null, page: 0 })}
-      />
+    <Screen topSafeArea={false} title={t.title}>
+      {selection.version || selection.text || selection.page > 0 ? (
+        <Button
+          label={t.current}
+          variant="secondary"
+          onPress={() => setSelection({ version: null, text: null, page: 0 })}
+        />
+      ) : null}
       {!agreementEndpoint ? <Message>{a.unavailable}</Message> : null}
       {change.status === "idle" || change.status === "busy" ? (
         <Loading />
@@ -263,25 +258,29 @@ function AgreementRead({
               <Text style={styles.text}>
                 {t.language}: {agreementLanguages[agreement.language]}
               </Text>
-              <View style={styles.languages}>
-                {data.languages.map((row) => (
-                  <Choice
-                    key={row.id}
-                    label={agreementLanguages[row.language]}
-                    selected={
-                      row.id === (agreement.translationId ?? agreement.id)
-                    }
-                    onPress={() =>
-                      setSelection({
-                        ...selection,
-                        version: agreement.id,
-                        text: row.id,
-                      })
-                    }
-                  />
-                ))}
-              </View>
-              <Text style={styles.note}>{t.verbatim}</Text>
+              {data.languages.length > 1 ? (
+                <View style={styles.languages}>
+                  {data.languages.map((row) => (
+                    <Choice
+                      key={row.id}
+                      label={agreementLanguages[row.language]}
+                      selected={
+                        row.id === (agreement.translationId ?? agreement.id)
+                      }
+                      onPress={() =>
+                        setSelection({
+                          ...selection,
+                          version: agreement.id,
+                          text: row.id,
+                        })
+                      }
+                    />
+                  ))}
+                </View>
+              ) : null}
+              <Text style={styles.note}>
+                {data.languages.length > 1 ? t.verbatim : t.asPublished}
+              </Text>
               <View style={styles.card}>
                 <Text selectable style={styles.body}>
                   {agreement.body}

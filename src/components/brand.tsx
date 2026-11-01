@@ -23,26 +23,48 @@ const icons = {
   profile: require("../../assets/icons/profile.svg"),
 };
 
-export function TabIcon({
-  name,
-  color,
-  size,
-}: {
-  name: keyof typeof icons;
-  color: ColorValue;
-  size: number;
-}) {
+export function InfoIcon() {
   return (
     <Image
-      source={icons[name]}
-      tintColor={typeof color === "string" ? color : colors.brand}
-      style={{ width: size, height: size }}
+      source={require("../../assets/icons/info.svg")}
+      style={{ width: 24, height: 24 }}
       accessible={false}
     />
   );
 }
 
+export function TabIcon({
+  name,
+  color,
+  size,
+  focused = false,
+}: {
+  name: keyof typeof icons;
+  color: ColorValue;
+  size: number;
+  focused?: boolean;
+}) {
+  return (
+    <View style={[styles.tabIcon, focused && styles.tabIconSelected]}>
+      <Image
+        source={icons[name]}
+        tintColor={typeof color === "string" ? color : colors.brand}
+        style={{ width: size, height: size }}
+        accessible={false}
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  tabIcon: {
+    width: 44,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabIconSelected: { backgroundColor: colors.accent },
   brand: { flexDirection: "row", alignItems: "center", gap: 4 },
   wordmark: {
     fontSize: 22,

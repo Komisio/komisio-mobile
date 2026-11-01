@@ -5,9 +5,9 @@ platform for second-hand stores. Built with Expo and React Native.
 
 > Status: store picker, login with two-step verification, profile, and the
 > store catalogue with item detail (S10/S11), own items (S19/S20), and store information (S12).
-> The seller overview (S22) shows server balances, item counts and recent payouts.
+> The seller overview (S22) shows item counts, attention items and recent sales.
 > Profile links to agreements (S08) and bank details (S25). Money shows payout
-> requests/history (S23/S24/S53) and issued statements (S54). New writes require
+> requests/history (S23/S24/S53). New writes require
 > the platform's opt-in mobile API; these slices await review and interactive
 > verification (see `docs/screens.md`).
 
@@ -44,6 +44,27 @@ npm test           # unit tests (node:test)
 
 Routes live in `src/app/`; keep components, hooks and utilities outside it.
 See `AGENTS.md` for Expo conventions.
+
+## iOS distribution
+
+The restart reuses the existing Komisio App Store and EAS production identities.
+See [iOS release and TestFlight](docs/ios-release.md) for environment setup,
+build/submission commands, proposed store copy and the remaining release gates.
+This configuration alone does not make the app release-ready.
+
+## Continuous integration
+
+The **Mobile checks / Test and export** GitHub Actions job runs on pull requests
+to `main` and pushes to `main`. It installs the lockfile with `npm ci`, uses the
+Node version in `.nvmrc`, and runs TypeScript, uncached ESLint, unit tests and
+Expo JavaScript exports for web, iOS and Android. New PR commits cancel the
+superseded run. The job has a 20-minute limit and read-only repository access.
+
+Exports use build-only loopback configuration without credentials or a running
+backend. The workflow does not deploy, sign or distribute the app, and does not
+exercise hosted writes. Passing it does not verify native builds, phone rendering,
+SecureStore recovery or real authentication/API/Storage integration. Those still
+need explicit device and staging verification before distribution.
 
 ## Store catalogue (S10/S11)
 
@@ -85,6 +106,7 @@ parseable during rollout, but the server remains responsible for withholding
 original files. This client change grants no Storage permission or hosted release.
 Independent review, actual device/browser image rendering and the coordinated
 platform rollout remain required.
+
 ## My items (S19/S20)
 
 The My items tab uses `my_items_page` with the chosen store's seller ID from
@@ -162,8 +184,13 @@ review remain pending.
 ## Payout account (S25)
 
 Profile opens the selected seller's bank details through `seller_bank_details`.
-Holder, searchable ISO country, IBAN/local account and routing follow the seller
-portal contract, including IBAN country/checksum validation. There is no Swish.
+The form has three fields: account holder, clearing/routing number and account
+number. New saves use a local account and the selected store's published address
+country from `public_store_profile`. Missing or unavailable country blocks saving
+with retry; language and currency are never country defaults. Existing IBAN or
+foreign-country accounts remain visible, but their numbers are not prefilled as
+local account numbers. They remain saved until explicitly replaced. Pending
+commands retain their original country/type for exact replay. There is no Swish.
 Saving uses the expected bank version; a concurrent edit requires reloading and
 reviewing the latest details, never silently overwriting them.
 
@@ -229,39 +256,9 @@ This used synthetic local fixtures, Node transport and in-memory storage. Native
 network/storage recovery, browser interactions and independent Opus review remain
 required before release; JavaScript export does not verify those behaviors.
 
-## Issued statements (S54)
+## Statements (S54)
 
-Money and Profile link to the issued-statement archive. The list uses
-`my_seller_statements_page` from [platform PR #722](https://github.com/Komisio/komisio/pull/722)
-with 25-row pages and a complete total. Detail reads the exact selected document
-through `my_seller_statement`; a scoped list read supplies the store currency.
-There is no date-range report, issuance, editing or PDF export in this slice.
-The earlier statement screenshot informs the totals layout only; its arbitrary
-date-range controls are outside the approved v1 scope.
-
-Header totals, signed ledger lines, correction links and frozen contact details
-are displayed without recomputation or substitution from current profiles.
-Business invoices retain their recorded supplier/buyer identities, document
-language marker, currency and stored net/VAT/gross line facts. Invoice totals group
-the recorded integer amounts by stored VAT rate as in the portal; VAT is never
-recalculated from a rate or current policy. App labels follow
-the platform's Swedish/English terminology; stored text remains verbatim. The
-interactive view does not claim to reproduce the portal's downloadable legal PDF.
-
-Ledger and invoice lines are separately paged at 25 rows in the client over the
-immutable exact read. Documents over 5,000 rows in either section fail explicitly
-and direct the seller to the portal; the app never silently truncates a statement.
-The RPC still downloads the complete document before this validation. Financial
-documents are not persisted in an offline cache. Blur/account changes discard
-late reads, and missing, denied, oversized and connection failures remain distinct.
-
-An actual local RPC/parser smoke verified a signed private correction and a
-business invoice correction after the current seller name/language changed:
-original identity/language and exact negative net/VAT/gross facts were preserved.
-Synthetic engine fixtures were fully rolled back. Unit tests also cover date
-boundaries across Stockholm daylight-saving changes, exact identity, correction
-semantics, line order and resource bounds. Interactive large-text/line navigation,
-native rendering and independent Opus review remain required before release.
+Removed from the mobile app by owner decision. Payout history remains under Money.
 
 ## Store information (S12)
 
@@ -287,7 +284,22 @@ owns headings, fields, buttons, filter chips, item rows and text-labelled status
 badges. System fonts respect device text scaling; there is no downloaded font.
 The five labelled tabs use one local SVG icon family.
 
-Catalogue photos are optional. A row without a photo uses its full text width,
+The tab bar uses a continuous sage surface through the home-indicator area,
+with a compact white highlight behind the selected icon. Its height follows measured
+label wrapping and system text size; the bottom inset is reserved once by the
+navigator. Tab content omits its own bottom safe-area padding, while standalone
+screens retain it. Clean headings, rounded controls and navigation
+arrows complement the forest-green balance card under Money. Decorative elements
+carry no financial meaning and are hidden from accessibility navigation.
+
+Signed-in detail screens use the platform stack header for back navigation,
+with an icon-only back button on iOS. The content retains its large wrapping
+heading and does not add a second top safe area. Direct links without stack
+history show an accessible back arrow to the relevant tab. Tab roots and authentication screens keep their existing headers and
+safe-area handling. Native swipe-back and VoiceOver behavior require device
+verification; compiled navigation tests verify options and fallback routing only.
+
+Catalogue photos are optional. A catalogue row without a photo uses a branded placeholder,
 and a detail without photos has no gallery. Mixed catalogues keep one stable
 list layout during search and paging. Existing images retain loading/error
 handling and detail retry. My items has no image read contract. Search and

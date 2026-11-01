@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   placeholder: {
     width: "100%",
     aspectRatio: 1,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.neutralSurface,
     alignItems: "center",
     justifyContent: "center",
     gap: 12,

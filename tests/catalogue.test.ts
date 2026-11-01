@@ -18,6 +18,7 @@ const row = {
   category: "Coats",
   priceOre: 12550,
   photo: null,
+  facts: [],
 };
 const page = (offset = 0): CataloguePage => ({
   currency: "SEK",
@@ -306,12 +307,13 @@ test("read parsers reject malformed amounts, foreign photo paths and unexpected 
   };
   assert.equal(parseDetail(detail, tenant, item).photos.length, 1);
   assert.throws(() => parseDetail(detail, tenant, image));
-  assert.throws(() =>
+  assert.deepEqual(
     parseDetail(
       { ...detail, facts: [{ slug: "seller", value: "private" }] },
       tenant,
       item,
-    ),
+    ).facts,
+    [],
   );
 });
 
