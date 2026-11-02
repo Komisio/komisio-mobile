@@ -21,8 +21,11 @@ import {
 } from "./appstore-capture-flow.mjs";
 
 const mode = process.env.CAPTURE_MODE;
+const target = process.env.CAPTURE_DEVICE ?? "ipad";
 const buildId = process.env.CAPTURE_BUILD_ID;
 function preflight() {
+  if (!["ipad", "iphone"].includes(target))
+    throw new Error("Choose ipad or iphone capture device.");
   if (!["probe", "capture"].includes(mode))
     throw new Error("Choose probe or capture mode.");
   if (
@@ -116,6 +119,7 @@ try {
   const { type, runtime } = selectCaptureSimulator(
     listing,
     plist("MinimumOSVersion"),
+    target,
   );
   console.log(`Selected ${type.identifier} with ${runtime.identifier}.`);
   console.log(
@@ -233,6 +237,7 @@ try {
   }).filter((file) => file.isFile());
   const manifest = {
     buildId,
+    target,
     appVersion,
     mode,
     device: type.name,
@@ -244,7 +249,7 @@ try {
     if (matches.length !== 1)
       throw new Error(`Expected exactly one ${filename}.`);
     const source = join(matches[0].parentPath, filename);
-    const dimensions = screenshotSize(readFileSync(source));
+    const dimensions = screenshotSize(readFileSync(source), target);
     copyFileSync(source, join(output, filename));
     manifest.captures.push({ filename, ...dimensions });
   }

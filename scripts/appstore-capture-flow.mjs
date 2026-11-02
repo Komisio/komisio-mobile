@@ -3,9 +3,17 @@ export const appId = "com.inority.komisio";
 export const screens = ["overview", "my-items", "money", "store", "profile"];
 export const locales = ["sv-SE", "en-GB"];
 
-export function selectCaptureSimulator(listing, minimumVersion) {
+export function selectCaptureSimulator(
+  listing,
+  minimumVersion,
+  target = "ipad",
+) {
+  if (!["ipad", "iphone"].includes(target))
+    throw new Error("Unsupported capture device");
   const types = listing.devicetypes.filter((d) =>
-    /^iPad Pro 13-inch/.test(d.name),
+    target === "ipad"
+      ? /^iPad Pro 13-inch/.test(d.name)
+      : d.name === "iPhone 16 Pro",
   );
   const runtimes = listing.runtimes
     .filter(
@@ -29,7 +37,7 @@ export function selectCaptureSimulator(listing, minimumVersion) {
     if (type) return { type, runtime };
   }
   throw new Error(
-    "No installed runtime supports a 13-inch iPad Pro and the app's minimum OS version.",
+    "No installed runtime supports the requested capture device and the app's minimum OS version.",
   );
 }
 
@@ -102,7 +110,9 @@ export function captureFlow(locale) {
   return `appId: ${appId}\n---\n${JSON.stringify(commands, null, 2)}\n`;
 }
 
-export function screenshotSize(bytes) {
+export function screenshotSize(bytes, target = "ipad") {
+  if (!["ipad", "iphone"].includes(target))
+    throw new Error("Unsupported capture device");
   if (
     bytes.length < 24 ||
     !bytes
@@ -114,12 +124,19 @@ export function screenshotSize(bytes) {
   }
   const width = bytes.readUInt32BE(16),
     height = bytes.readUInt32BE(20);
-  if (!(
-    (width === 2064 && height === 2752) ||
-    (width === 2048 && height === 2732)
-  )) {
+  const allowed =
+    target === "ipad"
+      ? [
+          [2064, 2752],
+          [2048, 2732],
+        ]
+      : [
+          [1206, 2622],
+          [1179, 2556],
+        ];
+  if (!allowed.some(([w, h]) => width === w && height === h)) {
     throw new Error(
-      `Unexpected iPad screenshot dimensions: ${width}x${height}`,
+      `Unexpected ${target} screenshot dimensions: ${width}x${height}`,
     );
   }
   return { width, height };

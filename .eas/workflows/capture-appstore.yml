@@ -11,14 +11,20 @@ on:
         options: [probe, capture]
         default: probe
         description: Probe verifies the simulator without login; capture requires demo credentials
+      device:
+        type: choice
+        options: [ipad, iphone]
+        default: ipad
+        description: Native 13-inch iPad or medium Dynamic Island iPhone screenshots
 jobs:
   screenshots:
-    name: Native iPad captures
+    name: Native App Store captures
     runs_on: macos-medium
     image: macos-tahoe-26.6-xcode-27.1
     environment: preview
     env:
       CAPTURE_MODE: ${{ inputs.mode }}
+      CAPTURE_DEVICE: ${{ inputs.device }}
       CAPTURE_BUILD_ID: ${{ inputs.build_id }}
     steps:
       - uses: eas/checkout

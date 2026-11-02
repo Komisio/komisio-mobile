@@ -156,10 +156,17 @@ output can contain expanded credentials, so they are never uploaded or printed.
 Only the ten explicitly named PNGs and a build/device/dimensions manifest are
 uploaded, after every flow succeeds. A fresh output directory is required.
 
+To replace an iPhone capture from the same app build, add `-F device=iphone`
+to the capture command. This selects an iPhone 16 Pro and checks medium
+Dynamic Island screenshot dimensions. The default `device=ipad` uses a
+13-inch iPad Pro. The runner matches the device to a compatible installed
+runtime instead of assuming the newest runtime supports every device.
+
 Download the `native-appstore-screenshots` artifact and visually inspect every
 image: correct language, store/currency, loaded images and amounts, no errors,
 truncation or title/price overlap. The dimension check accepts only native
-portrait 2064×2752 or 2048×2732 captures. It does not prove the visual content is
+portrait 2064×2752 or 2048×2732 iPad captures, or 1206×2622 / 1179×2556
+iPhone captures when explicitly selected. It does not prove the visual content is
 correct. Upload reviewed captures to their matching App Store locales manually;
 this workflow never submits or releases the app. Remove the capture credentials
 from EAS when no longer needed through the account's normal secret management.

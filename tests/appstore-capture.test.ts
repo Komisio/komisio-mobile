@@ -11,7 +11,7 @@ const { captureFlow, screenshotSize, screenshotName, selectCaptureSimulator } =
 test("simulator selection uses runtime compatibility, not advertised device names", () => {
   const m5 = { name: "iPad Pro 13-inch (M5)", identifier: "ipad-m5" };
   const m4 = { name: "iPad Pro 13-inch (M4)", identifier: "ipad-m4" };
-  const phone = { name: "iPhone", identifier: "iphone" };
+  const phone = { name: "iPhone 16 Pro", identifier: "iphone" };
   const phoneRuntime = {
     name: "iOS 27.1",
     version: "27.1",
@@ -30,6 +30,11 @@ test("simulator selection uses runtime compatibility, not advertised device name
     devicetypes: [m5, m4, phone],
     runtimes: [phoneRuntime, tabletRuntime],
   };
+  assert.equal(
+    selectCaptureSimulator(listing, "16.0", "iphone").type.identifier,
+    phone.identifier,
+  );
+  assert.throws(() => selectCaptureSimulator(listing, "16.0", "unknown"));
   assert.equal(
     selectCaptureSimulator(listing, "16.0").type.identifier,
     m4.identifier,
@@ -90,6 +95,12 @@ function png(width: number, height: number) {
 }
 
 test("capture dimensions reject the smaller iPad and phone formats", () => {
+  assert.deepEqual(screenshotSize(png(1206, 2622), "iphone"), {
+    width: 1206,
+    height: 2622,
+  });
+  assert.throws(() => screenshotSize(png(2064, 2752), "iphone"));
+  assert.throws(() => screenshotSize(png(2064, 2752), "unknown"));
   assert.deepEqual(screenshotSize(png(2064, 2752)), {
     width: 2064,
     height: 2752,
