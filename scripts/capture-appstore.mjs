@@ -55,10 +55,15 @@ function run(command, args, label, options = {}) {
     ...options,
   });
   // Maestro output and diagnostics may expand secrets. Never print them.
-  if (result.status !== 0 || result.error)
+  if (result.status !== 0 || result.error) {
+    // This command runs before login and only contains a new device name and
+    // public simulator identifiers. Its error explains worker incompatibility.
+    if (command === "xcrun" && args[0] === "simctl" && args[1] === "create")
+      console.error(result.stderr?.slice(0, 2000));
     throw new Error(
       `${label} failed. Raw output withheld to protect demo credentials.`,
     );
+  }
   return result.stdout.trim();
 }
 const sim = (args, label) => run("xcrun", ["simctl", ...args], label);
@@ -106,6 +111,13 @@ try {
     throw new Error(
       "This worker does not have a 13-inch iPad Pro and iOS 27 runtime.",
     );
+  console.log(`Selected ${type.identifier} with ${runtime.identifier}.`);
+  console.log(
+    `Installed iPad types: ${listing.devicetypes
+      .filter((d) => /^iPad Pro 13-inch/.test(d.name))
+      .map((d) => d.identifier)
+      .join(", ")}.`,
+  );
   device = sim(
     [
       "create",
