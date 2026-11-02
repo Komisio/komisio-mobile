@@ -62,6 +62,7 @@ function screen(name: "login" | "mfa") {
         },
       }),
     },
+    "@/components/privacy-link": { PrivacyLink: "PrivacyLink" },
     "@/lib/session": {
       useSession: () => ({
         store: { name: "Synthetic store" },
