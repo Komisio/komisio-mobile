@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
+import { PrivacyLink } from "./privacy-link";
 import {
   Button,
   Card,
@@ -82,6 +83,7 @@ export function ProfileScreen() {
           onPress={() => router.push("/agreement")}
         />
       </View>
+      <PrivacyLink />
     </Screen>
   );
 }

@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
-import { openBrowserAsync } from "expo-web-browser";
+import { ExternalPageButton } from "@/components/external-page-button";
 import { supabase } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { Button, Card, Field, Message, Screen } from "@/components/ui";
+import { PrivacyLink } from "@/components/privacy-link";
 
 const web = process.env.EXPO_PUBLIC_KOMISIO_WEB_URL;
 
@@ -78,12 +79,10 @@ export default function Login() {
       </Card>
       <Message>{d.login.firstTime}</Message>
       {web ? (
-        <Button
+        <ExternalPageButton
           label={d.login.forgot}
           variant="secondary"
-          onPress={() =>
-            void openBrowserAsync(new URL("/reset-password", web).href)
-          }
+          url={new URL("/reset-password", web).href}
         />
       ) : null}
       <Button
@@ -91,6 +90,7 @@ export default function Login() {
         variant="secondary"
         onPress={() => chooseStore(null)}
       />
+      <PrivacyLink />
     </Screen>
   );
 }

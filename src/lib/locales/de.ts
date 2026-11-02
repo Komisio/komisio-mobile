@@ -1,6 +1,7 @@
 import type { Dictionary } from "../dictionary-base.ts";
 
 export default {
+  externalPage: { privacy: "Datenschutzerklärung (Englisch)", failed: "Die Seite konnte nicht geöffnet werden. Bitte erneut versuchen." },
   storeInfo: {
     title: "Geschäftsinformationen",
     back: "Zurück zum Geschäft",

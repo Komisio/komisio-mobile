@@ -1,6 +1,7 @@
 import type { Dictionary } from "../dictionary-base.ts";
 
 export default {
+  externalPage: { privacy: "Tietosuojaseloste (englanniksi)", failed: "Sivua ei voitu avata. Yritä uudelleen." },
   storeInfo: {
     title: "Myymälän tiedot",
     back: "Takaisin myymälään",

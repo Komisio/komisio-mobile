@@ -44,7 +44,7 @@ function screen(name: "login" | "mfa") {
         Array(size).fill(Symbol.for("react.memo_cache_sentinel")),
     },
     "react/jsx-runtime": require("react/jsx-runtime"),
-    "expo-web-browser": {},
+    "@/components/external-page-button": { ExternalPageButton: "ExternalPageButton" },
     "@/components/ui": Object.fromEntries(
       ["Button", "Card", "Field", "Message", "Screen"].map((key) => [key, key]),
     ),
@@ -55,6 +55,7 @@ function screen(name: "login" | "mfa") {
             email: "email",
             password: "password",
             submit: "login",
+            forgot: "Forgot password",
             offline: "offline",
             failed: "failed",
           },
@@ -62,6 +63,7 @@ function screen(name: "login" | "mfa") {
         },
       }),
     },
+    "@/components/privacy-link": { PrivacyLink: "PrivacyLink" },
     "@/lib/session": {
       useSession: () => ({
         store: { name: "Synthetic store" },
@@ -108,7 +110,8 @@ function screen(name: "login" | "mfa") {
   const exports: { default?: () => unknown } = {};
   runInNewContext(compiled, {
     exports,
-    process: { env: {} },
+    process: { env: { EXPO_PUBLIC_KOMISIO_WEB_URL: "https://portal.example.test" } },
+    URL,
     require: (id: string) => {
       assert.ok(Object.hasOwn(modules, id), id);
       return modules[id];
@@ -126,6 +129,12 @@ function screen(name: "login" | "mfa") {
       }
     };
     visit(exports.default!());
+    if (name === "login") {
+      assert.equal(elements.filter((el) => el.type === "PrivacyLink").length, 1);
+      const reset = elements.find((el) => el.type === "ExternalPageButton");
+      assert.equal(reset?.props.label, "Forgot password");
+      assert.equal(reset?.props.url, "https://portal.example.test/reset-password");
+    }
     const find = (type: string, label: string) => {
       const match = elements.find(
         (el) => el.type === type && el.props.label === label,

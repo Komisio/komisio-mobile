@@ -56,6 +56,7 @@ test("profile exposes one store action, language detail, financial links and log
       StyleSheet: { create: (x: unknown) => x },
     },
     "expo-image": { Image: "Image" },
+    "./privacy-link": { PrivacyLink: "PrivacyLink" },
     "expo-router": { router: { push: (path: string) => actions.push(path) } },
     "@/lib/i18n": {
       useI18n: () => ({
@@ -93,6 +94,7 @@ test("profile exposes one store action, language detail, financial links and log
     },
   });
   const tree = nodes(screen.ProfileScreen());
+  assert.equal(tree.filter((n) => n.type === "PrivacyLink").length, 1);
   const settings = tree.filter((n) => n.type === "ItemCard");
   assert.deepEqual(
     settings.map((n) => n.props.label),
