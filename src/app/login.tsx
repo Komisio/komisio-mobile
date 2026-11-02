@@ -50,6 +50,7 @@ export default function Login() {
       <Card>
         <Field
           label={d.login.email}
+          testID="login-email"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -59,6 +60,7 @@ export default function Login() {
         />
         <Field
           label={d.login.password}
+          testID="login-password"
           value={password}
           onChangeText={setPassword}
           autoComplete="current-password"

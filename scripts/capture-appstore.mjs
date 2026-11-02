@@ -1,0 +1,251 @@
+import { spawnSync } from "node:child_process";
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  copyFileSync,
+  existsSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import {
+  appId,
+  captureFlow,
+  locales,
+  screens,
+  screenshotName,
+  screenshotSize,
+} from "./appstore-capture-flow.mjs";
+
+const mode = process.env.CAPTURE_MODE;
+const buildId = process.env.CAPTURE_BUILD_ID;
+function preflight() {
+  if (!["probe", "capture"].includes(mode))
+    throw new Error("Choose probe or capture mode.");
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      buildId ?? "",
+    )
+  ) {
+    throw new Error("An exact simulator build ID is required.");
+  }
+  if (
+    mode === "capture" &&
+    (!process.env.MAESTRO_SCREENSHOT_EMAIL ||
+      !process.env.MAESTRO_SCREENSHOT_PASSWORD)
+  ) {
+    throw new Error(
+      "Set MAESTRO_SCREENSHOT_EMAIL and MAESTRO_SCREENSHOT_PASSWORD as secret EAS preview variables. Never pass credentials as workflow inputs.",
+    );
+  }
+}
+
+let device;
+const deadline = Date.now() + 15 * 60 * 1000;
+function run(command, args, label, options = {}) {
+  const remaining = deadline - Date.now();
+  if (remaining <= 0)
+    throw new Error("Capture exceeded its 15 minute execution limit.");
+  const result = spawnSync(command, args, {
+    encoding: "utf8",
+    timeout: Math.min(remaining, 5 * 60 * 1000),
+    maxBuffer: 20 * 1024 * 1024,
+    ...options,
+  });
+  // Maestro output and diagnostics may expand secrets. Never print them.
+  if (result.status !== 0 || result.error)
+    throw new Error(
+      `${label} failed. Raw output withheld to protect demo credentials.`,
+    );
+  return result.stdout.trim();
+}
+const sim = (args, label) => run("xcrun", ["simctl", ...args], label);
+
+try {
+  preflight();
+  if (process.argv.includes("--preflight")) {
+    console.log(`Capture preflight passed (${mode}).`);
+    process.exit(0);
+  }
+  if (process.platform !== "darwin")
+    throw new Error("Run this capture on an EAS macOS worker.");
+  const app = process.env.SIMULATOR_APP_PATH;
+  if (!app?.endsWith(".app") || !existsSync(join(app, "Info.plist")))
+    throw new Error("A downloaded simulator .app is required.");
+  const plist = (key) =>
+    run(
+      "/usr/libexec/PlistBuddy",
+      ["-c", `Print :${key}`, join(app, "Info.plist")],
+      "Read app identity",
+    );
+  if (
+    plist("CFBundleIdentifier") !== appId ||
+    plist("DTPlatformName") !== "iphonesimulator"
+  ) {
+    throw new Error("The archive must be the Komisio iOS simulator app.");
+  }
+  const appVersion = plist("CFBundleShortVersionString");
+  if (appVersion !== "2.0.0")
+    throw new Error("This capture is scoped to Komisio 2.0.0.");
+  const listing = JSON.parse(sim(["list", "--json"], "List simulator devices"));
+  const type = listing.devicetypes
+    .filter((d) => /^iPad Pro 13-inch/.test(d.name))
+    .sort((a, b) => b.name.localeCompare(a.name, "en", { numeric: true }))[0];
+  const runtime = listing.runtimes
+    .filter((r) => r.isAvailable && /^iOS 27\./.test(r.name))
+    .sort((a, b) =>
+      b.version.localeCompare(a.version, "en", { numeric: true }),
+    )[0];
+  if (!type || !runtime)
+    throw new Error(
+      "This worker does not have a 13-inch iPad Pro and iOS 27 runtime.",
+    );
+  device = sim(
+    [
+      "create",
+      "Komisio App Store capture",
+      type.identifier,
+      runtime.identifier,
+    ],
+    "Create capture-only simulator",
+  );
+  if (!/^[0-9A-F-]{36}$/i.test(device))
+    throw new Error("Unexpected simulator identifier.");
+  console.log(`Capturing on ${type.name}, ${runtime.name}; mode=${mode}.`);
+  sim(["boot", device], "Boot simulator");
+  sim(["bootstatus", device, "-b"], "Wait for simulator boot");
+  sim(
+    [
+      "spawn",
+      device,
+      "defaults",
+      "write",
+      "NSGlobalDomain",
+      "AppleLanguages",
+      "-array",
+      "en-GB",
+    ],
+    "Set initial device language",
+  );
+  sim(
+    [
+      "spawn",
+      device,
+      "defaults",
+      "write",
+      "NSGlobalDomain",
+      "AppleLocale",
+      "en_GB",
+    ],
+    "Set initial device region",
+  );
+  sim(
+    [
+      "status_bar",
+      device,
+      "override",
+      "--time",
+      "9:41",
+      "--batteryState",
+      "charged",
+      "--batteryLevel",
+      "100",
+    ],
+    "Set capture status bar",
+  );
+  sim(["install", device, app], "Install simulator app");
+  const temporary = mkdtempSync(join(tmpdir(), "komisio-capture-"));
+  const output = resolve("artifacts/appstore");
+  // Refuse to mix outputs from two builds or an earlier failed run.
+  if (existsSync(output))
+    throw new Error("Capture output directory must be fresh.");
+  mkdirSync(output, { recursive: true });
+  const expected =
+    mode === "probe"
+      ? ["probe-store-picker.png"]
+      : locales.flatMap((locale) =>
+          screens.map((_, index) => `${screenshotName(locale, index)}.png`),
+        );
+  const maestro = existsSync(
+    join(process.env.HOME ?? "", ".maestro/bin/maestro"),
+  )
+    ? join(process.env.HOME, ".maestro/bin/maestro")
+    : "maestro";
+  const flows =
+    mode === "probe"
+      ? [
+          [
+            "probe",
+            `appId: ${appId}\n---\n- launchApp:\n    clearState: true\n    clearKeychain: true\n- extendedWaitUntil:\n    visible: "(Choose store|Välj butik)"\n    timeout: 60000\n- takeScreenshot: probe-store-picker\n`,
+          ],
+        ]
+      : locales.map((locale) => [locale, captureFlow(locale)]);
+  for (const [name, flow] of flows) {
+    const path = join(temporary, `${name}.yaml`);
+    writeFileSync(path, flow);
+    console.log(`Running ${name} capture flow.`);
+    run(
+      maestro,
+      [
+        "--device",
+        device,
+        "test",
+        "--debug-output",
+        join(temporary, "diagnostics", name),
+        "--test-output-dir",
+        join(temporary, "screens", name),
+        path,
+      ],
+      `${name} capture`,
+      {
+        env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: "1" },
+      },
+    );
+  }
+  // Explicit allowlist: no debug screenshots, command reports, logs or sessions.
+  const files = readdirSync(join(temporary, "screens"), {
+    recursive: true,
+    withFileTypes: true,
+  }).filter((file) => file.isFile());
+  const manifest = {
+    buildId,
+    appVersion,
+    mode,
+    device: type.name,
+    runtime: runtime.name,
+    captures: [],
+  };
+  for (const filename of expected) {
+    const matches = files.filter((file) => file.name === filename);
+    if (matches.length !== 1)
+      throw new Error(`Expected exactly one ${filename}.`);
+    const source = join(matches[0].parentPath, filename);
+    const dimensions = screenshotSize(readFileSync(source));
+    copyFileSync(source, join(output, filename));
+    manifest.captures.push({ filename, ...dimensions });
+  }
+  writeFileSync(
+    join(output, "manifest.json"),
+    JSON.stringify(manifest, null, 2),
+  );
+  console.log(
+    `Verified ${expected.length} native PNGs. Visual review is still required before App Store upload.`,
+  );
+} catch (error) {
+  console.error(error instanceof Error ? error.message : "Capture failed.");
+  process.exitCode = 1;
+} finally {
+  if (device && /^[0-9A-F-]{36}$/i.test(device)) {
+    // Only the simulator created by this run is touched, on the ephemeral VM.
+    spawnSync("xcrun", ["simctl", "shutdown", device], {
+      stdio: "ignore",
+      timeout: 20000,
+    });
+    spawnSync("xcrun", ["simctl", "delete", device], {
+      stdio: "ignore",
+      timeout: 20000,
+    });
+  }
+}

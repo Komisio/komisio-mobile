@@ -51,3 +51,4 @@ credentials.json
 *.aab
 *.apk
 .git/
+artifacts/
