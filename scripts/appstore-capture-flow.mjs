@@ -182,9 +182,9 @@ export function captureFlow(locale) {
       },
     },
     // iPad's password-saving modal is inaccessible to Maestro (#3277).
-    // Relaunch only after the signed-in UI appears, preserving the session.
+    // Relaunch after the login form disappears, preserving the session.
     // This dismisses transient OS UI without saving credentials or changing auth.
-    wait("(Not Now|Översikt|Overview)(,.*)?"),
+    { extendedWaitUntil: { notVisible: { id: "login-email" }, timeout: 60000 } },
     { launchApp: { clearState: false, clearKeychain: false, stopApp: true } },
     wait({ id: "tab-overview" }),
   ];
