@@ -239,6 +239,34 @@ try {
         },
       );
     } catch (error) {
+      // Inspect the actual post-failure screen, not the command report (which
+      // does not contain the current hierarchy). Keep raw output in memory.
+      const hierarchy = spawnSync(
+        maestro,
+        ["--device", device, "hierarchy", "--no-reinstall-driver"],
+        {
+          encoding: "utf8",
+          timeout: 60000,
+          maxBuffer: 5 * 1024 * 1024,
+          env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: "1" },
+        },
+      );
+      if (hierarchy.status === 0) {
+        const text = hierarchy.stdout ?? "";
+        console.log(`Current login errors: ${JSON.stringify(safeLoginFindings(text))}`);
+        console.log(`Current UI markers: ${JSON.stringify({
+          emailField: text.includes("login-email"),
+          passwordField: text.includes("login-password"),
+          overviewId: text.includes("tab-overview"),
+          profileId: text.includes("tab-profile"),
+          overviewLabel: text.includes("Översikt") || text.includes("Overview"),
+          profileLabel: text.includes("Profil") || text.includes("Profile"),
+          expectedEmailPresent: text.includes(process.env.MAESTRO_SCREENSHOT_EMAIL),
+          storePicker: text.includes("Choose store") || text.includes("Välj butik"),
+        })}`);
+      } else {
+        console.log("Post-failure UI inspection unavailable; raw output withheld.");
+      }
       const diagnostics = temporary;
       if (existsSync(diagnostics)) {
         for (const file of readdirSync(diagnostics, {
