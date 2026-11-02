@@ -181,10 +181,11 @@ export function captureFlow(locale) {
         below: { id: "login-password" },
       },
     },
-    // The fresh iOS simulator can offer to save the password after sign-in.
-    // Decline storage before looking for tabs behind the native modal.
+    // iPad's password-saving modal is inaccessible to Maestro (#3277).
+    // Relaunch only after the signed-in UI appears, preserving the session.
+    // This dismisses transient OS UI without saving credentials or changing auth.
     wait("(Not Now|Översikt|Overview)(,.*)?"),
-    { tapOn: { text: "Not Now", optional: true } },
+    { launchApp: { clearState: false, clearKeychain: false, stopApp: true } },
     wait({ id: "tab-overview" }),
   ];
   const tabs = ["overview", "items", "money", "store", "profile"];

@@ -117,8 +117,10 @@ test("capture flows only log in and navigate; passwords stay as runtime referenc
     const taps = commands.filter(
       (cmd: Record<string, unknown>) => "tapOn" in cmd,
     );
-    assert.equal(taps.length, 13);
-    assert.ok(taps.some((cmd: { tapOn: { text?: string } }) => cmd.tapOn.text === "Not Now"));
+    assert.equal(taps.length, 12);
+    assert.deepEqual(commands.filter((cmd: Record<string, unknown>) => "launchApp" in cmd)[1], {
+      launchApp: { clearState: false, clearKeychain: false, stopApp: true },
+    });
     assert.ok(
       !/payout|utbetalning|accept|godkänn|save|spara/i.test(
         JSON.stringify(taps),
