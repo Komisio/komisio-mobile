@@ -153,8 +153,12 @@ and visits Overview, My Items, Money, Store and Profile. It performs no financia
 writes. Maestro runs locally on that worker; no Maestro Cloud subscription or
 Expo Simulators partner access is needed. Its diagnostic reports and command
 output can contain expanded credentials, so they are never uploaded or printed.
-Only the ten explicitly named PNGs and a build/device/dimensions manifest are
-uploaded, after every flow succeeds. A fresh output directory is required.
+The marketing artifact contains only the ten explicitly named PNGs and a
+build/device/dimensions manifest, after every flow succeeds. A fresh output
+directory is required. A failed run may publish a separate `capture-diagnostic`
+image only after the credential fields have gone and no literal password is
+present in the native hierarchy. Its manifest says `marketingReady: false`;
+never upload that image to App Store Connect. Raw reports remain on the worker.
 
 To replace an iPhone capture from the same app build, add `-F device=iphone`
 to the capture command. This selects an iPhone 16 Pro and checks medium
