@@ -85,6 +85,11 @@ lime #DCF0A4, paper #F7F8F5 and the existing Komisio mark. Prioritize balances,
 item status and necessary actions; use sheets for filters and supporting detail.
 Keep economic rules and published agreement text unchanged.
 
+Owner decision, 2026-11-02 (S25): the three-field form accepts local accounts
+in the store's published country. IBAN changes go through the store. Existing
+IBAN/foreign accounts and pending requests are preserved; no new bank validation
+or automatic-transfer rules are introduced.
+
 ## Later
 
 | ID | Screen | Earlier route |

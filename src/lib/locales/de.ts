@@ -103,6 +103,8 @@ export default {
     pastEnd: "Auf dieser Seite gibt es keine Anträge.",
   },
   bank: {
+    localAccount: "Lokale Kontonummer",
+    ibanViaStore: "Gib eine lokale Kontonummer ein. Wende dich für IBAN an das Geschäft.",
     title: "Auszahlungskonto",
     discard: "Ausstehenden Antrag freigeben",
     discardWarning:

@@ -99,6 +99,8 @@ export default {
     pastEnd: "Tällä sivulla ei ole pyyntöjä.",
   },
   bank: {
+    localAccount: "Paikallinen tilinumero",
+    ibanViaStore: "Anna paikallinen tilinumero. Ota IBAN-asioissa yhteyttä myymälään.",
     title: "Tilitystili",
     discard: "Poista odottava paikallinen pyyntö",
     discardWarning:

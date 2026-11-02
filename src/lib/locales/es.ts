@@ -100,6 +100,8 @@ export default {
     pastEnd: "No hay solicitudes en esta página.",
   },
   bank: {
+    localAccount: "Número de cuenta local",
+    ibanViaStore: "Introduce un número de cuenta local. Para IBAN, contacta con la tienda.",
     title: "Cuenta de cobro",
     discard: "Liberar solicitud pendiente",
     discardWarning:

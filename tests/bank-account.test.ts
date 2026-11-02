@@ -26,6 +26,52 @@ const details = {
   account: "00012345",
   routing: "0123",
 };
+
+test("new local saves reject complete IBAN-shaped input regardless of checksum or store country", () => {
+  for (const account of [
+    "GB82WEST12345698765432",
+    "gb82 west 1234 5698 7654 32",
+    "GB00WEST12345698765432",
+    "SE4550000000058398257466",
+    "DE89370400440532013000",
+  ]) {
+    for (const country of ["SE", "GB", "US"]) {
+      assert.throws(
+        () => localBankDetails({ ...details, account }, country),
+        /IBAN_VIA_STORE/,
+      );
+    }
+  }
+  // Local formats remain opaque: leading zeroes, separators and alphabetic
+  // prefixes alone do not cause IBAN detection or imply bank verification.
+  for (const account of [
+    "00012345",
+    "1234-567890",
+    "12-1234-1234567-00",
+    "GB123456",
+    "ABC123456789012345",
+  ])
+    assert.equal(
+      localBankDetails({ ...details, account }, "NZ").account,
+      account,
+    );
+});
+
+test("local-form screening never changes historical local payloads or their replay parsing", () => {
+  const historical = { ...details, account: "GB00WEST12345698765432" };
+  const command = {
+    action: "saveBank",
+    tenantId: tenant,
+    sellerId: seller,
+    requestId,
+    expected: null,
+    details: historical,
+  };
+  assert.deepEqual(
+    parseBankCommand(command, tenant, seller).details,
+    historical,
+  );
+});
 test("local bank country comes only from the matching published store profile", () => {
   const profile = (country: unknown) => ({
     slug: "chosen",

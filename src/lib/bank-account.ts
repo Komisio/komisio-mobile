@@ -49,6 +49,13 @@ export function localBankDetails(
   fields: LocalBankFields,
   country: string,
 ): BankDetails {
+  // Only the new local-form submission is checked. Never reinterpret saved
+  // accounts or pending commands. Match the whole international structure,
+  // not a country prefix alone, and do not imply bank/account verification.
+  const compact = fields.account.replace(/\s/g, "").toUpperCase();
+  if (/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/.test(compact)) {
+    throw new Error("IBAN_VIA_STORE");
+  }
   return normalizeBankDetails({ ...fields, country, kind: "local" });
 }
 export type BankCommand = {

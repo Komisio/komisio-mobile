@@ -39,12 +39,21 @@ function harness(
     { status: "ready", data: null },
     { status: countryStatus, data: country },
   ];
+  let cursor = 0;
+  const values: unknown[] = [];
   const modules: Record<string, unknown> = {
     react: {
-      useState: (initial: unknown) => [
-        typeof initial === "function" ? initial() : initial,
-        () => {},
-      ],
+      useState: (initial: unknown) => {
+        const index = cursor++;
+        if (!(index in values))
+          values[index] = typeof initial === "function" ? initial() : initial;
+        return [
+          values[index],
+          (next: unknown) => {
+            values[index] = next;
+          },
+        ];
+      },
       useMemo: (fn: () => unknown) => fn(),
       useCallback: (fn: unknown) => fn,
       useSyncExternalStore: (_subscribe: unknown, get: () => unknown) => get(),
@@ -100,12 +109,20 @@ function harness(
   const exports: Record<string, (props: unknown) => unknown> = {};
   runInNewContext(compiled, {
     exports,
+    Error,
     require: (name: string) => {
       assert.ok(name in modules, name);
       return modules[name];
     },
   });
-  return { exports, retries: () => retries };
+  return {
+    exports,
+    retries: () => retries,
+    renderForm: (props: unknown) => {
+      cursor = 0;
+      return elements(exports.BankForm(props));
+    },
+  };
 }
 type Element = { type: unknown; props: Record<string, any> };
 function elements(node: any): Element[] {
@@ -139,7 +156,7 @@ test("compiled bank form exposes exactly the three local fields and saves store 
   );
   assert.deepEqual(
     tree.filter((e) => e.type === "Field").map((e) => e.props.label),
-    ["Kontohavare", "Clearingnummer (om det behövs)", "Kontonummer"],
+    ["Kontohavare", "Clearingnummer (om det behövs)", "Lokalt kontonummer"],
   );
   const text = tree
     .filter((e) => e.type === "Text")
@@ -157,6 +174,43 @@ test("compiled bank form exposes exactly the three local fields and saves store 
     .find((e) => e.type === "Button" && e.props.label === "Spara konto")!
     .props.onPress();
   assert.deepEqual(saved, current.details);
+});
+
+test("IBAN input shows the store instruction without saving, then local correction can save", () => {
+  const h = harness();
+  const saved: unknown[] = [];
+  const props = {
+    current: null,
+    country: "SE",
+    enabled: true,
+    onSave: (value: unknown) => saved.push(value),
+  };
+  const field = (label: string) =>
+    h
+      .renderForm(props)
+      .find((e) => e.type === "Field" && e.props.label === label)!.props;
+  field(bankCopy.sv.holder).onChangeText("Synthetic");
+  field(bankCopy.sv.localAccount).onChangeText("gb00 west 1234 5698 7654 32");
+  h.renderForm(props)
+    .find((e) => e.type === "Button")!
+    .props.onPress();
+  assert.equal(saved.length, 0);
+  assert.ok(
+    h
+      .renderForm(props)
+      .some(
+        (e) =>
+          e.type === "Message" &&
+          e.props.tone === "error" &&
+          e.props.children === bankCopy.sv.ibanViaStore,
+      ),
+  );
+  field(bankCopy.sv.localAccount).onChangeText("00012345");
+  assert.ok(!h.renderForm(props).some((e) => e.props.tone === "error"));
+  h.renderForm(props)
+    .find((e) => e.type === "Button")!
+    .props.onPress();
+  assert.equal(saved.length, 1);
 });
 
 test("compiled bank screen blocks editing until a valid store country is ready", () => {
