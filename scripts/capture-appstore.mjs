@@ -20,6 +20,7 @@ import {
   selectCaptureSimulator,
   safeCommandProgress,
   safeFailureCategory,
+  safeLoginFindings,
 } from "./appstore-capture-flow.mjs";
 
 const mode = process.env.CAPTURE_MODE;
@@ -246,6 +247,13 @@ try {
         })) {
           if (file.isFile() && /^commands.*\.json$/.test(file.name)) {
             try {
+              const reportText = readFileSync(
+                join(file.parentPath, file.name),
+                "utf8",
+              );
+              console.log(
+                `Visible login errors: ${JSON.stringify(safeLoginFindings(reportText))}`,
+              );
               console.log(
                 `Capture command status: ${JSON.stringify(safeCommandProgress(JSON.parse(readFileSync(join(file.parentPath, file.name), "utf8"))))}`,
               );

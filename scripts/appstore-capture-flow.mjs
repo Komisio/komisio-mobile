@@ -3,6 +3,30 @@ export const appId = "com.inority.komisio";
 export const screens = ["overview", "my-items", "money", "store", "profile"];
 export const locales = ["sv-SE", "en-GB"];
 
+export function safeLoginFindings(text) {
+  const messages = {
+    "wrong-credentials": [
+      "Fel e-post eller lösenord.",
+      "Wrong email or password.",
+    ],
+    "not-activated": [
+      "Kontot är inte aktiverat.",
+      "The account is not activated.",
+    ],
+    offline: ["Ingen anslutning. Försök igen.", "No connection. Try again."],
+    "mfa-required": ["Tvåstegsverifiering", "Two-step verification"],
+    "auth-bootstrap": [
+      "Inloggningen kunde inte läsas in.",
+      "Your sign-in could not be loaded.",
+    ],
+  };
+  return Object.entries(messages)
+    .filter(([, variants]) =>
+      variants.some((message) => text.includes(message)),
+    )
+    .map(([code]) => code);
+}
+
 export function safeFailureCategory(output) {
   if (
     /Failed to start.*driver|Unable to (?:connect to|launch|start).*driver|driver.*(?:unavailable|not ready)|DriverStartupException/i.test(
@@ -150,8 +174,13 @@ export function captureFlow(locale) {
         label: "Enter demo password",
       },
     },
-    // Keyboard submit uses the same guarded sign-in handler as the button.
-    { pressKey: "Enter" },
+    // Tap the actual submit control. iOS Password AutoFill can consume Enter.
+    {
+      tapOn: {
+        text: sv ? "Logga in" : "Log in",
+        below: { id: "login-password" },
+      },
+    },
     wait({ id: "tab-overview" }),
   ];
   const tabs = ["overview", "items", "money", "store", "profile"];

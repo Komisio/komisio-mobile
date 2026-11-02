@@ -10,11 +10,17 @@ const {
   selectCaptureSimulator,
   safeCommandProgress,
   safeFailureCategory,
+  safeLoginFindings,
 } = await import(
   new URL("../scripts/appstore-capture-flow.mjs", import.meta.url).href
 );
 
 test("capture progress never includes values or exception details", () => {
+  assert.deepEqual(
+    safeLoginFindings("private-password Fel e-post eller lösenord."),
+    ["wrong-credentials"],
+  );
+  assert.deepEqual(safeLoginFindings("private-password"), []);
   assert.equal(
     safeFailureCategory("Unable to connect to driver: private-password"),
     "driver-startup",
@@ -111,7 +117,7 @@ test("capture flows only log in and navigate; passwords stay as runtime referenc
     const taps = commands.filter(
       (cmd: Record<string, unknown>) => "tapOn" in cmd,
     );
-    assert.equal(taps.length, 11);
+    assert.equal(taps.length, 12);
     assert.ok(
       !/payout|utbetalning|accept|godkänn|save|spara/i.test(
         JSON.stringify(taps),
