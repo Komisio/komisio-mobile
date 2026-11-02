@@ -72,6 +72,10 @@ try {
   if (process.platform !== "darwin")
     throw new Error("Run this capture on an EAS macOS worker.");
   const app = process.env.SIMULATOR_APP_PATH;
+  if (!app)
+    throw new Error(
+      "The downloaded app path was not passed to the capture step.",
+    );
   if (!app?.endsWith(".app") || !existsSync(join(app, "Info.plist")))
     throw new Error("A downloaded simulator .app is required.");
   const plist = (key) =>

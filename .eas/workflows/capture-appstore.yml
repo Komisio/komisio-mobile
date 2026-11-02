@@ -30,9 +30,8 @@ jobs:
           build_id: ${{ inputs.build_id }}
           extensions: [app]
       - name: Capture native screens without financial writes
-        env:
-          SIMULATOR_APP_PATH: ${{ steps.app.outputs.artifact_path }}
-        run: node scripts/capture-appstore.mjs
+        run: |
+          SIMULATOR_APP_PATH='${{ steps.app.outputs.artifact_path }}' node scripts/capture-appstore.mjs
       # Only allowlisted PNGs and a non-sensitive manifest are published.
       # Maestro diagnostics can contain expanded credentials and stay on the VM.
       - uses: eas/upload_artifact
