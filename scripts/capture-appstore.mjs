@@ -263,7 +263,23 @@ try {
           profileLabel: text.includes("Profil") || text.includes("Profile"),
           expectedEmailPresent: text.includes(process.env.MAESTRO_SCREENSHOT_EMAIL),
           storePicker: text.includes("Choose store") || text.includes("Välj butik"),
+          springboard: /SpringBoard|Springboard/.test(text),
+          passwordPrompt: /Save Password|Passwords|Spara lösenord/.test(text),
         })}`);
+        // A disposable simulator contains only the authorized synthetic demo.
+        // Retain a diagnostic image only after credential fields have gone and
+        // the hierarchy contains no literal password. Never export raw reports.
+        if (
+          mode === "capture" &&
+          text.includes('"children"') &&
+          !/login-email|login-password|TextField|SecureTextField/i.test(text) &&
+          !text.includes(process.env.MAESTRO_SCREENSHOT_PASSWORD)
+        ) {
+          const diagnosticOutput = resolve("artifacts/capture-diagnostic");
+          mkdirSync(diagnosticOutput, { recursive: true });
+          sim(["io", device, "screenshot", join(diagnosticOutput, "failed-screen.png")], "Capture diagnostic screen");
+          writeFileSync(join(diagnosticOutput, "manifest.json"), JSON.stringify({ buildId, target, status: "failed", marketingReady: false }));
+        }
       } else {
         console.log("Post-failure UI inspection unavailable; raw output withheld.");
       }

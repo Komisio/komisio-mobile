@@ -45,3 +45,9 @@ jobs:
           type: other
           name: native-appstore-screenshots
           path: artifacts/appstore/*
+      - uses: eas/upload_artifact
+        if: ${{ always() && failure() }}
+        with:
+          type: other
+          name: capture-diagnostic
+          path: artifacts/capture-diagnostic/*
