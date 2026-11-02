@@ -3,6 +3,26 @@ export const appId = "com.inority.komisio";
 export const screens = ["overview", "my-items", "money", "store", "profile"];
 export const locales = ["sv-SE", "en-GB"];
 
+export function safeFailureCategory(output) {
+  if (
+    /Failed to start.*driver|Unable to (?:connect to|launch|start).*driver|driver.*(?:unavailable|not ready)|DriverStartupException/i.test(
+      output,
+    )
+  )
+    return "driver-startup";
+  if (
+    /Invalid flow|Syntax error|Unknown command|Unrecognized field|Cannot deserialize|InvalidCommand|Malformed|Yaml.*Exception/i.test(
+      output,
+    )
+  )
+    return "flow-syntax";
+  if (/Element not found|No nodes found/i.test(output))
+    return "element-not-found";
+  if (/Assertion is false|Assertion.*failed/i.test(output)) return "assertion";
+  if (/Failed to input|AutoFill/i.test(output)) return "text-input";
+  return "unclassified";
+}
+
 // Never include command values, evaluated variables, errors or UI hierarchies.
 export function safeCommandProgress(report) {
   const kinds = new Set([

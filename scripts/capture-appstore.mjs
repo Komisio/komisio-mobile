@@ -19,6 +19,7 @@ import {
   screenshotSize,
   selectCaptureSimulator,
   safeCommandProgress,
+  safeFailureCategory,
 } from "./appstore-capture-flow.mjs";
 
 const mode = process.env.CAPTURE_MODE;
@@ -61,6 +62,11 @@ function run(command, args, label, options = {}) {
   });
   // Maestro output and diagnostics may expand secrets. Never print them.
   if (result.status !== 0 || result.error) {
+    if (label.endsWith(" capture")) {
+      console.error(
+        `Capture failure category: ${safeFailureCategory(`${result.stdout ?? ""}\n${result.stderr ?? ""}`)}; timedOut=${result.error?.code === "ETIMEDOUT"}.`,
+      );
+    }
     // This command runs before login and only contains a new device name and
     // public simulator identifiers. Its error explains worker incompatibility.
     if (command === "xcrun" && args[0] === "simctl" && args[1] === "create")
@@ -232,7 +238,7 @@ try {
         },
       );
     } catch (error) {
-      const diagnostics = join(temporary, "diagnostics", name);
+      const diagnostics = temporary;
       if (existsSync(diagnostics)) {
         for (const file of readdirSync(diagnostics, {
           recursive: true,

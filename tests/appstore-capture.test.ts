@@ -9,11 +9,21 @@ const {
   screenshotName,
   selectCaptureSimulator,
   safeCommandProgress,
+  safeFailureCategory,
 } = await import(
   new URL("../scripts/appstore-capture-flow.mjs", import.meta.url).href
 );
 
 test("capture progress never includes values or exception details", () => {
+  assert.equal(
+    safeFailureCategory("Unable to connect to driver: private-password"),
+    "driver-startup",
+  );
+  assert.equal(
+    safeFailureCategory("Unrecognized field private-password"),
+    "flow-syntax",
+  );
+  assert.equal(safeFailureCategory("private-password"), "unclassified");
   const progress = safeCommandProgress([
     {
       command: { inputTextCommand: { text: "private-password" } },
