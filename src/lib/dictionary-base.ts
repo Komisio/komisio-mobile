@@ -8,6 +8,7 @@ import { payoutCopy } from "./payout-copy.ts";
 import { agreementAcceptCopy } from "./agreement-accept-copy.ts";
 
 export const sv = {
+  externalPage: { privacy: "Integritetspolicy", failed: "Kunde inte öppna sidan. Försök igen." },
   storeInfo: storeInfoCopy.sv,
   agreementAccept: agreementAcceptCopy.sv,
   payouts: payoutCopy.sv,
@@ -79,6 +80,7 @@ export const sv = {
 export type Dictionary = typeof sv;
 
 export const en: Dictionary = {
+  externalPage: { privacy: "Privacy policy", failed: "Could not open the page. Try again." },
   storeInfo: storeInfoCopy.en,
   agreementAccept: agreementAcceptCopy.en,
   payouts: payoutCopy.en,
