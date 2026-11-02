@@ -1,0 +1,53 @@
+name: Capture native App Store screenshots
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        type: string
+        required: true
+        description: Exact simulator build ID from the reviewed screenshot revision
+      mode:
+        type: choice
+        options: [probe, capture]
+        default: probe
+        description: Probe verifies the simulator without login; capture requires demo credentials
+      device:
+        type: choice
+        options: [ipad, iphone]
+        default: ipad
+        description: Native 13-inch iPad or medium Dynamic Island iPhone screenshots
+jobs:
+  screenshots:
+    name: Native App Store captures
+    runs_on: macos-medium
+    image: macos-tahoe-26.6-xcode-27.1
+    environment: preview
+    env:
+      CAPTURE_MODE: ${{ inputs.mode }}
+      CAPTURE_DEVICE: ${{ inputs.device }}
+      CAPTURE_BUILD_ID: ${{ inputs.build_id }}
+    steps:
+      - uses: eas/checkout
+      - name: Check capture prerequisites
+        run: node scripts/capture-appstore.mjs --preflight
+      - uses: eas/download_build
+        id: app
+        with:
+          build_id: ${{ inputs.build_id }}
+          extensions: [app]
+      - name: Capture native screens without financial writes
+        run: |
+          SIMULATOR_APP_PATH='${{ steps.app.outputs.artifact_path }}' node scripts/capture-appstore.mjs
+      # Only allowlisted PNGs and a non-sensitive manifest are published.
+      # Maestro diagnostics can contain expanded credentials and stay on the VM.
+      - uses: eas/upload_artifact
+        with:
+          type: other
+          name: native-appstore-screenshots
+          path: artifacts/appstore/*
+      - uses: eas/upload_artifact
+        if: ${{ always() && failure() }}
+        with:
+          type: other
+          name: capture-diagnostic
+          path: artifacts/capture-diagnostic/*

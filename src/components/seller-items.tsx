@@ -168,9 +168,11 @@ export function SellerItems({
               }
             >
               <View style={styles.itemTop}>
-                <Text style={[styles.itemTitle, styles.itemName]}>
-                  {item.title ?? t.untitled}
-                </Text>
+                <View style={styles.itemName}>
+                  <Text style={styles.itemTitle}>
+                    {item.title ?? t.untitled}
+                  </Text>
+                </View>
                 <Text style={styles.price}>{displayedPrice}</Text>
               </View>
               <Text style={styles.reference}>
@@ -285,9 +287,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    alignItems: "baseline",
+    alignItems: "flex-start",
   },
-  itemName: { flexGrow: 1, flexBasis: 140 },
+  // Constrain the text through a View: native Text's intrinsic measurement
+  // must not use the price's space when a long translated title wraps.
+  itemName: { flexGrow: 1, flexBasis: 140, minWidth: 0, maxWidth: "100%" },
   itemMeta: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -306,7 +310,7 @@ const styles = StyleSheet.create({
   },
   itemTitle: uiStyles.itemName,
   reference: { ...uiStyles.note },
-  price: uiStyles.itemPrice,
+  price: { ...uiStyles.itemPrice, maxWidth: "100%" },
   date: { ...uiStyles.note },
   footer: { paddingVertical: 16, gap: 12 },
 });

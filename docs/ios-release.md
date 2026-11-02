@@ -38,7 +38,10 @@ offline: validate the key using a read-only authenticated public API request
 before starting a build. Passing this guard is not an authorization check or
 evidence that the backend is healthy.
 
-Only the iOS production store profile is configured. Android release identity
+The `screenshots` profile additionally builds an unsigned iOS simulator app
+using the same production endpoints and public client key. It cannot be installed
+on a physical device, does not increment the store build counter and has no
+submission job. Android release identity
 and signing require a separate verified setup; Expo Go development still works
 on both platforms. No OTA update channel or legacy update delivery is enabled
 by this change.
@@ -113,6 +116,64 @@ lifecycle and review the encryption declaration and age-rating questions.
 Replace old staff-oriented review notes with a working synthetic seller account,
 an app-visible test store, populated item/payout history, and agreement access.
 Keep credentials in App Store Connect's private review fields, not these docs.
+
+## Native screenshot capture without a local Mac
+
+Two manually triggered EAS workflows separate building from capture, so retries
+reuse an exact simulator build ID. Check the account's remaining build and
+workflow allowance before starting; neither workflow upgrades the subscription.
+
+```sh
+npx eas-cli@latest workflow:run .eas/workflows/build-screenshot-simulator.yml
+# Record the exact successful simulator build ID and its source commit.
+npx eas-cli@latest workflow:run .eas/workflows/capture-appstore.yml \
+  -F build_id=<simulator-build-id> -F mode=probe
+```
+
+`probe` captures only the store picker, without login. It checks the worker,
+native app and required iPad resolution; it is not a marketing screenshot.
+
+For the five seller views in both languages, create project variables
+`MAESTRO_SCREENSHOT_EMAIL` and `MAESTRO_SCREENSHOT_PASSWORD` with **secret**
+visibility in the EAS **preview** environment. Use only an owner-approved
+synthetic seller account that can access the two configured demo stores. Never
+use an owner/admin login. Do not put passwords in commands, workflow inputs,
+source files or `EXPO_PUBLIC_*` variables. The production build environment does
+not need these credentials. A seller with TOTP requires a separate workflow;
+do not disable MFA or bypass authentication for screenshots.
+
+```sh
+npx eas-cli@latest workflow:run .eas/workflows/capture-appstore.yml \
+  -F build_id=<simulator-build-id> -F mode=capture
+```
+
+The capture runs the ordinary app in a disposable 13-inch iPad Pro simulator
+on an EAS macOS worker. It selects the language/store through the UI, signs in,
+and visits Overview, My Items, Money, Store and Profile. It performs no financial
+writes. Maestro runs locally on that worker; no Maestro Cloud subscription or
+Expo Simulators partner access is needed. Its diagnostic reports and command
+output can contain expanded credentials, so they are never uploaded or printed.
+The marketing artifact contains only the ten explicitly named PNGs and a
+build/device/dimensions manifest, after every flow succeeds. A fresh output
+directory is required. A failed run may publish a separate `capture-diagnostic`
+image only after the credential fields have gone and no literal password is
+present in the native hierarchy. Its manifest says `marketingReady: false`;
+never upload that image to App Store Connect. Raw reports remain on the worker.
+
+To replace an iPhone capture from the same app build, add `-F device=iphone`
+to the capture command. This selects an iPhone 16 Pro and checks medium
+Dynamic Island screenshot dimensions. The default `device=ipad` uses a
+13-inch iPad Pro. The runner matches the device to a compatible installed
+runtime instead of assuming the newest runtime supports every device.
+
+Download the `native-appstore-screenshots` artifact and visually inspect every
+image: correct language, store/currency, loaded images and amounts, no errors,
+truncation or title/price overlap. The dimension check accepts only native
+portrait 2064×2752 or 2048×2732 iPad captures, or 1206×2622 / 1179×2556
+iPhone captures when explicitly selected. It does not prove the visual content is
+correct. Upload reviewed captures to their matching App Store locales manually;
+this workflow never submits or releases the app. Remove the capture credentials
+from EAS when no longer needed through the account's normal secret management.
 
 Validate the intended version/build before requesting App Review. Choose the
 release timing explicitly. Do not restore availability of the legacy binary
