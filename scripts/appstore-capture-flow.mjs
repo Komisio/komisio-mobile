@@ -181,6 +181,10 @@ export function captureFlow(locale) {
         below: { id: "login-password" },
       },
     },
+    // The fresh iOS simulator can offer to save the password after sign-in.
+    // Decline storage before looking for tabs behind the native modal.
+    wait("(Not Now|Översikt|Overview)(,.*)?"),
+    { tapOn: { text: "Not Now", optional: true } },
     wait({ id: "tab-overview" }),
   ];
   const tabs = ["overview", "items", "money", "store", "profile"];
