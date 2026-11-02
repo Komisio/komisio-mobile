@@ -101,11 +101,12 @@ Supabase sessions. Verify no previous account/store data is shown after switchin
 
 ## Before App Review and public availability
 
-Resolve the local-account/IBAN input ambiguity before broader use: the current
-three-field form saves local details and does not validate IBAN-looking input
-as IBAN. Internal TestFlight bank/payout testing must use synthetic accounts and
-must not result in actual bank payments. Keep the existing staff destination
-review; do not infer new country-specific account rules in the app.
+The owner chose local-account entry using the store country; IBAN changes go
+through the store. The three-field form rejects complete IBAN-shaped input
+without claiming local account verification. Existing accounts and pending
+payloads retain their original country and kind. Test bank/payout flows with
+synthetic accounts without actual bank payments. Existing staff destination
+review remains required; the app adds no country-specific bank validation.
 
 Verify Postgres timestamps (including fractional seconds) in the signed Hermes
 build when checking recent sales and payout history on an iPhone.
