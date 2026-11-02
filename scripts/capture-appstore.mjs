@@ -18,6 +18,7 @@ import {
   screenshotName,
   screenshotSize,
   selectCaptureSimulator,
+  safeCommandProgress,
 } from "./appstore-capture-flow.mjs";
 
 const mode = process.env.CAPTURE_MODE;
@@ -212,23 +213,44 @@ try {
     const path = join(temporary, `${name}.yaml`);
     writeFileSync(path, flow);
     console.log(`Running ${name} capture flow.`);
-    run(
-      maestro,
-      [
-        "--device",
-        device,
-        "test",
-        "--debug-output",
-        join(temporary, "diagnostics", name),
-        "--test-output-dir",
-        join(temporary, "screens", name),
-        path,
-      ],
-      `${name} capture`,
-      {
-        env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: "1" },
-      },
-    );
+    try {
+      run(
+        maestro,
+        [
+          "--device",
+          device,
+          "test",
+          "--debug-output",
+          join(temporary, "diagnostics", name),
+          "--test-output-dir",
+          join(temporary, "screens", name),
+          path,
+        ],
+        `${name} capture`,
+        {
+          env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: "1" },
+        },
+      );
+    } catch (error) {
+      const diagnostics = join(temporary, "diagnostics", name);
+      if (existsSync(diagnostics)) {
+        for (const file of readdirSync(diagnostics, {
+          recursive: true,
+          withFileTypes: true,
+        })) {
+          if (file.isFile() && /^commands.*\.json$/.test(file.name)) {
+            try {
+              console.log(
+                `Capture command status: ${JSON.stringify(safeCommandProgress(JSON.parse(readFileSync(join(file.parentPath, file.name), "utf8"))))}`,
+              );
+            } catch {
+              /* Keep raw diagnostics private even if the report is incomplete. */
+            }
+          }
+        }
+      }
+      throw error;
+    }
   }
   // Explicit allowlist: no debug screenshots, command reports, logs or sessions.
   const files = readdirSync(join(temporary, "screens"), {

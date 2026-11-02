@@ -3,6 +3,40 @@ export const appId = "com.inority.komisio";
 export const screens = ["overview", "my-items", "money", "store", "profile"];
 export const locales = ["sv-SE", "en-GB"];
 
+// Never include command values, evaluated variables, errors or UI hierarchies.
+export function safeCommandProgress(report) {
+  const kinds = new Set([
+    "defineVariablesCommand",
+    "applyConfigurationCommand",
+    "launchAppCommand",
+    "assertConditionCommand",
+    "tapOnElement",
+    "scrollUntilVisible",
+    "inputTextCommand",
+    "pressKeyCommand",
+    "waitForAnimationToEndCommand",
+    "takeScreenshotCommand",
+  ]);
+  const statuses = new Set([
+    "PENDING",
+    "RUNNING",
+    "COMPLETED",
+    "FAILED",
+    "SKIPPED",
+    "WARNED",
+  ]);
+  if (!Array.isArray(report)) return [];
+  return report.map((entry, index) => ({
+    step: index,
+    kind:
+      Object.keys(entry?.command ?? {}).find((key) => kinds.has(key)) ??
+      "other",
+    status: statuses.has(entry?.metadata?.status)
+      ? entry.metadata.status
+      : "UNKNOWN",
+  }));
+}
+
 export function selectCaptureSimulator(
   listing,
   minimumVersion,

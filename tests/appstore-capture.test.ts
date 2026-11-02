@@ -3,10 +3,38 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-const { captureFlow, screenshotSize, screenshotName, selectCaptureSimulator } =
-  await import(
-    new URL("../scripts/appstore-capture-flow.mjs", import.meta.url).href
-  );
+const {
+  captureFlow,
+  screenshotSize,
+  screenshotName,
+  selectCaptureSimulator,
+  safeCommandProgress,
+} = await import(
+  new URL("../scripts/appstore-capture-flow.mjs", import.meta.url).href
+);
+
+test("capture progress never includes values or exception details", () => {
+  const progress = safeCommandProgress([
+    {
+      command: { inputTextCommand: { text: "private-password" } },
+      metadata: { status: "COMPLETED", evaluatedCommand: "private-password" },
+    },
+    {
+      command: { assertConditionCommand: { selector: "private-email" } },
+      metadata: { status: "FAILED", error: "private-password" },
+    },
+    {
+      command: { "private-key": "private-password" },
+      metadata: { status: "private-status" },
+    },
+  ]);
+  assert.deepEqual(progress, [
+    { step: 0, kind: "inputTextCommand", status: "COMPLETED" },
+    { step: 1, kind: "assertConditionCommand", status: "FAILED" },
+    { step: 2, kind: "other", status: "UNKNOWN" },
+  ]);
+  assert.equal(JSON.stringify(progress).includes("private"), false);
+});
 
 test("simulator selection uses runtime compatibility, not advertised device names", () => {
   const m5 = { name: "iPad Pro 13-inch (M5)", identifier: "ipad-m5" };
