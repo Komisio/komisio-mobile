@@ -1,0 +1,10 @@
+name: Build screenshot simulator
+on:
+  workflow_dispatch: {}
+jobs:
+  build_ios:
+    name: Build iOS simulator only
+    type: build
+    params:
+      platform: ios
+      profile: screenshots

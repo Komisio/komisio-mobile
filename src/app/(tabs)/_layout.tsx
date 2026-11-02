@@ -67,6 +67,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: d.tabs.store,
+          tabBarButtonTestID: "tab-store",
           tabBarIcon: (props) => <TabIcon name="store" {...props} />,
         }}
       />
@@ -74,6 +75,7 @@ export default function TabsLayout() {
         name="items"
         options={{
           title: d.tabs.items,
+          tabBarButtonTestID: "tab-items",
           tabBarIcon: (props) => <TabIcon name="items" {...props} />,
         }}
       />
@@ -81,6 +83,7 @@ export default function TabsLayout() {
         name="overview"
         options={{
           title: d.tabs.overview,
+          tabBarButtonTestID: "tab-overview",
           tabBarIcon: (props) => <TabIcon name="overview" {...props} />,
         }}
       />
@@ -88,6 +91,7 @@ export default function TabsLayout() {
         name="money"
         options={{
           title: d.tabs.money,
+          tabBarButtonTestID: "tab-money",
           tabBarIcon: (props) => <TabIcon name="money" {...props} />,
         }}
       />
@@ -95,6 +99,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: d.tabs.profile,
+          tabBarButtonTestID: "tab-profile",
           tabBarIcon: (props) => <TabIcon name="profile" {...props} />,
         }}
       />

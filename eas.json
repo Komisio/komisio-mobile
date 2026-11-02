@@ -5,6 +5,15 @@
     "requireCommit": true
   },
   "build": {
+    "screenshots": {
+      "extends": "production",
+      "distribution": "internal",
+      "autoIncrement": false,
+      "ios": {
+        "simulator": true,
+        "image": "macos-tahoe-26.6-xcode-27.1"
+      }
+    },
     "production": {
       "distribution": "store",
       "environment": "production",
