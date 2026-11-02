@@ -87,6 +87,11 @@ Keep economic rules and published agreement text unchanged.
 
 ## Later
 
+Owner decision, 2026-11-02 (S25): the three-field form accepts local accounts
+in the store's published country. IBAN changes go through the store. Existing
+IBAN/foreign accounts and pending requests are preserved; no new bank validation
+or automatic-transfer rules are introduced.
+
 | ID | Screen | Earlier route |
 | --- | --- | --- |
 | S03 | Create seller account | `/create-account` |

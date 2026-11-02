@@ -99,6 +99,8 @@ export default {
     pastEnd: "Non ci sono richieste in questa pagina.",
   },
   bank: {
+    localAccount: "Numero di conto locale",
+    ibanViaStore: "Inserisci un numero di conto locale. Per IBAN, contatta il negozio.",
     title: "Conto per i pagamenti",
     discard: "Rilascia richiesta in sospeso",
     discardWarning:

@@ -1,5 +1,7 @@
 export const bankCopy = {
   sv: {
+    localAccount: "Lokalt kontonummer",
+    ibanViaStore: "Ange ett lokalt kontonummer. För IBAN, kontakta butiken.",
     title: "Utbetalningskonto",
     discard: "Släpp väntande begäran",
     discardWarning:
@@ -61,6 +63,8 @@ export const bankCopy = {
       "Slutför lösenordsbytet i portalen, logga sedan in igen och återvänd hit.",
   },
   en: {
+    localAccount: "Local account number",
+    ibanViaStore: "Enter a local account number. For IBAN, contact the store.",
     title: "Payout account",
     discard: "Release pending request",
     discardWarning:

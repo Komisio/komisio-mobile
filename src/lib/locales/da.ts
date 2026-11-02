@@ -100,6 +100,8 @@ export default {
     pastEnd: "Der er ingen anmodninger på denne side.",
   },
   bank: {
+    localAccount: "Lokalt kontonummer",
+    ibanViaStore: "Angiv et lokalt kontonummer. Kontakt butikken ved brug af IBAN.",
     title: "Udbetalingskonto",
     discard: "Frigiv afventende anmodning",
     discardWarning:

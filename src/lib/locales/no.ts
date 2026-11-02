@@ -100,6 +100,8 @@ export default {
     pastEnd: "Det finnes ingen forespørsler på denne siden.",
   },
   bank: {
+    localAccount: "Lokalt kontonummer",
+    ibanViaStore: "Oppgi et lokalt kontonummer. Kontakt butikken for IBAN.",
     title: "Utbetalingskonto",
     discard: "Frigi ventende forespørsel",
     discardWarning:

@@ -287,11 +287,11 @@ function BankForm({
   const replacing =
     current &&
     (current.details.kind !== "local" || current.details.country !== country);
-  const [invalid, setInvalid] = useState(false);
+  const [invalid, setInvalid] = useState<"fields" | "iban" | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   function update(patch: Partial<LocalBankFields>) {
     setDetails({ ...details, ...patch });
-    setInvalid(false);
+    setInvalid(null);
   }
   return (
     <>
@@ -327,7 +327,7 @@ function BankForm({
         autoComplete="off"
       />
       <Field
-        label={t.account}
+        label={t.localAccount}
         value={details.account}
         onChangeText={(account) => update({ account })}
         maxLength={100}
@@ -336,7 +336,12 @@ function BankForm({
         autoCapitalize="characters"
         autoComplete="off"
       />
-      {invalid ? <Message tone="error">{t.invalid}</Message> : null}
+      {invalid !== "iban" ? <Message>{t.ibanViaStore}</Message> : null}
+      {invalid ? (
+        <Message tone="error">
+          {invalid === "iban" ? t.ibanViaStore : t.invalid}
+        </Message>
+      ) : null}
       {saveFailed ? <Message tone="error">{t.storage}</Message> : null}
       <Button
         label={t.save}
@@ -345,8 +350,12 @@ function BankForm({
           let normalized: BankDetails;
           try {
             normalized = localBankDetails(details, country);
-          } catch {
-            setInvalid(true);
+          } catch (error) {
+            setInvalid(
+              error instanceof Error && error.message === "IBAN_VIA_STORE"
+                ? "iban"
+                : "fields",
+            );
             return;
           }
           try {
