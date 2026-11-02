@@ -3,6 +3,36 @@ export const appId = "com.inority.komisio";
 export const screens = ["overview", "my-items", "money", "store", "profile"];
 export const locales = ["sv-SE", "en-GB"];
 
+export function selectCaptureSimulator(listing, minimumVersion) {
+  const types = listing.devicetypes.filter((d) =>
+    /^iPad Pro 13-inch/.test(d.name),
+  );
+  const runtimes = listing.runtimes
+    .filter(
+      (r) =>
+        r.isAvailable &&
+        /^i(?:Pad)?OS /.test(r.name) &&
+        r.version.localeCompare(minimumVersion, "en", { numeric: true }) >= 0,
+    )
+    .sort((a, b) =>
+      b.version.localeCompare(a.version, "en", { numeric: true }),
+    );
+  for (const runtime of runtimes) {
+    const supported = new Set(
+      (runtime.supportedDeviceTypes ?? []).map((d) => d.identifier),
+    );
+    for (const existing of listing.devices?.[runtime.identifier] ?? []) {
+      if (existing.isAvailable && existing.deviceTypeIdentifier)
+        supported.add(existing.deviceTypeIdentifier);
+    }
+    const type = types.find((d) => supported.has(d.identifier));
+    if (type) return { type, runtime };
+  }
+  throw new Error(
+    "No installed runtime supports a 13-inch iPad Pro and the app's minimum OS version.",
+  );
+}
+
 export function screenshotName(locale, index) {
   if (
     !locales.includes(locale) ||
@@ -84,12 +114,10 @@ export function screenshotSize(bytes) {
   }
   const width = bytes.readUInt32BE(16),
     height = bytes.readUInt32BE(20);
-  if (
-    !(
-      (width === 2064 && height === 2752) ||
-      (width === 2048 && height === 2732)
-    )
-  ) {
+  if (!(
+    (width === 2064 && height === 2752) ||
+    (width === 2048 && height === 2732)
+  )) {
     throw new Error(
       `Unexpected iPad screenshot dimensions: ${width}x${height}`,
     );

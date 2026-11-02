@@ -17,6 +17,7 @@ import {
   screens,
   screenshotName,
   screenshotSize,
+  selectCaptureSimulator,
 } from "./appstore-capture-flow.mjs";
 
 const mode = process.env.CAPTURE_MODE;
@@ -99,22 +100,23 @@ try {
   if (appVersion !== "2.0.0")
     throw new Error("This capture is scoped to Komisio 2.0.0.");
   const listing = JSON.parse(sim(["list", "--json"], "List simulator devices"));
-  // The worker advertises M5 types that simctl rejects as incompatible. Pin
-  // the M4 display target instead of selecting the newest advertised model.
-  const type = listing.devicetypes.find(
-    (d) =>
-      d.identifier ===
-      "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4-8GB",
+  // Installed device types alone do not establish runtime compatibility.
+  console.log(
+    JSON.stringify(
+      listing.runtimes.map((r) => ({
+        name: r.name,
+        version: r.version,
+        available: r.isAvailable,
+        supportedIpads: r.supportedDeviceTypes
+          ?.filter((d) => /^iPad/.test(d.name))
+          .map((d) => d.name),
+      })),
+    ),
   );
-  const runtime = listing.runtimes
-    .filter((r) => r.isAvailable && /^iOS 27\./.test(r.name))
-    .sort((a, b) =>
-      b.version.localeCompare(a.version, "en", { numeric: true }),
-    )[0];
-  if (!type || !runtime)
-    throw new Error(
-      "This worker does not have the 13-inch iPad Pro M4 and iOS 27 runtime.",
-    );
+  const { type, runtime } = selectCaptureSimulator(
+    listing,
+    plist("MinimumOSVersion"),
+  );
   console.log(`Selected ${type.identifier} with ${runtime.identifier}.`);
   console.log(
     `Installed iPad types: ${listing.devicetypes

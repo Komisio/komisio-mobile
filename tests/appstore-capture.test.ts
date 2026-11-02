@@ -3,9 +3,52 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-const { captureFlow, screenshotSize, screenshotName } = await import(
-  new URL("../scripts/appstore-capture-flow.mjs", import.meta.url).href
-);
+const { captureFlow, screenshotSize, screenshotName, selectCaptureSimulator } =
+  await import(
+    new URL("../scripts/appstore-capture-flow.mjs", import.meta.url).href
+  );
+
+test("simulator selection uses runtime compatibility, not advertised device names", () => {
+  const m5 = { name: "iPad Pro 13-inch (M5)", identifier: "ipad-m5" };
+  const m4 = { name: "iPad Pro 13-inch (M4)", identifier: "ipad-m4" };
+  const phone = { name: "iPhone", identifier: "iphone" };
+  const phoneRuntime = {
+    name: "iOS 27.1",
+    version: "27.1",
+    identifier: "phone-os",
+    isAvailable: true,
+    supportedDeviceTypes: [phone],
+  };
+  const tabletRuntime = {
+    name: "iPadOS 27.0",
+    version: "27.0",
+    identifier: "tablet-os",
+    isAvailable: true,
+    supportedDeviceTypes: [m4],
+  };
+  const listing = {
+    devicetypes: [m5, m4, phone],
+    runtimes: [phoneRuntime, tabletRuntime],
+  };
+  assert.equal(
+    selectCaptureSimulator(listing, "16.0").type.identifier,
+    m4.identifier,
+  );
+  assert.equal(
+    selectCaptureSimulator(listing, "16.0").runtime.identifier,
+    tabletRuntime.identifier,
+  );
+  assert.throws(() =>
+    selectCaptureSimulator({ ...listing, runtimes: [phoneRuntime] }, "16.0"),
+  );
+  assert.throws(() => selectCaptureSimulator(listing, "28.0"));
+  assert.throws(() =>
+    selectCaptureSimulator(
+      { ...listing, runtimes: [{ ...tabletRuntime, isAvailable: false }] },
+      "16.0",
+    ),
+  );
+});
 
 test("capture flows only log in and navigate; passwords stay as runtime references", () => {
   for (const locale of ["sv-SE", "en-GB"]) {
