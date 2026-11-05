@@ -11,6 +11,7 @@ import { supabase } from "./supabase";
 import { secureStorage } from "./secure-storage";
 import { createAuthBootstrap } from "./auth-bootstrap";
 import { setCommandUser } from "./command-storage";
+import { sellerPush } from "./push-runtime";
 
 export type AppStore = { id: string; name: string; slug: string };
 export type SellerAccount = {
@@ -135,12 +136,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    const signingOut = session?.user.id;
+    await sellerPush.beforeLogout();
+    const current = await supabase.auth.getSession();
+    if (current.error || current.data.session?.user.id !== signingOut)
+      throw new Error("SESSION_CHANGED");
     // Also clear before sending logout, so an offline logout does not leave
     // account numbers on a shared browser. No payout replay IDs are removed.
     try {
       setCommandUser(null);
     } finally {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     }
   };
 

@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
+import { pushCopy } from "@/lib/push-copy";
 import { PrivacyLink } from "./privacy-link";
 import {
   Button,
@@ -17,7 +18,7 @@ import {
 } from "./ui";
 
 export function ProfileScreen() {
-  const { d } = useI18n();
+  const { d, locale } = useI18n();
   const { session, store, chooseStore, signOut } = useSession();
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -74,6 +75,10 @@ export function ProfileScreen() {
         />
       </View>
       <View style={styles.group}>
+        <NavigationRow
+          label={pushCopy[locale].title}
+          onPress={() => router.push("/notifications")}
+        />
         <NavigationRow
           label={d.bank.title}
           onPress={() => router.push("/bank-account")}
