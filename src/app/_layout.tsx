@@ -5,6 +5,7 @@ import { I18nProvider, useI18n } from "@/lib/i18n";
 import { SessionProvider, useSession } from "@/lib/session";
 import { Button, Loading, Message, Screen } from "@/components/ui";
 import { detailHeaderOptions } from "@/components/detail-navigation";
+import { PushBridge } from "@/components/push-bridge";
 
 function Routes() {
   const { d } = useI18n();
@@ -35,6 +36,16 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={Boolean(store) && signedIn}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="notifications"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/profile",
+              d.profile.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
         <Stack.Screen
           name="language"
           options={({ navigation }) =>
@@ -106,6 +117,7 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <I18nProvider>
         <SessionProvider>
+          <PushBridge />
           <Routes />
         </SessionProvider>
       </I18nProvider>

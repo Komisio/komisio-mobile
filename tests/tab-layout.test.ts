@@ -211,6 +211,7 @@ test("native back is preserved with history; direct links retain an accessible e
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
+    "@/components/push-bridge": { PushBridge: "PushBridge" },
     "expo-status-bar": { StatusBar: "StatusBar" },
     "expo-router": {
       Stack: Object.assign(() => null, { Screen: "Route", Protected: "Guard" }),
@@ -252,7 +253,8 @@ test("all detail routes configure back navigation with their own fallback", () =
   const [statusBar, i18n] = layout.default().props.children;
   assert.equal(statusBar.type, "StatusBar");
   assert.equal(statusBar.props.style, "dark");
-  const routesElement = i18n.props.children.props.children;
+  const [bridge, routesElement] = i18n.props.children.props.children;
+  assert.equal(bridge.type, "PushBridge");
   const stack = routesElement.type();
   assert.equal(stack.props.screenOptions.headerShown, false);
   const screens = stack.props.children.at(-1).props.children;
@@ -263,10 +265,11 @@ test("all detail routes configure back navigation with their own fallback", () =
     "store-info": "/(tabs)",
     "my-items/[tenant]/[item]": "/(tabs)/items",
     language: "/(tabs)/profile",
+    notifications: "/(tabs)/profile",
     agreement: "/(tabs)/profile",
     "bank-account": "/(tabs)/profile",
   };
-  assert.equal(screens.length, 7);
+  assert.equal(screens.length, 8);
   for (const screen of screens.slice(1)) {
     for (const canGoBack of [true, false]) {
       const options = screen.props.options({

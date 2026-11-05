@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
 import { dictionaries } from "../src/lib/dictionaries.ts";
 import { locales } from "../src/lib/locale.ts";
+import { pushCopy } from "../src/lib/push-copy.ts";
 
 const require = createRequire(import.meta.url);
 function compile(file: string, modules: Record<string, unknown>) {
@@ -49,6 +50,7 @@ function nodes(element: any): any[] {
 test("profile exposes one store action, language detail, financial links and logout beside identity", async () => {
   const actions: unknown[] = [];
   const screen = compile("../src/components/profile-screen.tsx", {
+    "@/lib/push-copy": { pushCopy },
     react: { useState: (value: unknown) => [value, () => {}] },
     "react-native": {
       Text: "Text",
@@ -60,6 +62,7 @@ test("profile exposes one store action, language detail, financial links and log
     "expo-router": { router: { push: (path: string) => actions.push(path) } },
     "@/lib/i18n": {
       useI18n: () => ({
+        locale: "en",
         d: {
           tabs: { profile: "Profile" },
           profile: { signedInAs: "Signed in as", store: "Store" },
@@ -111,6 +114,7 @@ test("profile exposes one store action, language detail, financial links and log
   assert.deepEqual(actions, [
     null,
     "/language",
+    "/notifications",
     "/bank-account",
     "/agreement",
     "logout",

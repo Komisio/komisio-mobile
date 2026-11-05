@@ -36,6 +36,14 @@
     "plugins": [
       "expo-router",
       [
+        "expo-notifications",
+        {
+          "sounds": ["./assets/sounds/registeredstore.wav", "./assets/sounds/sale.wav"],
+          "defaultChannel": "komisio-registered-v1",
+          "color": "#143E34"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#F7F8F5",

@@ -311,6 +311,30 @@ with synthetic read/session/image adapters do not establish native image loading
 safe-area behavior, navigation or screen-reader support; verify those on devices
 before release. Visual direction remains subject to the owner's screen review.
 
+## Seller notifications
+
+Profile → Notifications enables or disables push for this installation. The OS
+permission prompt appears only after the seller chooses Enable. The store also
+opts in independently for registered and sold items. Notifications work across
+the seller's stores; selecting a different store does not change device consent.
+A tap verifies the signed-in seller and the store before opening the item, and
+waits through login/MFA. Device identity, secret and unconfirmed requests are
+stored atomically in SecureStore. Unknown registration/revocation responses are
+reconciled; logout waits for revocation if push was enabled.
+
+Deploy platform #767 before distributing this app. Its mobile device endpoint
+is derived from `EXPO_PUBLIC_KOMISIO_WEB_URL`; existing Supabase authentication
+remains the only source of user identity. The server worker and Expo/APNs/FCM
+credentials are configured by the platform operator, never in this app.
+
+`expo-notifications` and the two original legacy sounds (`registeredstore.wav`
+and `sale.wav`) require a new native build. Android channels have stable versioned
+IDs; changing channel sound later requires a new ID because OS channel settings
+are persistent. iOS uses the bundled sound filenames. Web, Expo Go and simulators
+show an unavailable state. Verify physical iOS/Android delivery, sounds, permission
+denial, foreground/background/cold-start taps and account changes before release.
+Successful JS exports do not establish APNs/FCM credentials or native delivery.
+
 ## Licence
 
 Not decided yet. Until a licence is added, no rights are granted beyond
