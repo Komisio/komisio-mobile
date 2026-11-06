@@ -10,15 +10,18 @@ Use the existing **Komisio** App Store record, not **Komisio (Dev)**:
 | Bundle identifier | `com.inority.komisio`                  |
 | EAS owner / slug  | `chrillenilsson` / `komisio`           |
 | EAS project ID    | `aa98c8e5-440a-4860-92e1-829f6b3bc1a1` |
-| Restart version   | `2.0.0`                                |
+| Release version   | `2.0.1`                                |
 
 The npm package and GitHub repository remain `komisio-mobile`. The Expo slug
 identifies the existing publishing project, not the source repository.
 
-The last inspected approved Apple listing was `1.06`, with binary `1.0.6`,
-build `53`. Version `2.0.0` is higher than both representations. EAS owns the
-build counter and increments it; do not reset it or assume the next number is
-54 without checking the current remote counter. Tablet support and the old
+Apple approved version `2.0.0` and closed that release train. Build `56` was
+uploaded successfully but subsequently rejected with ITMS-90186 and ITMS-90062.
+Use version `2.0.1` for the next submission. EAS owns the build counter and
+increments it; do not reset it or assume the next number without checking the
+current remote counter. `autoIncrement` increments the build number, not the
+marketing version: update `expo.version` before submitting to a new release train.
+Tablet support and the old
 `komisioapp` URL scheme are retained alongside `komisio`; upgrade behavior and
 iPad layout still need device verification. Auth email links continue on the web.
 
@@ -93,7 +96,11 @@ npx eas-cli@latest submit --platform ios --profile production --id <verified-bui
 ```
 
 EAS submission uploads to App Store Connect/TestFlight; it does not constitute
-App Review approval. Verify processing and install the actual signed build on
+successful Apple processing or App Review approval. EAS `FINISHED` can precede
+an Apple rejection email. Verify the exact version/build's processing state in
+App Store Connect (or its API); an upload receipt alone is not acceptance.
+Report uploaded, processing, invalid and ready-for-testing as distinct states.
+Install the actual signed build on
 an iPhone. Test small/large screens, larger text, iPad, safe areas, keyboard,
 back navigation, login/TOTP, photos, offline/retry and durable command recovery.
 Test upgrading an existing installation: legacy tokens must not be treated as
