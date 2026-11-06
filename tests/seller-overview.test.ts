@@ -63,8 +63,8 @@ function recentSales() {
   return {
     sellerId: seller,
     currency: "SEK",
-    limit: 5,
-    items: Array.from({ length: 5 }, (_, i) => ({
+    limit: 20,
+    items: Array.from({ length: 20 }, (_, i) => ({
       id: id(i + 200),
       reference: `I-${i}`,
       title: "Synthetic sale",
@@ -87,8 +87,9 @@ test("overview uses complete item counts and server-ordered sales without exposi
     expiring: 43,
   });
   assert.equal(result.expiring.length, 5);
-  assert.equal(result.recentSales?.length, 5);
+  assert.equal(result.recentSales?.length, 20);
   assert.equal(result.recentSales?.[0].soldPriceOre, 9000);
+  assert.equal(result.recentSales?.[19].id, id(219));
   assert.equal("balance" in result, false);
   assert.equal("payouts" in result, false);
   assert.equal("messages" in result, false);
@@ -196,6 +197,7 @@ test("recent sales reject wrong scope, prices, duplicates and acceptance-ordered
     { sellerId: id(9) },
     { currency: "NOK" },
     { limit: 25 },
+    { limit: 5 },
     { items: [...page.items, page.items[0]] },
     { items: [...page.items].reverse() },
     { items: [page.items[0], page.items[0]] },
@@ -221,6 +223,23 @@ test("recent sales reject wrong scope, prices, duplicates and acceptance-ordered
   assert.deepEqual(
     parseRecentSales(page, seller, "SEK").map((sale) => sale.id),
     page.items.map((sale) => sale.id),
+  );
+});
+test("legacy sales are accepted only with the legacy response contract", () => {
+  const page = recentSales();
+  const legacy = { ...page, limit: 5, items: page.items.slice(0, 5) };
+  assert.equal(parseRecentSales(legacy, seller, "SEK", 5).length, 5);
+  assert.throws(() => parseRecentSales(legacy, seller, "SEK"));
+  assert.throws(() => parseRecentSales(page, seller, "SEK", 5));
+  assert.throws(() =>
+    parseRecentSales({ ...legacy, items: page.items.slice(0, 6) }, seller, "SEK", 5),
+  );
+  assert.throws(() =>
+    parseRecentSales(
+      { ...page, items: [...page.items, { ...page.items[19], id: id(220) }] },
+      seller,
+      "SEK",
+    ),
   );
 });
 function deferred<T>() {
