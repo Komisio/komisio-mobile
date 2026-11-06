@@ -95,6 +95,78 @@ test("notification controls show confirmed state, actionable errors and system s
     );
   }
 });
+test("initial native permission waits for authenticated seller lookup and ignores stale or failed results", async () => {
+  const user = randomUUID();
+  const account = { tenantId: randomUUID(), sellerId: randomUUID() };
+  for (const scenario of [
+    "signed-out",
+    "loading",
+    "mfa",
+    "empty",
+    "error",
+    "stale",
+    "seller",
+  ]) {
+    const effects: (() => void | (() => void))[] = [];
+    const requests: string[] = [];
+    let resolveLookup!: (result: unknown) => void;
+    const lookup = new Promise((resolve) => {
+      resolveLookup = resolve;
+    });
+    const bridge = compile("../src/components/push-bridge.tsx", {
+      react: {
+        useRef: (v: unknown) => ({ current: v }),
+        useState: (v: unknown) => [v, () => {}],
+        useEffect: (run: () => void) => {
+          effects.push(run);
+        },
+      },
+      "react-native": {
+        AppState: { addEventListener: () => ({ remove: () => {} }) },
+      },
+      "expo-router": { router: { push: () => {} } },
+      "@/lib/session": {
+        useSession: () => ({
+          ready: scenario !== "loading",
+          mfaRequired: scenario === "mfa",
+          session: scenario === "signed-out" ? null : { user: { id: user } },
+          store: null,
+          account: undefined,
+        }),
+      },
+      "@/lib/i18n": { useI18n: () => ({ locale: "sv" }) },
+      "@/lib/supabase": { supabase: { rpc: () => lookup } },
+      "@/lib/push-runtime": {
+        sellerPush: {
+          setContext: async () => {},
+          refresh: async () => {},
+          requestInitialPermission: async (id: string) => {
+            requests.push(id);
+          },
+        },
+      },
+      "@/lib/push-native": {
+        configurePushChannels: () => {},
+        clearPushResponse: () => {},
+        observePush: () => () => {},
+      },
+      "@/lib/push-contract": { parsePushData },
+      "@/lib/push-routing": { ownsPush, pushDestination },
+      "@/lib/push-copy": { pushCopy },
+    });
+    bridge.PushBridge();
+    const cleanup = effects.map((run) => run());
+    assert.equal(requests.length, 0, scenario);
+    if (scenario === "stale") cleanup.forEach((stop) => stop?.());
+    resolveLookup({
+      data: scenario === "empty" ? [] : [account],
+      error: scenario === "error" ? { code: "FORBIDDEN" } : null,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.deepEqual(requests, scenario === "seller" ? [user] : [], scenario);
+    cleanup.forEach((stop) => stop?.());
+  }
+});
 test("a tap waits through login/MFA, chooses the verified store and opens once; a foreign seller is rejected", async () => {
   const tenantId = randomUUID(),
     sellerId = randomUUID(),
@@ -110,7 +182,8 @@ test("a tap waits through login/MFA, chooses the verified store and opens once; 
     itemId: randomUUID(),
   };
   const navigation: any[] = [],
-    contexts: any[] = [];
+    contexts: any[] = [],
+    initialRequests: string[] = [];
   let callback: (v: unknown) => void = () => {},
     visibility: (v: unknown) => boolean = () => false;
   let dirty = false,
@@ -176,6 +249,7 @@ test("a tap waits through login/MFA, chooses the verified store and opens once; 
     "@/lib/push-runtime": {
       sellerPush: {
         setContext: async (u: unknown) => contexts.push(u),
+        requestInitialPermission: async (u: string) => initialRequests.push(u),
         refresh: async () => {},
         getSnapshot: () => ({ status: "on" }),
       },
@@ -205,6 +279,7 @@ test("a tap waits through login/MFA, chooses the verified store and opens once; 
     throw new Error("Render did not settle");
   }
   await render();
+  assert.equal(initialRequests.length, 0);
   callback(payload);
   await render();
   assert.equal(navigation.length, 0);
@@ -212,9 +287,11 @@ test("a tap waits through login/MFA, chooses the verified store and opens once; 
   state.session = { user: { id: userId } };
   state.mfaRequired = true;
   await render();
+  assert.equal(initialRequests.length, 0);
   assert.equal(navigation.length, 0);
   state.mfaRequired = false;
   await render();
+  assert.deepEqual(initialRequests, [userId]);
   assert.equal(navigation.length, 1);
   assert.equal(state.store.id, tenantId);
   assert.equal(navigation[0].params.item, payload.itemId);
