@@ -46,7 +46,7 @@ for (const scenario of [
             currency: "SEK",
             counts: {
               active: 2,
-              sold: 3,
+              sold: populated ? 27 : 0,
               expiring: populated ? 1 : 0,
               ended: 0,
             },
@@ -64,7 +64,7 @@ for (const scenario of [
               scenario === "unavailable"
                 ? null
                 : populated
-                  ? Array.from({ length: 5 }, (_, i) => ({
+                  ? Array.from({ length: 20 }, (_, i) => ({
                       id: `sale-${i}`,
                       title: `Synthetic sale ${i}`,
                       reference: `S-${i}`,
@@ -190,12 +190,12 @@ for (const scenario of [
       populated,
     );
     if (populated) {
-      assert.equal(nodes.filter((node) => node.type === "article").length, 5);
+      assert.equal(nodes.filter((node) => node.type === "article").length, 20);
       assert.equal(
         nodes.filter(
           (node) => node.props?.children === overviewCopy.sv.salePrice,
         ).length,
-        5,
+        20,
       );
     }
   });

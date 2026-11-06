@@ -1,6 +1,8 @@
 import { isId } from "./catalogue.ts";
 import { parseSellerItemsPage, type SellerItem } from "./seller-items.ts";
 
+export const recentSalesLimit = 20;
+
 export const payoutStatuses = [
   "requested",
   "approved",
@@ -95,15 +97,16 @@ export function parseRecentSales(
   value: unknown,
   seller: string,
   currency: string,
+  limit: typeof recentSalesLimit | 5 = recentSalesLimit,
 ): RecentSale[] {
   const page = object(value);
   if (
     !isId(seller) ||
     page.sellerId !== seller ||
     page.currency !== currency ||
-    page.limit !== 5 ||
+    page.limit !== limit ||
     !Array.isArray(page.items) ||
-    page.items.length > 5
+    page.items.length > limit
   )
     throw new Error("INVALID_OVERVIEW");
   const sales: RecentSale[] = page.items.map((value) => {
@@ -145,6 +148,7 @@ export function parseOverview(
   expiringPage: unknown,
   salesPage: unknown | null,
   seller: string,
+  salesLimit: typeof recentSalesLimit | 5 = recentSalesLimit,
 ): SellerOverview {
   if (!isId(seller)) throw new Error("INVALID_OVERVIEW");
   const page = parseSellerItemsPage(expiringPage);
@@ -162,7 +166,7 @@ export function parseOverview(
   let recentSales: RecentSale[] | null = null;
   if (salesPage !== null) {
     try {
-      recentSales = parseRecentSales(salesPage, seller, page.currency);
+      recentSales = parseRecentSales(salesPage, seller, page.currency, salesLimit);
     } catch {
       // Discard the entire invalid sales section, including wrong-scope data.
       // Independently validated item totals remain useful; never show zero sales.
