@@ -12,6 +12,7 @@ type Stored = DeviceIdentity & {
   owner: string;
   desired: boolean;
   registered: boolean;
+  initialPermissionAsked?: boolean;
   pending: { user: string; command: PushCommand } | null;
 };
 export type PushSnapshot = {
@@ -61,6 +62,8 @@ export function createPushController(deps: PushDependencies) {
         typeof r.owner !== "string" ||
         typeof r.desired !== "boolean" ||
         typeof r.registered !== "boolean" ||
+        (r.initialPermissionAsked !== undefined &&
+          typeof r.initialPermissionAsked !== "boolean") ||
         (r.pending !== null &&
           (!r.pending ||
             typeof r.pending.user !== "string" ||
@@ -77,6 +80,7 @@ export function createPushController(deps: PushDependencies) {
       owner: currentUser,
       desired: false,
       registered: false,
+      initialPermissionAsked: false,
       pending: null,
     };
     await save(r);
@@ -91,7 +95,7 @@ export function createPushController(deps: PushDependencies) {
     return result;
   }
   async function synchronize(
-    intent: "refresh" | "enable" | "disable" | "logout",
+    intent: "refresh" | "initial" | "enable" | "disable" | "logout",
     expected: number,
   ) {
     const currentUser = user;
@@ -109,14 +113,35 @@ export function createPushController(deps: PushDependencies) {
       }
       let permission = await deps.permission(false);
       if (!current()) return;
-      if (intent === "enable" && permission !== "unavailable") {
+      if (
+        intent === "initial" &&
+        (r.initialPermissionAsked ||
+          permission !== "undetermined" ||
+          r.desired ||
+          r.registered ||
+          r.pending)
+      ) {
+        emit({ ...snapshot, busy: false });
+        return;
+      }
+      if (
+        (intent === "enable" || intent === "initial") &&
+        permission !== "unavailable"
+      ) {
+        // Save before opening the native dialog so relaunch or repeated seller
+        // lookups cannot prompt again, even if this attempt is interrupted.
+        r.initialPermissionAsked = true;
+        await save(r);
+        if (!current()) return;
         permission = await deps.permission(true);
         if (!current()) return;
         r.desired = permission === "granted";
         await save(r);
+        if (!current()) return;
       }
       if (intent === "disable" || intent === "logout") {
         r.desired = false;
+        if (intent === "disable") r.initialPermissionAsked = true;
         await save(r);
         await deps.dismiss();
       }
@@ -251,6 +276,11 @@ export function createPushController(deps: PushDependencies) {
     refresh() {
       const expected = generation;
       return schedule(() => synchronize("refresh", expected));
+    },
+    requestInitialPermission(expectedUser: string) {
+      if (user !== expectedUser) return queue;
+      const expected = generation;
+      return schedule(() => synchronize("initial", expected));
     },
     enable() {
       const expected = generation;

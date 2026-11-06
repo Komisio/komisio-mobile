@@ -81,8 +81,10 @@ export function PushBridge() {
     }
     let active = true;
     void supabase.rpc("my_seller_accounts").then(({ data, error }) => {
-      if (active)
-        accounts.current = error ? null : { user, values: data ?? [] };
+      if (!active) return;
+      accounts.current = error ? null : { user, values: data ?? [] };
+      if (!error && Array.isArray(data) && data.length > 0)
+        void sellerPush.requestInitialPermission(user);
     });
     return () => {
       active = false;
