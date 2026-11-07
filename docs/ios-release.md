@@ -44,8 +44,7 @@ evidence that the backend is healthy.
 The `screenshots` profile additionally builds an unsigned iOS simulator app
 using the same production endpoints and public client key. It cannot be installed
 on a physical device, does not increment the store build counter and has no
-submission job. Android release identity
-and signing require a separate verified setup; Expo Go development still works
+submission job. Android uses the separate [Google Play internal test profile](android-release.md); Expo Go development still works
 on both platforms. No OTA update channel or legacy update delivery is enabled
 by this change.
 

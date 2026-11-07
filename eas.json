@@ -5,6 +5,10 @@
     "requireCommit": true
   },
   "build": {
+    "android-play-internal": {
+      "extends": "production",
+      "android": { "buildType": "app-bundle" }
+    },
     "screenshots": {
       "extends": "production",
       "distribution": "internal",
@@ -27,6 +31,9 @@
     }
   },
   "submit": {
+    "android-play-internal": {
+      "android": { "track": "internal", "releaseStatus": "completed" }
+    },
     "production": {
       "ios": {
         "ascAppId": "6753813071"

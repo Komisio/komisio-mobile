@@ -52,3 +52,6 @@ credentials.json
 *.apk
 .git/
 artifacts/
+google-services*.json
+*firebase-adminsdk*.json
+komisio-push-*.json

@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -23,6 +26,32 @@ const run = (overrides: Record<string, string> = {}) =>
   });
 const jwt = (role: string, ref: string) =>
   `header.${Buffer.from(JSON.stringify({ role, ref })).toString("base64url")}.signature`;
+
+test("Play builds require the real package, Firebase project and production backend", (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "komisio-android-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const file = join(dir, "client.json");
+  const android = {
+    EAS_BUILD_PROFILE: "android-play-internal",
+    EAS_BUILD_PLATFORM: "android",
+    GOOGLE_SERVICES_JSON: file,
+  };
+  assert.equal(run(android).status, 1);
+  const config = {
+    project_info: { project_id: "komisio-push" },
+    client: [{ client_info: { android_client_info: { package_name: "com.inority.komisio" },
+      mobilesdk_app_id: "synthetic" }, api_key: [{ current_key: "synthetic" }] }],
+  };
+  writeFileSync(file, JSON.stringify(config));
+  assert.equal(run(android).status, 0);
+  assert.equal(run({ ...android, EAS_BUILD_PLATFORM: "ios" }).status, 1);
+  assert.equal(run({ ...android, EXPO_PUBLIC_KOMISIO_WEB_URL: "https://staging.invalid" }).status, 1);
+  writeFileSync(file, JSON.stringify({ ...config, project_info: { project_id: "another-project" } }));
+  assert.equal(run(android).status, 1);
+  config.client[0].client_info.android_client_info.package_name = "com.example.other";
+  writeFileSync(file, JSON.stringify(config));
+  assert.equal(run(android).status, 1);
+});
 
 test("production preflight accepts public key formats without claiming validity", () => {
   assert.equal(run().status, 0);

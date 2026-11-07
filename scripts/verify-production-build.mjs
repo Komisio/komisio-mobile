@@ -7,7 +7,24 @@ const fail = (message) => {
   process.exit(1);
 };
 
-if (env.EAS_BUILD_PROFILE === "screenshots") {
+if (env.EAS_BUILD_PROFILE === "android-play-internal") {
+  if (env.EAS_BUILD_PLATFORM !== "android") fail("the Play profile requires Android.");
+  const app = JSON.parse(readFileSync(new URL("../app.json", import.meta.url), "utf8"));
+  const pkg = app.expo.android.package;
+  if (pkg !== "com.inority.komisio") fail("the package must match the existing Play app.");
+  let firebase;
+  try {
+    firebase = JSON.parse(readFileSync(env.GOOGLE_SERVICES_JSON, "utf8"));
+  } catch {
+    fail("set GOOGLE_SERVICES_JSON to the Firebase Android configuration file.");
+  }
+  if (firebase?.project_info?.project_id !== "komisio-push" ||
+      !firebase.client?.some(client =>
+        client.client_info?.android_client_info?.package_name === pkg &&
+        client.client_info?.mobilesdk_app_id && client.api_key?.some(key => key.current_key))) {
+    fail("the Firebase configuration must match Komisio Push and the Play package.");
+  }
+} else if (env.EAS_BUILD_PROFILE === "screenshots") {
   const config = JSON.parse(
     readFileSync(new URL("../eas.json", import.meta.url), "utf8"),
   );
@@ -22,10 +39,11 @@ if (env.EAS_BUILD_PROFILE === "screenshots") {
     );
   }
 } else if (env.EAS_BUILD_PROFILE !== "production") {
-  fail("only production and the screenshots simulator profile are configured.");
+  fail("unknown release build profile.");
 }
-if (env.EAS_BUILD_PLATFORM && env.EAS_BUILD_PLATFORM !== "ios") {
-  fail("Android store identity and signing have not been configured yet.");
+if (env.EAS_BUILD_PROFILE !== "android-play-internal" &&
+    env.EAS_BUILD_PLATFORM && env.EAS_BUILD_PLATFORM !== "ios") {
+  fail("Android must use the internal Play build profile.");
 }
 if (env.EXPO_NO_DOTENV !== "1") {
   fail("EXPO_NO_DOTENV must be 1 to exclude local environment overrides.");
@@ -59,5 +77,5 @@ if (!/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(key)) {
 }
 
 console.log(
-  "Production iOS environment checks passed. Key validity requires a live read-only check.",
+  "Production environment checks passed. Key validity requires a live read-only check.",
 );

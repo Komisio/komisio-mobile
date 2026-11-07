@@ -22,6 +22,7 @@
       }
     },
     "android": {
+      "package": "com.inority.komisio",
       "adaptiveIcon": {
         "backgroundColor": "#143E34",
         "foregroundImage": "./assets/images/komisio-foreground.png",
