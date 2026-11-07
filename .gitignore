@@ -47,3 +47,9 @@ example
 .env.*
 private/
 artifacts/
+credentials.json
+google-services*.json
+*firebase-adminsdk*.json
+komisio-push-*.json
+*.aab
+*.apk
