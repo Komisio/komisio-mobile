@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-09: Local draft saves serialize navigation: Back cannot open an unsaved-changes sheet during a save, and successful navigation waits until any sheet is removed. Failed saves keep the current form editable.
+
 - 2026-11-09: Continue the owner-tested photo flow with one opted-in recipient and local item details. Upgrade photo manifests without losing images; serialize edits and reject stale forms. Store selection is separate from seller login. Requested prices are optional hints in the store currency.
 
 - 2026-11-09: Owner directs one native iOS/Android codebase, tested in TestFlight before public release. Version 2.0.2 includes photo drafts and native camera permissions without preview flags. This supersedes the earlier development-only and autolinking-exclusion decisions.
