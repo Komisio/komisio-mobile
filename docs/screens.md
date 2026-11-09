@@ -92,6 +92,12 @@ or automatic-transfer rules are introduced.
 
 ## Later
 
+S14's camera/library selection and persistent local draft (1–8 images) are
+implemented at `/photo-draft`, reachable from the store picker and My items in
+the shared native iOS/Android app. It works in signed builds without test flags.
+AI analysis, S15/S16, public registration and server/financial writes remain
+future work. See the README and iOS release guide for TestFlight verification.
+
 | ID | Screen | Earlier route |
 | --- | --- | --- |
 | S03 | Create seller account | `/create-account` |

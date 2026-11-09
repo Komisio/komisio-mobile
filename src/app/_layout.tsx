@@ -6,9 +6,10 @@ import { SessionProvider, useSession } from "@/lib/session";
 import { Button, Loading, Message, Screen } from "@/components/ui";
 import { detailHeaderOptions } from "@/components/detail-navigation";
 import { PushBridge } from "@/components/push-bridge";
+import { photoDraftCopy } from "@/lib/photo-draft-copy";
 
 function Routes() {
-  const { d } = useI18n();
+  const { d, locale } = useI18n();
   const { ready, authFailed, retryAuth, store, session, mfaRequired } =
     useSession();
   // No route opens until session and two-step state are known.
@@ -28,6 +29,19 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={Boolean(store) && !session}>
         <Stack.Screen name="login" />
+      </Stack.Protected>
+      <Stack.Protected guard={!session || (Boolean(store) && signedIn)}>
+        <Stack.Screen
+          name="photo-draft"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              session ? "/(tabs)/items" : store ? "/login" : "/store",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: photoDraftCopy(locale).title,
+          })}
+        />
       </Stack.Protected>
       <Stack.Protected
         guard={Boolean(store) && Boolean(session) && mfaRequired}

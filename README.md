@@ -52,6 +52,32 @@ See [iOS release and TestFlight](docs/ios-release.md) for environment setup,
 build/submission commands, proposed store copy and the remaining release gates.
 This configuration alone does not make the app release-ready.
 
+## Photo drafts
+
+The same native iOS/Android app offers **Photograph an item** on the store picker
+and in **My items**. `/photo-draft` works in signed builds, including TestFlight,
+without development flags. Existing authentication and MFA guards still apply.
+
+The screen takes or selects up to eight photos for one item. Every completed
+edit saves a local draft: private app files on iOS/Android and a dedicated
+IndexedDB database on web. Closing and reopening the preview restores it.
+Removing photos or clearing the draft never deletes library originals. Camera
+permission is requested on the Take a photo action; no microphone access is used.
+After a successful save, imported files inside the app's own picker cache are
+removed on a best-effort basis. Uncommitted files are left for the OS to reclaim.
+
+The standard store build includes the native image picker and iOS camera/photo
+purpose strings. Use the existing `production` EAS profile for iOS, then upload
+that exact build to TestFlight. Test camera/library permissions, app restart,
+offline recovery and existing seller flows on the signed app before public
+release. Android uses the same code and its existing build profile. Web/export
+checks do not establish native-device behavior.
+
+There is no AI analysis, upload, SMS verification, eligible-store list, offer,
+guarantee or seller-balance update in this first photo-draft step. Those require the platform
+contracts for external applicants; the existing public app directory is not
+used as an external-intake eligibility list.
+
 ## Continuous integration
 
 The **Mobile checks / Test and export** GitHub Actions job runs on pull requests

@@ -16,6 +16,7 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { DetailSheet } from "./detail-sheet";
+import { PhotoDraftEntry } from "./photo-draft-entry";
 import {
   Button,
   colors,
@@ -85,6 +86,7 @@ export function SellerItems({
   const header = (
     <View style={styles.header}>
       <PageHeading title={t.title} />
+      <PhotoDraftEntry />
       <View style={styles.searchRow}>
         <View style={styles.search}>
           <Field

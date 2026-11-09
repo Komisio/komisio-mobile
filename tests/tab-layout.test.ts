@@ -211,6 +211,7 @@ test("native back is preserved with history; direct links retain an accessible e
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/photo-draft-copy": { photoDraftCopy: () => ({ title: "Photos" }) },
     "@/components/push-bridge": { PushBridge: "PushBridge" },
     "expo-status-bar": { StatusBar: "StatusBar" },
     "expo-router": {
@@ -279,4 +280,69 @@ test("all detail routes configure back navigation with their own fallback", () =
       assert.equal(options.canGoBack, canGoBack);
     }
   }
+});
+
+test("photo drafts are available in the signed app while preserving login, MFA and seller guards", () => {
+  let state: Record<string, unknown> = { ready: true };
+  const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/photo-draft-copy": { photoDraftCopy: () => ({ title: "Photos" }) },
+    "@/components/push-bridge": { PushBridge: "PushBridge" },
+    "expo-status-bar": { StatusBar: "StatusBar" },
+    "expo-router": {
+      Stack: Object.assign(() => null, { Screen: "Route", Protected: "Guard" }),
+    },
+    "react-native-safe-area-context": { SafeAreaProvider: "SafeAreaProvider" },
+    "@/lib/i18n": {
+      I18nProvider: "I18nProvider",
+      useI18n: () => ({
+        d: Object.fromEntries(
+          [
+            "catalogue",
+            "storeInfo",
+            "items",
+            "agreement",
+            "bank",
+            "profile",
+          ].map((key) => [key, { back: "Back" }]),
+        ),
+        locale: "en",
+      }),
+    },
+    "@/lib/session": {
+      SessionProvider: "SessionProvider",
+      useSession: () => state,
+    },
+    "@/components/ui": {
+      Loading: "Loading",
+      Screen: "Screen",
+      Message: "Message",
+      Button: "Button",
+    },
+    "@/components/detail-navigation": { detailHeaderOptions: () => ({}) },
+  });
+  function routes() {
+    const routes =
+      layout.default().props.children[1].props.children.props.children[1];
+    const stack = routes.type();
+    if (stack.type === "Loading" || stack.type === "Screen") return [];
+    return Array.from<any>(stack.props.children)
+      .filter((g: any) => g.props.guard)
+      .flatMap((g: any) =>
+        [g.props.children].flat().map((s: any) => s.props.name),
+      );
+  }
+  state = { ready: true, store: null, session: null, mfaRequired: false };
+  assert.deepEqual(routes(), ["store", "photo-draft"]);
+  state = { ...state, store: {} };
+  assert.deepEqual(routes(), ["login", "photo-draft"]);
+  state = { ...state, session: {}, mfaRequired: true };
+  assert.deepEqual(routes(), ["mfa"]);
+  state = { ...state, mfaRequired: false };
+  assert.equal(routes().length, 9);
+  assert.ok(routes().includes("(tabs)"));
+  assert.ok(routes().includes("photo-draft"));
+  state = { ...state, ready: false };
+  assert.deepEqual(routes(), []);
+  state = { ...state, ready: true, authFailed: true };
+  assert.deepEqual(routes(), []);
 });
