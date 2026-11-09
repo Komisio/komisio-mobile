@@ -92,6 +92,12 @@ or automatic-transfer rules are introduced.
 
 ## Later
 
+Owner-authorized development slice, 2026-11-09: `/photo-draft` previews S14's
+camera/library selection and persistent local draft (1–8 images). It is off by
+default, unavailable in production and outside the authenticated seller routes.
+It does not implement S15/S16, public registration or any server/financial write.
+See the README for local activation and native verification requirements.
+
 | ID | Screen | Earlier route |
 | --- | --- | --- |
 | S03 | Create seller account | `/create-account` |

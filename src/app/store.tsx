@@ -4,6 +4,7 @@ import { supabase, supabaseConfigured } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
 import { useSession, type AppStore } from "@/lib/session";
 import { LanguagePicker } from "@/components/language-picker";
+import { PhotoDraftEntry } from "@/components/photo-draft-entry";
 import {
   Button,
   NavigationRow,
@@ -80,6 +81,7 @@ export default function ChooseStore() {
           </View>
         </>
       )}
+      <PhotoDraftEntry />
     </Screen>
   );
 }

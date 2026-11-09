@@ -7,6 +7,10 @@ const fail = (message) => {
   process.exit(1);
 };
 
+if (env.EXPO_PUBLIC_EXTERNAL_INTAKE_PREVIEW === "true") {
+  fail("external photo intake is a development-only preview.");
+}
+
 if (env.EAS_BUILD_PROFILE === "android-play-internal") {
   if (env.EAS_BUILD_PLATFORM !== "android") fail("the Play profile requires Android.");
   const app = JSON.parse(readFileSync(new URL("../app.json", import.meta.url), "utf8"));
