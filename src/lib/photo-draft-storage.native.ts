@@ -8,7 +8,7 @@ import {
 
 let repository: Promise<PhotoDraftRepository> | undefined;
 export function photoDraftRepository() {
-  // Keep preview storage lazy; the existing native file-system module is retained.
+  // Load the existing native file-system module when a draft is opened.
   return (repository ??= createRepository().catch((error) => {
     repository = undefined;
     throw error;

@@ -6,9 +6,10 @@ module.exports = ({ config }) => ({
     [
       "expo-image-picker",
       {
-        // Native picker modules are excluded from custom binaries. Use Expo Go.
-        cameraPermission: false,
-        photosPermission: false,
+        cameraPermission:
+          "Komisio använder kameran för att du ska kunna fotografera dina varor.",
+        photosPermission:
+          "Komisio använder de bilder du väljer för att skapa ett fotoutkast av din vara.",
         microphonePermission: false,
       },
     ],

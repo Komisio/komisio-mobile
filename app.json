@@ -3,7 +3,7 @@
     "name": "Komisio",
     "slug": "komisio",
     "owner": "chrillenilsson",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/komisio-icon.png",
     "scheme": ["komisio", "komisioapp"],

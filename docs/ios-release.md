@@ -10,14 +10,19 @@ Use the existing **Komisio** App Store record, not **Komisio (Dev)**:
 | Bundle identifier | `com.inority.komisio`                  |
 | EAS owner / slug  | `chrillenilsson` / `komisio`           |
 | EAS project ID    | `aa98c8e5-440a-4860-92e1-829f6b3bc1a1` |
-| Release version   | `2.0.1`                                |
+| Release version   | `2.0.2`                                |
 
 The npm package and GitHub repository remain `komisio-mobile`. The Expo slug
 identifies the existing publishing project, not the source repository.
 
 Apple approved version `2.0.0` and closed that release train. Build `56` was
 uploaded successfully but subsequently rejected with ITMS-90186 and ITMS-90062.
-Use version `2.0.1` for the next submission. EAS owns the build counter and
+Version `2.0.2` is the next TestFlight candidate, including native photo drafts.
+Use the standard `production` profile; no development flag or separate native
+implementation is needed. TestFlight distribution is separate from choosing a
+build for App Review/public release. The same codebase builds Android, and
+preparing this iOS candidate does not update Google's pending release.
+EAS owns the build counter and
 increments it; do not reset it or assume the next number without checking the
 current remote counter. `autoIncrement` increments the build number, not the
 marketing version: update `expo.version` before submitting to a new release train.

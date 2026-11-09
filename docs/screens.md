@@ -92,11 +92,11 @@ or automatic-transfer rules are introduced.
 
 ## Later
 
-Owner-authorized development slice, 2026-11-09: `/photo-draft` previews S14's
-camera/library selection and persistent local draft (1–8 images). It is off by
-default, unavailable in production and outside the authenticated seller routes.
-It does not implement S15/S16, public registration or any server/financial write.
-See the README for local activation and native verification requirements.
+S14's camera/library selection and persistent local draft (1–8 images) are
+implemented at `/photo-draft`, reachable from the store picker and My items in
+the shared native iOS/Android app. It works in signed builds without test flags.
+AI analysis, S15/S16, public registration and server/financial writes remain
+future work. See the README and iOS release guide for TestFlight verification.
 
 | ID | Screen | Earlier route |
 | --- | --- | --- |

@@ -211,9 +211,6 @@ test("native back is preserved with history; direct links retain an accessible e
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
-    "@/lib/external-intake-preview": {
-      externalIntakePreviewEnabled: () => false,
-    },
     "@/lib/photo-draft-copy": { photoDraftCopy: () => ({ title: "Photos" }) },
     "@/components/push-bridge": { PushBridge: "PushBridge" },
     "expo-status-bar": { StatusBar: "StatusBar" },
@@ -285,13 +282,9 @@ test("all detail routes configure back navigation with their own fallback", () =
   }
 });
 
-test("photo preview leaves store, login, MFA and seller guards intact", () => {
-  let preview = false;
+test("photo drafts are available in the signed app while preserving login, MFA and seller guards", () => {
   let state: Record<string, unknown> = { ready: true };
   const layout = compile("../src/app/_layout.tsx", {
-    "@/lib/external-intake-preview": {
-      externalIntakePreviewEnabled: () => preview,
-    },
     "@/lib/photo-draft-copy": { photoDraftCopy: () => ({ title: "Photos" }) },
     "@/components/push-bridge": { PushBridge: "PushBridge" },
     "expo-status-bar": { StatusBar: "StatusBar" },
@@ -338,21 +331,18 @@ test("photo preview leaves store, login, MFA and seller guards intact", () => {
         [g.props.children].flat().map((s: any) => s.props.name),
       );
   }
-  for (const enabled of [false, true]) {
-    preview = enabled;
-    state = { ready: true, store: null, session: null, mfaRequired: false };
-    assert.deepEqual(routes(), enabled ? ["store", "photo-draft"] : ["store"]);
-    state = { ...state, store: {} };
-    assert.deepEqual(routes(), enabled ? ["login", "photo-draft"] : ["login"]);
-    state = { ...state, session: {}, mfaRequired: true };
-    assert.deepEqual(routes(), ["mfa"]);
-    state = { ...state, mfaRequired: false };
-    assert.equal(routes().length, 8);
-    assert.ok(routes().includes("(tabs)"));
-    assert.ok(!routes().includes("photo-draft"));
-    state = { ...state, ready: false };
-    assert.deepEqual(routes(), []);
-    state = { ...state, ready: true, authFailed: true };
-    assert.deepEqual(routes(), []);
-  }
+  state = { ready: true, store: null, session: null, mfaRequired: false };
+  assert.deepEqual(routes(), ["store", "photo-draft"]);
+  state = { ...state, store: {} };
+  assert.deepEqual(routes(), ["login", "photo-draft"]);
+  state = { ...state, session: {}, mfaRequired: true };
+  assert.deepEqual(routes(), ["mfa"]);
+  state = { ...state, mfaRequired: false };
+  assert.equal(routes().length, 9);
+  assert.ok(routes().includes("(tabs)"));
+  assert.ok(routes().includes("photo-draft"));
+  state = { ...state, ready: false };
+  assert.deepEqual(routes(), []);
+  state = { ...state, ready: true, authFailed: true };
+  assert.deepEqual(routes(), []);
 });

@@ -8,7 +8,6 @@ import {
   type PhotoDraft,
   type PhotoDraftStorage,
 } from "../src/lib/photo-draft.ts";
-import { canPreviewExternalIntake } from "../src/lib/external-intake-preview.ts";
 import { pickedDraftPhotos } from "../src/lib/photo-draft-picker-result.ts";
 import { photoDraftCopy } from "../src/lib/photo-draft-copy.ts";
 import { locales } from "../src/lib/locale.ts";
@@ -55,12 +54,6 @@ function fixture() {
 }
 const input = () => ({ uri: "file:///camera/photo.jpg", fileSize: 100 });
 
-test("preview requires development and explicit opt-in, even for direct links", () => {
-  for (const flag of [undefined, "", "false", "true"])
-    assert.equal(canPreviewExternalIntake(false, flag), false);
-  assert.equal(canPreviewExternalIntake(true), false);
-  assert.equal(canPreviewExternalIntake(true, "true"), true);
-});
 test("picker cancellation, non-images and interrupted Android results are handled explicitly", () => {
   assert.deepEqual(pickedDraftPhotos(null), []);
   assert.deepEqual(pickedDraftPhotos({ canceled: true, assets: null }), []);

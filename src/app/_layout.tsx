@@ -6,7 +6,6 @@ import { SessionProvider, useSession } from "@/lib/session";
 import { Button, Loading, Message, Screen } from "@/components/ui";
 import { detailHeaderOptions } from "@/components/detail-navigation";
 import { PushBridge } from "@/components/push-bridge";
-import { externalIntakePreviewEnabled } from "@/lib/external-intake-preview";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
 
 function Routes() {
@@ -31,12 +30,12 @@ function Routes() {
       <Stack.Protected guard={Boolean(store) && !session}>
         <Stack.Screen name="login" />
       </Stack.Protected>
-      <Stack.Protected guard={externalIntakePreviewEnabled() && !session}>
+      <Stack.Protected guard={!session || (Boolean(store) && signedIn)}>
         <Stack.Screen
           name="photo-draft"
           options={({ navigation }) => ({
             ...detailHeaderOptions(
-              store ? "/login" : "/store",
+              session ? "/(tabs)/items" : store ? "/login" : "/store",
               d.close,
               navigation.canGoBack(),
             ),

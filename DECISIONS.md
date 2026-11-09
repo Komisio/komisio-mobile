@@ -1,5 +1,6 @@
 # Decisions
 
+- 2026-11-09: Owner directs one native iOS/Android codebase, tested in TestFlight before public release. Version 2.0.2 includes photo drafts and native camera permissions without preview flags. This supersedes the earlier development-only and autolinking-exclusion decisions.
 - 2026-11-09: Photo preview runs in Expo Go or web only. Exclude image-picker and image-loader from native autolinking; retain the existing file-system module. A custom native preview requires a separate reviewed build configuration before release.
 - 2026-11-09: External photo intake starts as an explicit development-only preview with local 1–8-photo drafts. Production navigation and existing seller access stay unchanged; there is no upload, AI, SMS, offer or financial command in this slice.
 - 2026-11-09: Use SDK-compatible expo-image-picker and expo-file-system for user-initiated photos and private local drafts. Load native modules only inside the preview; request no microphone access and preserve saved drafts on cancellation or write failure.

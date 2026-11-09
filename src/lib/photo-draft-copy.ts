@@ -2,7 +2,6 @@ import type { Locale } from "./locale";
 import { MAX_DRAFT_PHOTOS, MAX_PHOTO_BYTES } from "./photo-draft.ts";
 
 const sv = {
-  entry: "Prova fotoinlämning",
   title: "Fota en vara",
   intro: "Ett utkast på den här enheten. Inget skickas till någon butik ännu.",
   empty: "Börja med en bild av hela varan",
@@ -33,7 +32,6 @@ type Copy = { [K in keyof typeof sv]: string };
 const copies: Record<Locale, Copy> = {
   sv,
   en: {
-    entry: "Try photo intake",
     title: "Photograph an item",
     intro: "A draft on this device. Nothing is sent to a store yet.",
     empty: "Start with a photo of the whole item",
@@ -60,7 +58,6 @@ const copies: Record<Locale, Copy> = {
     settings: "Open settings",
   },
   no: {
-    entry: "Prøv fotoinnlevering",
     title: "Ta bilde av en vare",
     intro: "Et utkast på denne enheten. Ingenting sendes til en butikk ennå.",
     empty: "Start med et bilde av hele varen",
@@ -88,7 +85,6 @@ const copies: Record<Locale, Copy> = {
     settings: "Åpne innstillinger",
   },
   da: {
-    entry: "Prøv fotoindlevering",
     title: "Tag et billede af en vare",
     intro: "En kladde på denne enhed. Intet sendes til en butik endnu.",
     empty: "Start med et billede af hele varen",
@@ -116,7 +112,6 @@ const copies: Record<Locale, Copy> = {
     settings: "Åbn indstillinger",
   },
   fi: {
-    entry: "Kokeile kuvien lisäämistä",
     title: "Kuvaa tuote",
     intro: "Luonnos tällä laitteella. Mitään ei vielä lähetetä myymälään.",
     empty: "Aloita kuvalla koko tuotteesta",
@@ -143,7 +138,6 @@ const copies: Record<Locale, Copy> = {
     settings: "Avaa asetukset",
   },
   de: {
-    entry: "Fotoeinreichung ausprobieren",
     title: "Artikel fotografieren",
     intro:
       "Ein Entwurf auf diesem Gerät. Es wird noch nichts an ein Geschäft gesendet.",
@@ -174,7 +168,6 @@ const copies: Record<Locale, Copy> = {
     settings: "Einstellungen öffnen",
   },
   es: {
-    entry: "Probar envío de fotos",
     title: "Fotografía un artículo",
     intro:
       "Un borrador en este dispositivo. Todavía no se envía nada a ninguna tienda.",
@@ -203,7 +196,6 @@ const copies: Record<Locale, Copy> = {
     settings: "Abrir ajustes",
   },
   it: {
-    entry: "Prova l’invio di foto",
     title: "Fotografa un articolo",
     intro:
       "Una bozza su questo dispositivo. Non viene ancora inviato nulla ai negozi.",

@@ -32,6 +32,7 @@ test("overview filter intent clears old search once and does not override later 
   let focus: () => unknown;
   const reads: string[] = [];
   const modules: Record<string, unknown> = {
+    "./photo-draft-entry": { PhotoDraftEntry: "PhotoDraftEntry" },
     react: {
       useState: () => {
         const index = hook++;

@@ -27,10 +27,6 @@ const run = (overrides: Record<string, string> = {}) =>
 const jwt = (role: string, ref: string) =>
   `header.${Buffer.from(JSON.stringify({ role, ref })).toString("base64url")}.signature`;
 
-test("release preflight refuses the unfinished external intake preview", () => {
-  assert.equal(run({ EXPO_PUBLIC_EXTERNAL_INTAKE_PREVIEW: "true" }).status, 1);
-});
-
 test("Play builds require the real package, Firebase project and production backend", (t) => {
   const dir = mkdtempSync(join(tmpdir(), "komisio-android-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
