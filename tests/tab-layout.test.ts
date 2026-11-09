@@ -211,6 +211,13 @@ test("native back is preserved with history; direct links retain an accessible e
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/item-draft-copy": {
+      itemDraftCopy: () => ({
+        storeTitle: "Store",
+        detailsTitle: "Details",
+        reviewTitle: "Review",
+      }),
+    },
     "@/lib/photo-draft-copy": { photoDraftCopy: () => ({ title: "Photos" }) },
     "@/components/push-bridge": { PushBridge: "PushBridge" },
     "expo-status-bar": { StatusBar: "StatusBar" },
@@ -285,6 +292,13 @@ test("all detail routes configure back navigation with their own fallback", () =
 test("photo drafts are available in the signed app while preserving login, MFA and seller guards", () => {
   let state: Record<string, unknown> = { ready: true };
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/item-draft-copy": {
+      itemDraftCopy: () => ({
+        storeTitle: "Store",
+        detailsTitle: "Details",
+        reviewTitle: "Review",
+      }),
+    },
     "@/lib/photo-draft-copy": { photoDraftCopy: () => ({ title: "Photos" }) },
     "@/components/push-bridge": { PushBridge: "PushBridge" },
     "expo-status-bar": { StatusBar: "StatusBar" },
@@ -332,13 +346,25 @@ test("photo drafts are available in the signed app while preserving login, MFA a
       );
   }
   state = { ready: true, store: null, session: null, mfaRequired: false };
-  assert.deepEqual(routes(), ["store", "photo-draft"]);
+  assert.deepEqual(routes(), [
+    "store",
+    "photo-draft",
+    "photo-store",
+    "photo-details",
+    "photo-review",
+  ]);
   state = { ...state, store: {} };
-  assert.deepEqual(routes(), ["login", "photo-draft"]);
+  assert.deepEqual(routes(), [
+    "login",
+    "photo-draft",
+    "photo-store",
+    "photo-details",
+    "photo-review",
+  ]);
   state = { ...state, session: {}, mfaRequired: true };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 9);
+  assert.equal(routes().length, 12);
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
   state = { ...state, ready: false };

@@ -289,6 +289,7 @@ export function Screen({
   brand = false,
   bottomSafeArea = true,
   topSafeArea = true,
+  keyboardInsets = false,
   refresh,
 }: {
   title?: string;
@@ -297,6 +298,7 @@ export function Screen({
   brand?: boolean;
   bottomSafeArea?: boolean;
   topSafeArea?: boolean;
+  keyboardInsets?: boolean;
   refresh?: { refreshing: boolean; onRefresh: () => void; label: string };
 }) {
   return (
@@ -310,6 +312,7 @@ export function Screen({
       }}
     >
       <ScrollView
+        automaticallyAdjustKeyboardInsets={keyboardInsets}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}

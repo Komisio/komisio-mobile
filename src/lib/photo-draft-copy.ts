@@ -17,7 +17,7 @@ const sv = {
   clear: "Radera utkast",
   clearTitle: "Radera fotoutkastet?",
   clearBody:
-    "Bilderna tas bort från utkastet. Originalen i ditt bildbibliotek påverkas inte.",
+    "Utkastet med bilder och uppgifter raderas. Originalen i ditt bildbibliotek påverkas inte.",
   keep: "Behåll utkastet",
   error: "Det gick inte att läsa eller spara utkastet. Försök igen.",
   limit:
@@ -47,7 +47,7 @@ const copies: Record<Locale, Copy> = {
     clear: "Delete draft",
     clearTitle: "Delete the photo draft?",
     clearBody:
-      "Photos will be removed from the draft. Originals in your photo library are unaffected.",
+      "The draft, including its photos and item details, will be deleted. Originals in your photo library are unaffected.",
     keep: "Keep draft",
     error: "The draft could not be read or saved. Please try again.",
     limit: "You can have up to {maxPhotos} photos. Remove one to add another.",
@@ -73,7 +73,7 @@ const copies: Record<Locale, Copy> = {
     clear: "Slett utkast",
     clearTitle: "Slette fotoutkastet?",
     clearBody:
-      "Bildene fjernes fra utkastet. Originalene i bildebiblioteket påvirkes ikke.",
+      "Utkastet med bilder og opplysninger slettes. Originalene i bildebiblioteket påvirkes ikke.",
     keep: "Behold utkastet",
     error: "Utkastet kunne ikke leses eller lagres. Prøv igjen.",
     limit:
@@ -100,7 +100,7 @@ const copies: Record<Locale, Copy> = {
     clear: "Slet kladde",
     clearTitle: "Slet fotokladden?",
     clearBody:
-      "Billederne fjernes fra kladden. Originalerne i dit billedbibliotek påvirkes ikke.",
+      "Kladden med billeder og oplysninger slettes. Originalerne i dit billedbibliotek påvirkes ikke.",
     keep: "Behold kladden",
     error: "Kladden kunne ikke læses eller gemmes. Prøv igen.",
     limit:
@@ -127,7 +127,7 @@ const copies: Record<Locale, Copy> = {
     clear: "Poista luonnos",
     clearTitle: "Poistetaanko kuvaluonnos?",
     clearBody:
-      "Kuvat poistetaan luonnoksesta. Kuvakirjastosi alkuperäiset kuvat säilyvät.",
+      "Luonnos kuvineen ja tuotetietoineen poistetaan. Kuvakirjastosi alkuperäiset kuvat säilyvät.",
     keep: "Säilytä luonnos",
     error: "Luonnosta ei voitu lukea tai tallentaa. Yritä uudelleen.",
     limit:
@@ -155,7 +155,7 @@ const copies: Record<Locale, Copy> = {
     clear: "Entwurf löschen",
     clearTitle: "Fotoentwurf löschen?",
     clearBody:
-      "Die Fotos werden aus dem Entwurf entfernt. Originale in Ihrer Fotomediathek bleiben erhalten.",
+      "Der Entwurf mit Fotos und Artikelangaben wird gelöscht. Originale in Ihrer Fotomediathek bleiben erhalten.",
     keep: "Entwurf behalten",
     error:
       "Der Entwurf konnte nicht gelesen oder gespeichert werden. Versuchen Sie es erneut.",
@@ -185,7 +185,7 @@ const copies: Record<Locale, Copy> = {
     clear: "Eliminar borrador",
     clearTitle: "¿Eliminar el borrador de fotos?",
     clearBody:
-      "Las fotos se quitarán del borrador. Los originales de tu biblioteca no se modificarán.",
+      "Se eliminará el borrador con sus fotos y los datos del artículo. Los originales de tu biblioteca no se modificarán.",
     keep: "Conservar borrador",
     error: "No se ha podido leer o guardar el borrador. Inténtalo de nuevo.",
     limit: "Puedes añadir hasta {maxPhotos} fotos. Quita una para añadir otra.",
@@ -212,7 +212,7 @@ const copies: Record<Locale, Copy> = {
     clear: "Elimina bozza",
     clearTitle: "Eliminare la bozza fotografica?",
     clearBody:
-      "Le foto verranno rimosse dalla bozza. Gli originali nella libreria non verranno modificati.",
+      "La bozza con le foto e i dettagli dell'articolo verrà eliminata. Gli originali nella libreria non verranno modificati.",
     keep: "Conserva bozza",
     error: "Impossibile leggere o salvare la bozza. Riprova.",
     limit:

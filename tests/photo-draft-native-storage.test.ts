@@ -141,6 +141,54 @@ test("native adapter falls back from missing/corrupt primary only to a complete 
   f.files.delete(`${root}${oldId}.image`);
   await assert.rejects(repo.read(), /DRAFT_UNAVAILABLE/);
 });
+
+test("installed v1 native drafts survive metadata upgrade and interrupted replacement", async () => {
+  const f = fixture(),
+    repo = await f.repo();
+  const id = "00000000-0000-4000-8000-000000000099";
+  const legacy = JSON.stringify({ version: 1, photoIds: [id] });
+  f.files.set(`${root}${id}.image`, { text: "photo", size: 100 });
+  f.files.set(primary, { text: legacy, size: legacy.length });
+  f.files.set(backup, { text: legacy, size: legacy.length });
+  const loaded = await repo.snapshot();
+  assert.equal(loaded.photos.length, 1);
+  assert.equal(
+    f.files.get(primary)!.text,
+    legacy,
+    "reading does not rewrite an installed draft",
+  );
+  const store = {
+    id,
+    name: "Synthetic store",
+    slug: "synthetic",
+    city: null,
+    country: null,
+    currency: "SEK" as const,
+  };
+  f.failures.move = true;
+  await assert.rejects(
+    repo.selectStore(store, loaded.draft),
+    /interrupted move/,
+  );
+  assert.equal((await repo.snapshot()).photos[0].id, id);
+  f.failures.move = false;
+  const selected = await repo.selectStore(store, loaded.draft);
+  const details = {
+    description: "Jacket",
+    brand: "",
+    condition: "good" as const,
+    notes: "Small mark",
+    desiredPrice: "1000,50",
+  };
+  const saved = await repo.saveDetails(details, selected.draft);
+  f.files.set(primary, { text: "broken", size: 6 });
+  assert.deepEqual(
+    (await repo.snapshot()).draft,
+    saved.draft,
+    "v2 backup retains recipient, item details and price",
+  );
+  assert.ok(f.files.has(`${root}${id}.image`));
+});
 test("backup mirrors committed removals and clear, and remains recoverable after an interrupted replacement", async () => {
   const f = fixture(),
     repo = await f.repo();
