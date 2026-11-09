@@ -65,11 +65,17 @@ edit saves a local draft: private app files on iOS/Android and a dedicated
 IndexedDB database on web. Closing and reopening the preview restores it.
 Removing photos or clearing the draft never deletes library originals. Camera
 permission is requested on the Take a photo action; no microphone access is used.
+After a successful save, imported files inside the app's own picker cache are
+removed on a best-effort basis. Uncommitted files are left for the OS to reclaim.
 
 Use Expo Go with SDK 58 to try the native picker, permission denial/recovery,
-app restart and Android activity restoration. A custom native preview build
-would need a separate development profile and camera usage permissions; the
-existing release profiles reject the preview flag. Web verification does not
+app restart and Android activity restoration. `expo-image-picker` and its
+`expo-image-loader` dependency are excluded from native autolinking on both
+platforms, including release builds. The existing `expo-file-system` module stays
+linked at the same version. This preview therefore runs in Expo Go or web only;
+a custom native preview requires a separately reviewed linking/permission setup
+and development profile. Existing release profiles reject the preview flag.
+Web verification does not
 establish native-device behavior. The existing seller tabs, login/MFA,
 bank details and pending financial commands retain their existing paths.
 

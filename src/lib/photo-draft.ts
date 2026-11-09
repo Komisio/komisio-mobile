@@ -11,6 +11,7 @@ export interface PhotoDraftStorage {
   read(): Promise<unknown>;
   write(draft: PhotoDraft): Promise<void>;
   importPhoto(id: string, input: PhotoInput): Promise<void>;
+  releaseInputs?(inputs: PhotoInput[]): Promise<void>;
   uri(id: string): Promise<string>;
   cleanup(keep: string[]): Promise<void>;
 }
@@ -99,6 +100,11 @@ export class PhotoDraftRepository {
       } catch (error) {
         await this.cleanup(current.photoIds);
         throw error;
+      }
+      try {
+        await this.storage.releaseInputs?.(inputs);
+      } catch {
+        // The draft has committed. The OS may reclaim remaining picker cache.
       }
       await this.cleanup(next.photoIds);
       return photos;

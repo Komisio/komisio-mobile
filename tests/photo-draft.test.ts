@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   PhotoDraftRepository,
+  MAX_DRAFT_PHOTOS,
+  MAX_PHOTO_BYTES,
   parsePhotoDraft,
   type PhotoDraft,
   type PhotoDraftStorage,
@@ -98,6 +100,11 @@ test("all app languages explain the local draft and preserve photo counters", ()
     assert.ok(Object.values(copy).every((value) => value.length > 0));
     assert.match(copy.count, /\{count\}/);
     assert.match(copy.remove, /\{count\}/);
+    assert.equal(copy.photo.replace("{count}", "3").includes("3"), true);
+    assert.ok(copy.count.includes(String(MAX_DRAFT_PHOTOS)));
+    assert.ok(copy.limit.includes(String(MAX_DRAFT_PHOTOS)));
+    assert.ok(copy.invalid.includes(String(MAX_PHOTO_BYTES / 1024 / 1024)));
+    assert.doesNotMatch(JSON.stringify(copy), /\{maxPhotos\}|\{maxMB\}/);
   }
 });
 test("draft accepts 1–8 photos, appends in order and reopens persisted files", async () => {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Linking, Text, View } from "react-native";
-import { Image } from "expo-image";
+import { PhotoDraftImage } from "./photo-draft-image";
 import { Button, Card, Loading, Message, Screen, colors, uiStyles } from "./ui";
 import { DetailSheet } from "./detail-sheet";
 import { useI18n } from "@/lib/i18n";
@@ -103,23 +103,11 @@ export function PhotoDraftScreen() {
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
               {photos.map((photo, index) => (
                 <View key={photo.id} style={{ width: "47%", gap: 4 }}>
-                  <Image
-                    source={{ uri: photo.uri }}
-                    contentFit="contain"
-                    cachePolicy="none"
-                    accessibilityLabel={t.count.replace(
-                      "{count}",
-                      String(index + 1),
-                    )}
-                    style={{
-                      width: "100%",
-                      aspectRatio: 1,
-                      borderRadius: 12,
-                      borderWidth: 1,
-                      borderColor: colors.line,
-                      backgroundColor: "white",
-                    }}
-                    onError={() => setError("PHOTO_INVALID")}
+                  <PhotoDraftImage
+                    uri={photo.uri}
+                    label={t.photo.replace("{count}", String(index + 1))}
+                    errorText={t.previewError}
+                    retryLabel={d.retry}
                   />
                   <Button
                     label={t.remove.replace("{count}", String(index + 1))}

@@ -13,6 +13,9 @@ export async function readDraftPhotos() {
   recovery ??= pending
     .then((photos) => (photos.length ? repo.add(photos) : undefined))
     .catch((error) => {
+      // Surface a failed recovery once, then let Retry reopen the saved draft.
+      // Replaying an oversized/invalid pending result would lock it indefinitely.
+      pending = Promise.resolve([]);
       recovery = undefined;
       throw error;
     });
