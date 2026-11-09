@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
 import { Linking, Text, View } from "react-native";
 import { PhotoDraftImage } from "./photo-draft-image";
 import { Button, Card, Loading, Message, Screen, colors, uiStyles } from "./ui";
 import { DetailSheet } from "./detail-sheet";
 import { useI18n } from "@/lib/i18n";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
+import { itemDraftCopy } from "@/lib/item-draft-copy";
 import { MAX_DRAFT_PHOTOS, type DraftPhoto } from "@/lib/photo-draft";
 import { photoDraftRepository } from "@/lib/photo-draft-storage";
 import { pickDraftPhotos } from "@/lib/photo-draft-picker";
@@ -14,28 +16,38 @@ export function PhotoDraftScreen() {
   const { locale, d } = useI18n();
   const t = photoDraftCopy(locale);
   const [photos, setPhotos] = useState<DraftPhoto[] | null>(null);
+  const [hasRecipient, setHasRecipient] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
-  const [attempt, setAttempt] = useState(0);
   const locked = useRef(false);
   const alive = useRef(true);
-  useEffect(() => {
-    alive.current = true;
-    let current = true;
+  const readVersion = useRef(0);
+  const load = useCallback(() => {
+    const started = ++readVersion.current;
     void readDraftPhotos()
+      .then(async () => (await photoDraftRepository()).snapshot())
       .then((saved) => {
-        if (current) setPhotos(saved);
+        if (started === readVersion.current) {
+          setPhotos(saved.photos);
+          setHasRecipient(Boolean(saved.draft.store));
+        }
       })
       .catch((e: unknown) => {
-        if (current)
+        if (started === readVersion.current)
           setError(e instanceof Error ? e.message : "DRAFT_UNAVAILABLE");
       });
-    return () => {
-      current = false;
-      alive.current = false;
-    };
-  }, [attempt]);
+  }, [setPhotos, setHasRecipient, setError]);
+  useFocusEffect(
+    useCallback(() => {
+      alive.current = true;
+      load();
+      return () => {
+        readVersion.current += 1;
+        alive.current = false;
+      };
+    }, [load]),
+  );
 
   async function update(action: () => Promise<DraftPhoto[]>) {
     if (locked.current) return false;
@@ -135,6 +147,21 @@ export function PhotoDraftScreen() {
             onPress={() => pick(false)}
           />
           {count === MAX_DRAFT_PHOTOS ? <Message>{t.limit}</Message> : null}
+          {count > 0 ? (
+            <Button
+              label={
+                hasRecipient
+                  ? itemDraftCopy(locale).detailsTitle
+                  : itemDraftCopy(locale).storeTitle
+              }
+              disabled={busy}
+              onPress={() =>
+                router.navigate(
+                  hasRecipient ? "/photo-details" : "/photo-store",
+                )
+              }
+            />
+          ) : null}
           {busy ? (
             <Message>{t.working}</Message>
           ) : count > 0 && !error ? (
@@ -162,7 +189,7 @@ export function PhotoDraftScreen() {
               disabled={busy}
               onPress={() => {
                 setError(null);
-                setAttempt((n) => n + 1);
+                load();
               }}
             />
           ) : null}
@@ -187,7 +214,10 @@ export function PhotoDraftScreen() {
           busy={busy}
           onPress={() => {
             void update(clearDraftPhotos).then((saved) => {
-              if (saved && alive.current) setConfirmClear(false);
+              if (saved && alive.current) {
+                setConfirmClear(false);
+                setHasRecipient(false);
+              }
             });
           }}
         />

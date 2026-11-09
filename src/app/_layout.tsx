@@ -7,6 +7,7 @@ import { Button, Loading, Message, Screen } from "@/components/ui";
 import { detailHeaderOptions } from "@/components/detail-navigation";
 import { PushBridge } from "@/components/push-bridge";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
+import { itemDraftCopy } from "@/lib/item-draft-copy";
 
 function Routes() {
   const { d, locale } = useI18n();
@@ -40,6 +41,39 @@ function Routes() {
               navigation.canGoBack(),
             ),
             title: photoDraftCopy(locale).title,
+          })}
+        />
+        <Stack.Screen
+          name="photo-store"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/photo-draft",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: itemDraftCopy(locale).storeTitle,
+          })}
+        />
+        <Stack.Screen
+          name="photo-details"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/photo-store",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: itemDraftCopy(locale).detailsTitle,
+          })}
+        />
+        <Stack.Screen
+          name="photo-review"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/photo-details",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: itemDraftCopy(locale).reviewTitle,
           })}
         />
       </Stack.Protected>

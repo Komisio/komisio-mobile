@@ -30,10 +30,12 @@ async function createRepository() {
     photo.size > 0 &&
     photo.size <= MAX_PHOTO_BYTES;
   async function readManifest(source: InstanceType<typeof File>) {
-    const draft = parsePhotoDraft(JSON.parse(await source.text()));
+    const saved: unknown = JSON.parse(await source.text());
+    const draft = parsePhotoDraft(saved);
     if (draft.photoIds.some((id) => !readablePhoto(file(id))))
       throw new Error("DRAFT_UNAVAILABLE");
-    return draft;
+    // Keep the on-disk version until the repository performs its single upgrade.
+    return saved;
   }
   const storage: PhotoDraftStorage = {
     async read() {

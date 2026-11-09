@@ -73,10 +73,23 @@ offline recovery and existing seller flows on the signed app before public
 release. Android uses the same code and its existing build profile. Web/export
 checks do not establish native-device behavior.
 
-There is no AI analysis, upload, SMS verification, eligible-store list, offer,
-guarantee or seller-balance update in this first photo-draft step. Those require the platform
-contracts for external applicants; the existing public app directory is not
-used as an external-intake eligibility list.
+After the photos, choose one receiving store, enter the description, brand,
+condition and optional desired selling price, then review the local draft.
+The dedicated `public_external_app_stores` RPC lists only explicitly opted-in
+stores; ordinary app visibility and seller login remain separate. A platform
+without that RPC shows an unavailable message and retains the draft. No store
+is opted in automatically. Selection is refreshed before saving, and a currency
+change requires confirmation before clearing the optional price.
+
+Version 1 photo manifests remain readable and upgrade on the next edit without
+discarding images. Item details persist alongside the photos; stale editors are
+rejected instead of overwriting newer changes. Leaving an edited form asks
+whether to save. Drafts stay on the current device, including offline.
+
+There is no AI analysis, upload, SMS verification, offer, guarantee or
+seller-balance update in this increment. Those require the platform contracts
+for external applicants. The summary explicitly remains a local draft, with no
+send action until authenticated submission is available.
 
 ## Continuous integration
 
