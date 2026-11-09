@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-10: Consume native pending photo results on each draft read, serialized with explicit reset. Android activity recreation can keep the JS runtime alive; an earlier empty result must not hide later photos, and delayed recovery must not resurrect a cleared draft.
+
 - 2026-11-09: Local draft saves serialize navigation: Back cannot open an unsaved-changes sheet during a save, and successful navigation waits until any sheet is removed. Failed saves keep the current form editable.
 
 - 2026-11-09: Continue the owner-tested photo flow with one opted-in recipient and local item details. Upgrade photo manifests without losing images; serialize edits and reject stale forms. Store selection is separate from seller login. Requested prices are optional hints in the store currency.
