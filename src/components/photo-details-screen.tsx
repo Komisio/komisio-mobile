@@ -72,7 +72,10 @@ export function PhotoDetailsScreen() {
   );
   const disablePrevention = usePreventRemove(
     (dirty || busy) && !leaving,
-    ({ repeat }) => setPendingExit({ repeat }),
+    ({ repeat }) => {
+      // The current save owns navigation until it succeeds or fails.
+      if (!locked.current) setPendingExit({ repeat });
+    },
   );
   function change<K extends keyof ItemDraftDetails>(
     field: K,
@@ -110,8 +113,13 @@ export function PhotoDetailsScreen() {
   async function open(path: Href, complete = false) {
     if (await save(complete)) {
       setLeaving(true);
-      disablePrevention();
-      router.navigate(path);
+      setPendingExit(null);
+      setExitAction({
+        repeat: () => {
+          disablePrevention();
+          router.navigate(path);
+        },
+      });
     }
   }
   function exit() {
