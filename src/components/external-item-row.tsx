@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { externalOfferCopy } from "@/lib/external-offer-copy";
+import { externalHandoverCopy } from "@/lib/external-handover-copy";
 import { offerAmount, type ExternalOffer } from "@/lib/external-offer";
 import { Text, View } from "react-native";
 import { useI18n } from "@/lib/i18n";
@@ -24,26 +25,30 @@ export function ExternalItemRow({
   const { locale } = useI18n();
   const t = externalSubmissionCopy(locale),
     flow = photoFlowCopy(locale);
-  const date = new Intl.DateTimeFormat(formattingLocale(locale), {
+  const dates = new Intl.DateTimeFormat(formattingLocale(locale), {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(item.created_at));
-  const o = externalOfferCopy(locale);
-  const status = offer
-    ? offer.status === "offered"
-      ? o.offerBadge.replace(
-          "{amount}",
-          offerAmount(offer.sellerAmountOre, formattingLocale(locale)),
-        )
-      : offer.status === "accepted"
-        ? o.accepted
-        : offer.status === "declined"
-          ? o.declined
-          : o.expired
-    : item.status === "waiting"
-      ? t.waiting
-      : t.declined;
+  });
+  const date = dates.format(new Date(item.created_at));
+  const o = externalOfferCopy(locale),
+    h = externalHandoverCopy(locale);
+  const status = offer?.handover
+    ? h[offer.handover.status]
+    : offer
+      ? offer.status === "offered"
+        ? o.offerBadge.replace(
+            "{amount}",
+            offerAmount(offer.sellerAmountOre, formattingLocale(locale)),
+          )
+        : offer.status === "accepted"
+          ? o.accepted
+          : offer.status === "declined"
+            ? o.declined
+            : o.expired
+      : item.status === "waiting"
+        ? t.waiting
+        : t.declined;
   const content = (
     <View style={{ gap: 8 }}>
       <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
@@ -60,19 +65,31 @@ export function ExternalItemRow({
           {offersLoaded || item.status === "declined" ? (
             <StatusBadge
               tone={
-                offer?.status === "offered"
-                  ? "positive"
-                  : item.status === "waiting"
-                    ? "neutral"
-                    : "warning"
+                offer?.handover?.status === "open"
+                  ? "warning"
+                  : offer?.handover?.status === "received"
+                    ? "positive"
+                    : offer?.status === "offered"
+                      ? "positive"
+                      : item.status === "waiting"
+                        ? "neutral"
+                        : "warning"
               }
             >
               {status}
             </StatusBadge>
           ) : null}
           <Text style={uiStyles.note}>
-            {flow.submitted.replace("{date}", date)}
+            {offer?.handover?.receivedAt
+              ? h.receivedAt.replace(
+                  "{date}",
+                  dates.format(new Date(offer.handover.receivedAt)),
+                )
+              : flow.submitted.replace("{date}", date)}
           </Text>
+          {offer?.handover?.status === "open" ? (
+            <Text style={uiStyles.note}>{offer.handover.reference}</Text>
+          ) : null}
           {item.store_name !== "Komisio" ? (
             <Text style={uiStyles.note}>{item.store_name}</Text>
           ) : null}
@@ -90,7 +107,10 @@ export function ExternalItemRow({
       label={`${item.description}. ${status}`}
       onPress={() =>
         router.push({
-          pathname: "/external-offer/[offer]",
+          pathname:
+            offer.status === "accepted"
+              ? "/external-onboarding/[offer]"
+              : "/external-offer/[offer]",
           params: { offer: offer.id },
         })
       }

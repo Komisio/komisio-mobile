@@ -16,6 +16,13 @@ export type ExternalOffer = {
   canAccept: boolean;
   canDecline: boolean;
   response: { id: string; accepted: boolean; createdAt: string } | null;
+  handover?: {
+    id: string;
+    reference: string;
+    status: "open" | "received" | "cancelled";
+    receivedAt: string | null;
+    itemCount: number;
+  } | null;
 };
 export type ExternalOfferDetail = ExternalOffer & {
   agreement: {
@@ -79,6 +86,21 @@ export function parseExternalOffer(value: unknown): ExternalOffer {
     )
       invalid();
   } else if (o.status === "accepted") invalid();
+  if (o.handover != null) {
+    const h = object(o.handover);
+    if (
+      o.status !== "accepted" ||
+      !isId(h.id) ||
+      typeof h.reference !== "string" ||
+      !/^H-[1-9]\d{0,11}$/.test(h.reference) ||
+      !["open", "received", "cancelled"].includes(String(h.status)) ||
+      !Number.isInteger(h.itemCount) ||
+      (h.itemCount as number) < 1 ||
+      (h.itemCount as number) > 10 ||
+      (h.status === "received" ? !date(h.receivedAt) : h.receivedAt !== null)
+    )
+      invalid();
+  }
   return o as unknown as ExternalOffer;
 }
 export function parseExternalOfferDetail(value: unknown): ExternalOfferDetail {

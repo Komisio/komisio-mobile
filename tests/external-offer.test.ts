@@ -156,3 +156,46 @@ test("a lost acceptance survives remount and retries the exact response, never a
   assert.equal(resumed.getState().status, "success");
   assert.equal(values.size, 0);
 });
+
+test("handover progress requires real accepted and received states while old reads remain compatible", () => {
+  const accepted = {
+    ...offer,
+    status: "accepted",
+    canAccept: false,
+    canDecline: false,
+    response: { id: id(6), accepted: true, createdAt: offer.createdAt },
+  };
+  const handover = {
+    id: id(7),
+    reference: "H-128",
+    status: "open",
+    receivedAt: null,
+    itemCount: 2,
+  };
+  assert.equal(parseExternalOffer(accepted).handover, undefined);
+  assert.equal(
+    parseExternalOffer({ ...accepted, handover }).handover?.itemCount,
+    2,
+  );
+  const received = {
+    ...handover,
+    status: "received",
+    receivedAt: "2026-11-12T10:00:00Z",
+  };
+  assert.equal(
+    parseExternalOffer({ ...accepted, handover: received }).handover?.status,
+    "received",
+  );
+  assert.throws(() => parseExternalOffer({ ...offer, handover }));
+  for (const patch of [
+    { reference: "H-0" },
+    { itemCount: 11 },
+    { itemCount: 0 },
+    { status: "on_sale" },
+    { status: "received" },
+    { receivedAt: offer.createdAt },
+  ])
+    assert.throws(() =>
+      parseExternalOffer({ ...accepted, handover: { ...handover, ...patch } }),
+    );
+});

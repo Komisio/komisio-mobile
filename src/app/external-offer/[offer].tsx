@@ -21,6 +21,7 @@ import {
 import { offerAmount, offerIsExpired } from "@/lib/external-offer";
 import { externalOfferCopy } from "@/lib/external-offer-copy";
 import { externalOnboardingCopy } from "@/lib/external-onboarding-copy";
+import { externalHandoverCopy } from "@/lib/external-handover-copy";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { formattingLocale } from "@/lib/locale";
@@ -240,11 +241,21 @@ function Offer({ user, id }: { user: string; id: string }) {
           </Card>
           {o.status === "accepted" ? (
             <>
-              <StatusBadge>{t.accepted}</StatusBadge>
-              <Text style={uiStyles.body}>{t.acceptedText}</Text>
+              <StatusBadge>
+                {o.handover
+                  ? externalHandoverCopy(locale)[o.handover.status]
+                  : t.accepted}
+              </StatusBadge>
+              {!o.handover ? (
+                <Text style={uiStyles.body}>{t.acceptedText}</Text>
+              ) : null}
               {!pending && !busy ? (
                 <Button
-                  label={externalOnboardingCopy(locale).continue}
+                  label={
+                    o.handover
+                      ? externalHandoverCopy(locale).view
+                      : externalOnboardingCopy(locale).continue
+                  }
                   onPress={() =>
                     router.push({
                       pathname: "/external-onboarding/[offer]",

@@ -28,3 +28,4 @@
 - 2026-11-06: #72 requests native push permission once after authenticated seller lookup when OS permission is undetermined. Persist the attempt before prompting; preserve existing choices and account isolation. Profile notification controls remain available.
 
 - 2026-11-10: Central onboarding explicitly binds the SMS identity to its own seller record. Email is contact-only. Final consent atomically saves account, Swedish bank and frozen agreement evidence with a real grouped H-handover; retries retain the exact command. Ordinary email accounts stay unchanged.
+- 2026-11-10: My items uses actual linked handover state to distinguish Ready for drop-off from Received and opens accepted requests directly at account/handover. Receipt is not labelled on-sale or credited; older offer reads without progress remain compatible.
