@@ -11,6 +11,7 @@ import { itemDraftCopy } from "@/lib/item-draft-copy";
 import { externalSubmissionCopy } from "@/lib/external-submission-copy";
 import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { externalOfferCopy } from "@/lib/external-offer-copy";
+import { externalOnboardingCopy } from "@/lib/external-onboarding-copy";
 import { photoFlowCopy } from "@/lib/photo-flow-copy";
 
 function Routes() {
@@ -142,6 +143,13 @@ function Routes() {
         <Stack.Screen name="login" />
       </Stack.Protected>
       <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
+        <Stack.Screen
+          name="external-onboarding/[offer]"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions("/external-items", d.close, navigation.canGoBack()),
+            title: externalOnboardingCopy(locale).title,
+          })}
+        />
         <Stack.Screen
           name="external-offer/[offer]"
           options={({ navigation }) => ({

@@ -212,6 +212,7 @@ test("native back is preserved with history; direct links retain an accessible e
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/external-onboarding-copy": { externalOnboardingCopy: () => ({ title: "Account" }) },
     "@/lib/external-offer-copy": {
       externalOfferCopy: () => ({ title: "Offer" }),
     },
@@ -313,6 +314,7 @@ test("all detail routes configure back navigation with their own fallback", () =
 test("photo drafts are available in the signed app while preserving login, MFA and seller guards", () => {
   let state: Record<string, unknown> = { ready: true };
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/external-onboarding-copy": { externalOnboardingCopy: () => ({ title: "Account" }) },
     "@/lib/external-offer-copy": {
       externalOfferCopy: () => ({ title: "Offer" }),
     },
@@ -405,7 +407,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 16);
+  assert.equal(routes().length, 17);
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
   state = { ...state, store: null };
@@ -418,6 +420,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     },
   };
   assert.deepEqual(routes(), [
+    "external-onboarding/[offer]",
     "external-offer/[offer]",
     "external-items",
     "photo-sent",

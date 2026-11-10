@@ -5,8 +5,8 @@ import {
   parseExternalOfferDetail,
 } from "./external-offer.ts";
 
-export function createExternalOfferApi(deps: CommandTransport) {
-  async function call(body: unknown) {
+export function createExternalPhoneRead(deps: CommandTransport) {
+  return async function call(body: unknown) {
     if (!deps.endpoint) throw new Error("OFFER_UNAVAILABLE");
     const session = await deps.session();
     if (!session || session.user !== deps.user)
@@ -44,7 +44,11 @@ export function createExternalOfferApi(deps: CommandTransport) {
     } finally {
       clearTimeout(timeout);
     }
-  }
+  };
+}
+
+export function createExternalOfferApi(deps: CommandTransport) {
+  const call = createExternalPhoneRead(deps);
   return {
     async list(requestIds: string[]) {
       if (

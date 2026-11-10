@@ -6,7 +6,6 @@ import { randomUUID } from "expo-crypto";
 import {
   Button,
   Card,
-  Choice,
   Loading,
   Message,
   Screen,
@@ -21,6 +20,7 @@ import {
 } from "@/lib/external-offer-runtime";
 import { offerAmount, offerIsExpired } from "@/lib/external-offer";
 import { externalOfferCopy } from "@/lib/external-offer-copy";
+import { externalOnboardingCopy } from "@/lib/external-onboarding-copy";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { formattingLocale } from "@/lib/locale";
@@ -55,8 +55,7 @@ function Offer({ user, id }: { user: string; id: string }) {
     writer.getState,
     writer.getState,
   );
-  const [terms, setTerms] = useState(false),
-    [agreed, setAgreed] = useState(false);
+  const [terms, setTerms] = useState(false);
   const [now, setNow] = useState(() => performance.now());
   const read = useMemo(
     () =>
@@ -87,7 +86,6 @@ function Offer({ user, id }: { user: string; id: string }) {
     error = state.status === "failed";
   const reload = useCallback(() => {
     setTerms(false);
-    setAgreed(false);
     void read.refresh();
   }, [read]);
   useFocusEffect(
@@ -144,7 +142,7 @@ function Offer({ user, id }: { user: string; id: string }) {
       !ready ||
       busy ||
       pending ||
-      (accepted && (!agreed || expired || !o.canAccept)) ||
+      accepted ||
       (!accepted && !o.canDecline)
     )
       return;
@@ -244,6 +242,17 @@ function Offer({ user, id }: { user: string; id: string }) {
             <>
               <StatusBadge>{t.accepted}</StatusBadge>
               <Text style={uiStyles.body}>{t.acceptedText}</Text>
+              {!pending && !busy ? (
+                <Button
+                  label={externalOnboardingCopy(locale).continue}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/external-onboarding/[offer]",
+                      params: { offer: o.id },
+                    })
+                  }
+                />
+              ) : null}
             </>
           ) : o.status === "declined" ? (
             <StatusBadge tone="neutral">{t.declined}</StatusBadge>
@@ -281,27 +290,19 @@ function Offer({ user, id }: { user: string; id: string }) {
               <Text selectable style={uiStyles.body}>
                 {o.agreement.body}
               </Text>
-              {o.canAccept && !expired ? (
-                <Choice
-                  role="checkbox"
-                  listRow
-                  label={t.agree}
-                  selected={agreed}
-                  disabled={!ready || busy || pending}
-                  onPress={() => setAgreed((v) => !v)}
-                />
-              ) : null}
             </Card>
           ) : null}
           {o.canAccept && !expired && !pending ? (
             <Button
-              label={terms ? t.confirm : t.yes}
+              label={t.yes}
               busy={busy}
-              disabled={!ready || (terms && !agreed)}
-              onPress={() => {
-                if (terms) send(true);
-                else setTerms(true);
-              }}
+              disabled={!ready}
+              onPress={() =>
+                router.push({
+                  pathname: "/external-onboarding/[offer]",
+                  params: { offer: o.id },
+                })
+              }
             />
           ) : null}
           {o.canDecline && !pending ? (

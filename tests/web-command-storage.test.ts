@@ -75,3 +75,20 @@ test("only known API refusals are candidates for first-attempt settlement", () =
   ] as const)
     assert.equal(commandRefusal(status, { error }), null);
 });
+
+test("onboarding bank payloads share logout and identity-switch cleanup", async () => {
+  const f = fixture(),
+    key = "komisio.pending.onboarding.v1.user.offer";
+  f.store.setUser("user");
+  await f.store.commands.setItem(key, "synthetic bank");
+  f.store.setUser("user");
+  assert.equal(await f.store.commands.getItem(key), "synthetic bank");
+  f.store.setUser("other");
+  assert.equal(f.values.has(key), false);
+  await assert.rejects(f.store.commands.setItem(key, "stale writer"));
+  f.store.setUser("user");
+  await f.store.commands.setItem(key, "synthetic bank");
+  f.store.setUser(null);
+  assert.equal(f.values.has(key), false);
+  await assert.rejects(f.store.commands.getItem(key));
+});

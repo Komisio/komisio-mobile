@@ -19,7 +19,7 @@ const copy = {
     confirm: "Godkänn erbjudandet",
     accepted: "Du har tackat ja",
     acceptedText:
-      "Ditt svar är sparat. Varan är ännu inte registrerad som inlämnad.",
+      "Ditt svar är sparat. Här kan du gå vidare till din inlämning.",
     declined: "Du har tackat nej",
     expired: "Erbjudandet har gått ut",
     superseded: "Det finns ett nyare erbjudande för varan.",
@@ -51,7 +51,7 @@ const copy = {
     confirm: "Accept the offer",
     accepted: "You accepted",
     acceptedText:
-      "Your response is saved. The item has not yet been recorded as handed in.",
+      "Your response is saved. Continue here to view your handover.",
     declined: "You declined",
     expired: "The offer has expired",
     superseded: "There is a newer offer for this item.",
@@ -80,8 +80,7 @@ const copy = {
     agree: "Jeg godtar dette tilbudet og selgeravtalen.",
     confirm: "Godta tilbudet",
     accepted: "Du har takket ja",
-    acceptedText:
-      "Svaret ditt er lagret. Varen er ennå ikke registrert som innlevert.",
+    acceptedText: "Svaret ditt er lagret. Fortsett her til innleveringen din.",
     declined: "Du har takket nei",
     expired: "Tilbudet har utløpt",
     superseded: "Det finnes et nyere tilbud for varen.",
@@ -111,8 +110,7 @@ const copy = {
     agree: "Jeg accepterer dette tilbud og sælgeraftalen.",
     confirm: "Accepter tilbuddet",
     accepted: "Du har accepteret",
-    acceptedText:
-      "Dit svar er gemt. Varen er endnu ikke registreret som indleveret.",
+    acceptedText: "Dit svar er gemt. Fortsæt her til din indlevering.",
     declined: "Du har afvist",
     expired: "Tilbuddet er udløbet",
     superseded: "Der er et nyere tilbud på varen.",
@@ -142,8 +140,7 @@ const copy = {
     agree: "Hyväksyn tämän tarjouksen ja myyjäsopimuksen.",
     confirm: "Hyväksy tarjous",
     accepted: "Hyväksyit tarjouksen",
-    acceptedText:
-      "Vastauksesi on tallennettu. Tuotetta ei ole vielä kirjattu luovutetuksi.",
+    acceptedText: "Vastauksesi on tallennettu. Jatka tästä toimitukseesi.",
     declined: "Hylkäsit tarjouksen",
     expired: "Tarjous on vanhentunut",
     superseded: "Tuotteelle on uudempi tarjous.",
@@ -173,8 +170,7 @@ const copy = {
     agree: "Ich akzeptiere dieses Angebot und die Verkäufervereinbarung.",
     confirm: "Angebot annehmen",
     accepted: "Sie haben angenommen",
-    acceptedText:
-      "Ihre Antwort ist gespeichert. Der Artikel ist noch nicht als abgegeben erfasst.",
+    acceptedText: "Ihre Antwort ist gespeichert. Hier geht es zu Ihrer Abgabe.",
     declined: "Sie haben abgelehnt",
     expired: "Das Angebot ist abgelaufen",
     superseded: "Für diesen Artikel gibt es ein neueres Angebot.",
@@ -206,7 +202,7 @@ const copy = {
     confirm: "Aceptar la oferta",
     accepted: "Has aceptado",
     acceptedText:
-      "Tu respuesta está guardada. El artículo aún no se ha registrado como entregado.",
+      "Tu respuesta está guardada. Continúa aquí para ver tu entrega.",
     declined: "Has rechazado",
     expired: "La oferta ha caducado",
     superseded: "Hay una oferta más reciente para este artículo.",
@@ -238,7 +234,7 @@ const copy = {
     confirm: "Accetta l’offerta",
     accepted: "Hai accettato",
     acceptedText:
-      "La tua risposta è salvata. L’articolo non è ancora registrato come consegnato.",
+      "La tua risposta è salvata. Continua qui per vedere la consegna.",
     declined: "Hai rifiutato",
     expired: "L’offerta è scaduta",
     superseded: "È disponibile un’offerta più recente per questo articolo.",
