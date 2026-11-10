@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-10: Show real fixed-SEK offers with server-timed 48-hour expiry and frozen store terms. Responses use the existing owner/project-bound command journal. Read confirmations before updating status; acceptance alone creates no seller, handover or credit.
+
 - 2026-11-10: Owner sets central offers to expire after 48 hours and selects the recipient store's ordinary versioned seller agreement. Later versions require seller consent for subsequent uploads; earlier items retain their agreed version. Offer and agreement execution remain a separate backend slice.
 
 - 2026-11-10: Follow the owner's mobile sketches for central photo intake: guest welcome, three visible steps, SMS cells, confirmed success and private item thumbnails. Preserve native capture, saved-photo recovery, owner-bound retries and existing store access; no simulated AI, offers or payments.

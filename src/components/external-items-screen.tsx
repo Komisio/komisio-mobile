@@ -1,3 +1,6 @@
+import { externalOfferCopy } from "@/lib/external-offer-copy";
+import { externalOfferApi } from "@/lib/external-offer-runtime";
+import type { ExternalOffer } from "@/lib/external-offer";
 import { useCallback, useRef, useState } from "react";
 import { Text } from "react-native";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -32,51 +35,80 @@ export function ExternalItemsScreen() {
   const owner = session?.user.id,
     verified = hasVerifiedPhone(session?.user);
   const { snapshot } = useItemDraft();
-  const [offset, setOffset] = useState(0),
-    [retry, setRetry] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [page, setPage] = useState<{
     owner: string;
     data: ExternalRequestPage;
+    offers: ExternalOffer[] | null;
   } | null>(null);
   const [pending, setPending] = useState(false),
     [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [offerError, setOfferError] = useState(false);
   const leaving = useRef(false);
-  useFocusEffect(
-    useCallback(() => {
-      void retry;
-      let current = true;
-      setPage(null);
-      setError("");
-      setPending(false);
-      if (owner && verified) {
-        void Promise.all([
-          externalRequestApi(owner).list(offset),
-          externalSubmission(owner).then((c) => c.load()),
-        ])
-          .then(([data, attempt]) => {
+  const load = useCallback(() => {
+    let current = true;
+    setPage(null);
+    setError("");
+    setOfferError(false);
+    setPending(false);
+    if (owner && verified) {
+      void Promise.all([
+        externalRequestApi(owner).list(offset),
+        externalSubmission(owner).then((c) => c.load()),
+      ])
+        .then(async ([data, attempt]) => {
+          if (current) {
+            setPage({ owner, data, offers: null });
+            setPending(
+              attempt?.state === "pending" || attempt?.state === "confirmed",
+            );
+          }
+          try {
+            const offers = await externalOfferApi(owner).list(
+              data.requests.map((r) => r.id),
+            );
+            if (current) setPage({ owner, data, offers });
+          } catch (e) {
             if (current) {
-              setPage({ owner, data });
-              setPending(
-                attempt?.state === "pending" || attempt?.state === "confirmed",
-              );
-            }
-          })
-          .catch((e) => {
-            if (current) {
-              setError(t.loadError);
+              setOfferError(true);
               if (
                 e instanceof Error &&
-                ["AUTH_REQUIRED", "MFA_REQUIRED"].includes(e.message)
+                [
+                  "AUTH_REQUIRED",
+                  "MFA_REQUIRED",
+                  "PASSWORD_UPDATE_REQUIRED",
+                ].includes(e.message)
               )
                 void refreshAssurance();
             }
-          });
-      }
-      return () => {
-        current = false;
-      };
-    }, [owner, verified, offset, retry, t.loadError, refreshAssurance]),
+          }
+        })
+        .catch((e) => {
+          if (current) {
+            setError(t.loadError);
+            if (
+              e instanceof Error &&
+              ["AUTH_REQUIRED", "MFA_REQUIRED"].includes(e.message)
+            )
+              void refreshAssurance();
+          }
+        });
+    }
+    return () => {
+      current = false;
+    };
+  }, [owner, verified, offset, t.loadError, refreshAssurance]);
+  const stop = useRef<(() => void) | null>(null);
+  const refresh = useCallback(() => {
+    stop.current?.();
+    stop.current = load();
+  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+      return () => stop.current?.();
+    }, [refresh]),
   );
   const data = page && page.owner === owner ? page.data : null;
   if (!verified)
@@ -99,7 +131,7 @@ export function ExternalItemsScreen() {
       topSafeArea={false}
       refresh={{
         refreshing: !data && !error,
-        onRefresh: () => setRetry((n) => n + 1),
+        onRefresh: refresh,
         label: d.retry,
       }}
     >
@@ -109,7 +141,7 @@ export function ExternalItemsScreen() {
       {error ? (
         <>
           <Message tone="error">{error}</Message>
-          <Button label={d.retry} onPress={() => setRetry((n) => n + 1)} />
+          <Button label={d.retry} onPress={refresh} />
         </>
       ) : null}
       {!data && !error ? <Loading /> : null}
@@ -140,8 +172,22 @@ export function ExternalItemsScreen() {
           ) : null}
           {data.activeCount >= 10 ? <Message>{t.limit}</Message> : null}
           {!data.requests.length ? <Message>{t.noRequests}</Message> : null}
+          {offerError ? (
+            <>
+              <Message tone="error">
+                {externalOfferCopy(locale).listError}
+              </Message>
+              <Button label={d.retry} variant="secondary" onPress={refresh} />
+            </>
+          ) : null}
           {data.requests.map((r) => (
-            <ExternalItemRow key={r.id} item={r} owner={owner!} />
+            <ExternalItemRow
+              key={r.id}
+              item={r}
+              owner={owner!}
+              offer={page?.offers?.find((o) => o.requestId === r.id)}
+              offersLoaded={page?.offers !== null}
+            />
           ))}
           {data.requests.some((r) => r.status === "declined") ? (
             <Text style={uiStyles.note}>
