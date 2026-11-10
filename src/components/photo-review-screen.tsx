@@ -1,9 +1,11 @@
 import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { useCallback, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 import { router, useFocusEffect, usePreventRemove } from "expo-router";
 import { Button, Card, Choice, Loading, Message, Screen, uiStyles } from "./ui";
-import { PhotoDraftImage } from "./photo-draft-image";
+import { PhotoPhoneScreen } from "./photo-phone-screen";
+import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
+import { photoFlowCopy } from "@/lib/photo-flow-copy";
 import { useItemDraft } from "@/lib/use-item-draft";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
@@ -26,6 +28,7 @@ export function PhotoReviewScreen() {
   const { session, refreshAssurance } = useSession();
   const s = externalSubmissionCopy(locale);
   const central = centralIntakeCopy(locale);
+  const flow = photoFlowCopy(locale);
   const [countryConfirmed, setCountryConfirmed] = useState(false);
   const owner = session?.user.id;
   const [outbox, setOutbox] = useState<{
@@ -104,8 +107,8 @@ export function PhotoReviewScreen() {
         if (result.state === "complete") {
           disablePrevention();
           router.replace({
-            pathname: "/external-items",
-            params: { sent: result.command.requestId },
+            pathname: "/photo-sent",
+            params: { request: result.command.requestId },
           });
         } else
           setError(externalSubmissionError(locale, result.rejection ?? ""));
@@ -197,65 +200,59 @@ export function PhotoReviewScreen() {
       </Screen>
     );
   return (
-    <Screen topSafeArea={false}>
-      <Message>{s.reviewIntro}</Message>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
-        {photos.map((p, i) => (
-          <View key={p.id} style={{ width: "47%" }}>
-            <PhotoDraftImage
-              uri={p.uri}
-              label={photo.photo.replace("{count}", String(i + 1))}
-              errorText={photo.previewError}
-              retryLabel={d.retry}
-            />
-          </View>
-        ))}
-      </View>
-      <Button
-        label={t.editPhotos}
-        variant="text"
-        disabled={busy}
-        onPress={() => router.navigate("/photo-draft")}
-      />
-      <Card>
-        <Text selectable style={uiStyles.heading}>
-          {details.description}
-        </Text>
-        {details.brand ? (
-          <Text selectable style={uiStyles.body}>
-            {details.brand}
+    <Screen topSafeArea={false} keyboardInsets>
+      <PhotoStep step={3} />
+      {!hasVerifiedPhone(session?.user) ? (
+        <PhotoPhoneScreen embedded />
+      ) : (
+        <>
+          <Text accessibilityRole="header" style={uiStyles.title}>
+            {flow.review}
           </Text>
-        ) : null}
-        <Text style={uiStyles.body}>{t.conditions[details.condition!]}</Text>
-        {details.notes ? (
-          <Text selectable style={uiStyles.body}>
-            {details.notes}
-          </Text>
-        ) : null}
-        {details.desiredPrice.trim() ? (
-          <>
+          <PhotoStrip photos={photos} />
+          <Button
+            label={t.editPhotos}
+            variant="text"
+            disabled={busy}
+            onPress={() => router.navigate("/photo-draft")}
+          />
+          <Card>
+            <Text selectable style={uiStyles.itemName}>
+              {details.description}
+            </Text>
+            {details.brand ? (
+              <Text selectable style={uiStyles.body}>
+                {details.brand}
+              </Text>
+            ) : null}
             <Text style={uiStyles.body}>
-              {t.desiredPrice.replace("{currency}", draft.store.currency)}
+              {t.conditions[details.condition!]}
             </Text>
-            <Text selectable style={uiStyles.rowTitle}>
-              {details.desiredPrice} {draft.store.currency}
-            </Text>
-          </>
-        ) : null}
-        <Button
-          label={t.editDetails}
-          variant="text"
-          disabled={busy}
-          onPress={() => router.navigate("/photo-details")}
-        />
-      </Card>
-      <Card>
-        <Text style={uiStyles.rowTitle}>{draft.store.name}</Text>
-        {draft.store.city ? (
-          <Text style={uiStyles.body}>{draft.store.city}</Text>
-        ) : null}
-      </Card>
-      <Message>{central.intro}</Message>
+            {details.notes ? (
+              <Text selectable style={uiStyles.body}>
+                {details.notes}
+              </Text>
+            ) : null}
+            {details.desiredPrice.trim() ? (
+              <>
+                <Text style={uiStyles.body}>
+                  {t.desiredPrice.replace("{currency}", draft.store.currency)}
+                </Text>
+                <Text selectable style={uiStyles.rowTitle}>
+                  {details.desiredPrice} {draft.store.currency}
+                </Text>
+              </>
+            ) : null}
+            <Button
+              label={t.editDetails}
+              variant="text"
+              disabled={busy}
+              onPress={() => router.navigate("/photo-details")}
+            />
+          </Card>
+        </>
+      )}
+      <Text style={uiStyles.note}>{flow.reviewHint}</Text>
       <Choice
         role="checkbox"
         label={central.confirmCountry}
@@ -276,9 +273,9 @@ export function PhotoReviewScreen() {
       ) : null}
       {progress ? <Message>{progress}</Message> : null}
       <Button
-        label={hasVerifiedPhone(session?.user) ? s.send : s.verifyPhone}
+        label={s.send}
         busy={busy}
-        disabled={!countryConfirmed}
+        disabled={!countryConfirmed || !hasVerifiedPhone(session?.user)}
         onPress={() => void send()}
       />
     </Screen>

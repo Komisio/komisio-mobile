@@ -5,7 +5,11 @@ import {
   usePreventRemove,
   useFocusEffect,
 } from "expo-router";
-import { Button, Card, Field, Loading, Message, Screen } from "./ui";
+import { Text, View } from "react-native";
+import { Button, Field, Loading, Message, Screen, uiStyles } from "./ui";
+import { PhotoStep } from "./photo-flow-ui";
+import { PhoneCodeField } from "./phone-code-field";
+import { photoFlowCopy } from "@/lib/photo-flow-copy";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
@@ -21,9 +25,10 @@ import {
 import { verifyPhoneCode } from "@/lib/phone-verification-runtime";
 import { hasVerifiedPhone } from "@/lib/identity-gates";
 
-export function PhotoPhoneScreen() {
+export function PhotoPhoneScreen({ embedded = false }: { embedded?: boolean }) {
   const { locale } = useI18n();
   const t = externalSubmissionCopy(locale);
+  const flow = photoFlowCopy(locale);
   const { session, refreshAssurance } = useSession();
   const { destination } = useLocalSearchParams<{ destination?: string }>();
   const target =
@@ -43,8 +48,9 @@ export function PhotoPhoneScreen() {
   const phoneVerified = hasVerifiedPhone(session?.user);
   useFocusEffect(
     useCallback(() => {
-      if (phoneVerified && !busy && !locked.current) router.replace(target);
-    }, [phoneVerified, busy, target]),
+      if (phoneVerified && !busy && !locked.current && !embedded)
+        router.replace(target);
+    }, [phoneVerified, busy, target, embedded]),
   );
   useEffect(() => {
     alive.current = true;
@@ -78,12 +84,12 @@ export function PhotoPhoneScreen() {
         if (assurance.error) throw new Error("PHONE_UNAVAILABLE");
         if (alive.current) {
           disablePrevention();
-          router.replace(
+          if (
             assurance.data.nextLevel === "aal2" &&
-              assurance.data.currentLevel !== "aal2"
-              ? "/mfa"
-              : target,
-          );
+            assurance.data.currentLevel !== "aal2"
+          )
+            router.replace("/mfa");
+          else if (!embedded) router.replace(target);
         }
       } else {
         const next = await beginPhoneVerification(supabase.auth, phone);
@@ -109,12 +115,16 @@ export function PhotoPhoneScreen() {
       if (alive.current) setBusy(false);
     }
   }
-  if (phoneVerified) return <Loading />;
-  return (
-    <Screen topSafeArea={false} keyboardInsets>
-      <Message>{t.phoneIntro}</Message>
+  if (phoneVerified) return embedded ? null : <Loading />;
+  const content = (
+    <>
+      {!embedded && destination !== "requests" ? <PhotoStep step={3} /> : null}
+      <Text accessibilityRole="header" style={uiStyles.title}>
+        {flow.phoneHeading}
+      </Text>
+      <Text style={uiStyles.body}>{flow.phoneHint}</Text>
       {session ? <Message>{t.existingAccount}</Message> : null}
-      <Card>
+      <View style={{ gap: 16 }}>
         <Field
           label={t.phone}
           value={phone}
@@ -132,18 +142,12 @@ export function PhotoPhoneScreen() {
           maxLength={30}
         />
         {ticket ? (
-          <Field
+          <PhoneCodeField
             label={t.code}
             value={code}
-            editable={!busy}
-            onChangeText={(value) =>
-              setCode(value.replace(/\D/g, "").slice(0, 6))
-            }
-            keyboardType="number-pad"
-            autoComplete="one-time-code"
-            textContentType="oneTimeCode"
-            maxLength={6}
-            onSubmitEditing={() => {
+            disabled={busy}
+            onChange={setCode}
+            onSubmit={() => {
               if (code.length === 6) void run(true);
             }}
           />
@@ -170,7 +174,15 @@ export function PhotoPhoneScreen() {
           busy={!ticket && busy}
           onPress={() => void run(false)}
         />
-      </Card>
+        <Text style={uiStyles.note}>{flow.whyPhone}</Text>
+      </View>
+    </>
+  );
+  return embedded ? (
+    <View style={{ gap: 16 }}>{content}</View>
+  ) : (
+    <Screen topSafeArea={false} keyboardInsets>
+      {content}
     </Screen>
   );
 }

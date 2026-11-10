@@ -20,6 +20,9 @@ import {
 import type { ExternalRequestPage } from "@/lib/external-submission";
 import { hasVerifiedEmail, hasVerifiedPhone } from "@/lib/identity-gates";
 import { useItemDraft } from "@/lib/use-item-draft";
+import { PhotoCapacity } from "./photo-flow-ui";
+import { ExternalItemRow } from "./external-item-row";
+import { photoFlowCopy } from "@/lib/photo-flow-copy";
 
 export function ExternalItemsScreen() {
   const { locale, d } = useI18n(),
@@ -112,9 +115,7 @@ export function ExternalItemsScreen() {
       {!data && !error ? <Loading /> : null}
       {data ? (
         <>
-          <Text style={uiStyles.heading}>
-            {t.activeCount.replace("{count}", String(data.activeCount))}
-          </Text>
+          <PhotoCapacity count={data.activeCount} />
           {pending ? (
             <Card>
               <Message>{t.pending}</Message>
@@ -140,23 +141,13 @@ export function ExternalItemsScreen() {
           {data.activeCount >= 10 ? <Message>{t.limit}</Message> : null}
           {!data.requests.length ? <Message>{t.noRequests}</Message> : null}
           {data.requests.map((r) => (
-            <Card key={r.id}>
-              <StatusBadge
-                tone={r.status === "waiting" ? "neutral" : "warning"}
-              >
-                {r.status === "waiting" ? t.waiting : t.declined}
-              </StatusBadge>
-              <Text selectable style={uiStyles.rowTitle}>
-                {r.description}
-              </Text>
-              <Text style={uiStyles.body}>{r.store_name}</Text>
-              {r.decline_note ? (
-                <Text selectable style={uiStyles.body}>
-                  {r.decline_note}
-                </Text>
-              ) : null}
-            </Card>
+            <ExternalItemRow key={r.id} item={r} owner={owner!} />
           ))}
+          {data.requests.some((r) => r.status === "declined") ? (
+            <Text style={uiStyles.note}>
+              {photoFlowCopy(locale).capacityHint}
+            </Text>
+          ) : null}
           {offset > 0 ? (
             <Button
               label={t.previous}

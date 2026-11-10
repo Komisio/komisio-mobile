@@ -1,5 +1,9 @@
 # Decisions
 
+- 2026-11-10: Owner sets central offers to expire after 48 hours and selects the recipient store's ordinary versioned seller agreement. Later versions require seller consent for subsequent uploads; earlier items retain their agreed version. Offer and agreement execution remain a separate backend slice.
+
+- 2026-11-10: Follow the owner's mobile sketches for central photo intake: guest welcome, three visible steps, SMS cells, confirmed success and private item thumbnails. Preserve native capture, saved-photo recovery, owner-bound retries and existing store access; no simulated AI, offers or payments.
+
 - 2026-11-10: Owner selects Komisio as the central photo recipient for Swedish residents and SEK only. Resolve the recipient from the server, preserve old drafts and pending requests, and record an explicit residence declaration before new submissions. Existing store login remains unchanged.
 
 - 2026-11-10: Prepare Supabase phone verification for external requests without activating an SMS provider. Add a phone to an existing identity rather than signing it into another account; verify phone changes with a separate nonpersisting client and preserve the original MFA session.

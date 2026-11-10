@@ -10,6 +10,7 @@ import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
 import { externalSubmissionCopy } from "@/lib/external-submission-copy";
 import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { photoFlowCopy } from "@/lib/photo-flow-copy";
 
 function Routes() {
   const { d, locale } = useI18n();
@@ -36,14 +37,16 @@ function Routes() {
           ? "/external-items"
           : store
             ? "/login"
-            : "/store";
+            : session
+              ? "/store"
+              : "/welcome";
   const photoHome = session
     ? sellerRoutes
       ? "/(tabs)/items"
       : "/external-items"
     : store
       ? "/login"
-      : "/store";
+      : "/welcome";
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={sellerRoutes} redirectTo={homeRoute}>
@@ -120,6 +123,9 @@ function Routes() {
         />
       </Stack.Protected>
 
+      <Stack.Protected guard={!session && !store} redirectTo={homeRoute}>
+        <Stack.Screen name="welcome" />
+      </Stack.Protected>
       <Stack.Protected
         redirectTo={homeRoute}
         guard={
@@ -143,7 +149,18 @@ function Routes() {
               d.close,
               navigation.canGoBack(),
             ),
-            title: externalSubmissionCopy(locale).myRequests,
+            title: photoFlowCopy(locale).myItems,
+          })}
+        />
+        <Stack.Screen
+          name="photo-sent"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/external-items",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: externalSubmissionCopy(locale).success,
           })}
         />
       </Stack.Protected>
@@ -185,7 +202,7 @@ function Routes() {
               d.close,
               navigation.canGoBack(),
             ),
-            title: itemDraftCopy(locale).reviewTitle,
+            title: externalSubmissionCopy(locale).send,
           })}
         />
         <Stack.Screen

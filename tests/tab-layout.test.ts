@@ -212,6 +212,7 @@ test("native back is preserved with history; direct links retain an accessible e
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/photo-flow-copy": { photoFlowCopy: () => ({ myItems: "My items" }) },
     "@/lib/item-draft-copy": {
       itemDraftCopy: () => ({
         storeTitle: "Store",
@@ -309,6 +310,7 @@ test("all detail routes configure back navigation with their own fallback", () =
 test("photo drafts are available in the signed app while preserving login, MFA and seller guards", () => {
   let state: Record<string, unknown> = { ready: true };
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/photo-flow-copy": { photoFlowCopy: () => ({ myItems: "My items" }) },
     "@/lib/item-draft-copy": {
       itemDraftCopy: () => ({
         storeTitle: "Store",
@@ -371,6 +373,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   }
   state = { ready: true, store: null, session: null, mfaRequired: false };
   assert.deepEqual(routes(), [
+    "welcome",
     "store",
     "photo-draft",
     "photo-store",
@@ -396,7 +399,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 14);
+  assert.equal(routes().length, 15);
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
   state = { ...state, store: null };
@@ -410,6 +413,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), [
     "external-items",
+    "photo-sent",
     "photo-draft",
     "photo-store",
     "photo-details",

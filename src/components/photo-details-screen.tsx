@@ -3,16 +3,18 @@ import { Keyboard, Text, View } from "react-native";
 import { router, usePreventRemove, type Href } from "expo-router";
 import {
   Button,
-  Card,
   Choice,
   Field,
   Loading,
   Message,
   Screen,
   uiStyles,
+  colors,
 } from "./ui";
 import { DetailSheet } from "./detail-sheet";
-import { PhotoDraftImage } from "./photo-draft-image";
+import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
+import { photoFlowCopy } from "@/lib/photo-flow-copy";
+import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { useI18n } from "@/lib/i18n";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
@@ -30,6 +32,7 @@ export function PhotoDetailsScreen() {
   const { locale, d } = useI18n();
   const t = itemDraftCopy(locale);
   const photo = photoDraftCopy(locale);
+  const flow = photoFlowCopy(locale);
   const [values, setValues] = useState<ItemDraftDetails>(emptyItemDetails);
   const [busy, setBusy] = useState(false);
   const locked = useRef(false);
@@ -169,20 +172,11 @@ export function PhotoDetailsScreen() {
   };
   return (
     <Screen topSafeArea={false} keyboardInsets>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View style={{ width: 76 }}>
-          <PhotoDraftImage
-            uri={snapshot.photos[0].uri}
-            label={photo.photo.replace("{count}", "1")}
-            errorText={photo.previewError}
-            retryLabel={d.retry}
-          />
-        </View>
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text style={uiStyles.rowTitle}>{snapshot.draft.store.name}</Text>
-        </View>
-      </View>
-      <Text style={uiStyles.body}>{t.detailsIntro}</Text>
+      <PhotoStep step={2} />
+      <PhotoStrip photos={snapshot.photos} />
+      <Text accessibilityRole="header" style={uiStyles.title}>
+        {flow.details}
+      </Text>
       <Field
         label={t.description}
         value={values.description}
@@ -205,7 +199,7 @@ export function PhotoDetailsScreen() {
         accessibilityRole="radiogroup"
         accessibilityLabel={t.condition}
       >
-        <Text style={uiStyles.rowTitle}>{t.condition}</Text>
+        <Text style={uiStyles.label}>{t.condition}</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           {itemConditions.map((condition) => (
             <Choice
@@ -232,13 +226,15 @@ export function PhotoDetailsScreen() {
           {
             minHeight: 88,
             borderWidth: 1,
+            borderColor: colors.control,
+            backgroundColor: colors.surface,
             borderRadius: 12,
             padding: 12,
             textAlignVertical: "top",
           },
         ]}
       />
-      <Card>
+      <View style={{ gap: 6 }}>
         <Field
           label={t.desiredPrice.replace("{currency}", currency)}
           value={values.desiredPrice}
@@ -248,8 +244,8 @@ export function PhotoDetailsScreen() {
           inputMode="decimal"
           keyboardType="decimal-pad"
         />
-        <Text style={uiStyles.body}>{t.priceHint}</Text>
-      </Card>
+        <Text style={uiStyles.note}>{t.priceHint}</Text>
+      </View>
       {issues.length ? (
         <Message tone="error">
           {issues.map((key) => issueText[key]).join("\n")}
@@ -261,17 +257,10 @@ export function PhotoDetailsScreen() {
         </Message>
       ) : null}
       <Button
-        label={t.review}
+        label={centralIntakeCopy(locale).continue}
         busy={busy}
         onPress={() => void open("/photo-review", true)}
       />
-      <Button
-        label={t.save}
-        variant="secondary"
-        disabled={busy}
-        onPress={() => void save()}
-      />
-      <Message>{dirty ? t.unsaved : photo.saved}</Message>
       {pendingExit ? (
         <DetailSheet
           title={t.leaveTitle}
