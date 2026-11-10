@@ -1,7 +1,8 @@
+import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { useCallback, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { router, useFocusEffect, usePreventRemove } from "expo-router";
-import { Button, Card, Loading, Message, Screen, uiStyles } from "./ui";
+import { Button, Card, Choice, Loading, Message, Screen, uiStyles } from "./ui";
 import { PhotoDraftImage } from "./photo-draft-image";
 import { useItemDraft } from "@/lib/use-item-draft";
 import { useI18n } from "@/lib/i18n";
@@ -24,6 +25,8 @@ export function PhotoReviewScreen() {
   const { snapshot, failed, reload } = useItemDraft();
   const { session, refreshAssurance } = useSession();
   const s = externalSubmissionCopy(locale);
+  const central = centralIntakeCopy(locale);
+  const [countryConfirmed, setCountryConfirmed] = useState(false);
   const owner = session?.user.id;
   const [outbox, setOutbox] = useState<{
     owner: string;
@@ -33,6 +36,7 @@ export function PhotoReviewScreen() {
   const [readVersion, setReadVersion] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [recipientChanged, setRecipientChanged] = useState(false);
   const [progress, setProgress] = useState("");
   const locked = useRef(false),
     active = useRef(false),
@@ -72,14 +76,19 @@ export function PhotoReviewScreen() {
       return;
     }
     if (!resume && !snapshot) return;
+    if (!resume && !countryConfirmed) {
+      setError(central.countryRequired);
+      return;
+    }
     locked.current = true;
     setBusy(true);
     setError("");
+    setRecipientChanged(false);
     setProgress("");
     const current = () => active.current && currentOwner.current === owner;
     try {
       const controller = await externalSubmission(owner);
-      if (!resume) await controller.prepare(snapshot!);
+      if (!resume) await controller.prepare(snapshot!, "SE");
       const result = await controller.resume((done, total) => {
         if (current())
           setProgress(
@@ -103,6 +112,10 @@ export function PhotoReviewScreen() {
       }
     } catch (e) {
       if (current()) {
+        setRecipientChanged(
+          e instanceof Error &&
+            ["STORE_CHANGED", "STORE_UNAVAILABLE"].includes(e.message),
+        );
         setError(
           externalSubmissionError(locale, e instanceof Error ? e.message : ""),
         );
@@ -241,21 +254,31 @@ export function PhotoReviewScreen() {
         {draft.store.city ? (
           <Text style={uiStyles.body}>{draft.store.city}</Text>
         ) : null}
-        <Button
-          label={t.changeStore}
-          variant="text"
-          disabled={busy}
-          onPress={() => router.navigate("/photo-store")}
-        />
       </Card>
+      <Message>{central.intro}</Message>
+      <Choice
+        role="checkbox"
+        label={central.confirmCountry}
+        selected={countryConfirmed}
+        disabled={busy}
+        onPress={() => setCountryConfirmed((v) => !v)}
+      />
       {error ? <Message tone="error">{error}</Message> : null}
-      {attempt?.state === "rejected" ? (
-        <Message>{s.editAfterRefusal}</Message>
+      {attempt?.state === "rejected" || recipientChanged ? (
+        <>
+          <Message>{s.editAfterRefusal}</Message>
+          <Button
+            label={central.title}
+            variant="text"
+            onPress={() => router.navigate("/photo-store")}
+          />
+        </>
       ) : null}
       {progress ? <Message>{progress}</Message> : null}
       <Button
         label={hasVerifiedPhone(session?.user) ? s.send : s.verifyPhone}
         busy={busy}
+        disabled={!countryConfirmed}
         onPress={() => void send()}
       />
     </Screen>

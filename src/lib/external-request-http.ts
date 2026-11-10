@@ -18,6 +18,7 @@ const safeErrors = new Set([
   "SUPPORT_READ_ONLY",
   "STORE_UNAVAILABLE",
   "STORE_CHANGED",
+  "SWEDEN_REQUIRED",
   "ACTIVE_REQUEST_LIMIT",
   "PHOTO_NOT_FOUND",
   "PHOTO_LIMIT",
@@ -46,6 +47,7 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
     if (!row || typeof row !== "object")
       throw new Error("SUBMISSION_UNAVAILABLE");
     const command = parseExternalCommand({
+      senderCountry: row.sender_country ?? undefined,
       action: "submit",
       requestId: row.id,
       tenantId: row.tenant_id,
@@ -69,6 +71,7 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
     )
       throw new Error("SUBMISSION_UNAVAILABLE");
     return {
+      sender_country: command.senderCountry ?? null,
       id: command.requestId,
       tenant_id: command.tenantId,
       store_name: row.store_name,

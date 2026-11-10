@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-10: Owner selects Komisio as the central photo recipient for Swedish residents and SEK only. Resolve the recipient from the server, preserve old drafts and pending requests, and record an explicit residence declaration before new submissions. Existing store login remains unchanged.
+
 - 2026-11-10: Prepare Supabase phone verification for external requests without activating an SMS provider. Add a phone to an existing identity rather than signing it into another account; verify phone changes with a separate nonpersisting client and preserve the original MFA session.
 - 2026-11-10: Use SDK-compatible expo-image-manipulator to decode and resize upload copies within 1536 pixels before JPEG encoding. Keep camera originals and saved drafts intact. The native dependency belongs in both iOS and Android builds, without preview flags.
 - 2026-11-10: Freeze a user-bound external submission before sending images or item details. Preserve its request UUID and upload bytes across retries, reconcile unknown outcomes first, and clear only the matching draft revision after confirmed success. Existing financial-command journals stay separate.

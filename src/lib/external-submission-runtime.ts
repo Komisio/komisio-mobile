@@ -1,3 +1,4 @@
+import { readCentralRecipient } from "./external-stores";
 import { randomUUID } from "expo-crypto";
 import { fetch } from "expo/fetch";
 import { supabase } from "./supabase";
@@ -46,6 +47,7 @@ export function externalSubmission(ownerId: string) {
             lock: commandLock,
             uuid: randomUUID,
             preparePhoto: prepareExternalPhoto,
+            recipient: () => readCentralRecipient(supabase),
             finishDraft: async (expected, preserve) => {
               const { data, error } = await supabase.auth.getSession();
               if (error || data.session?.user.id !== ownerId)

@@ -1,156 +1,119 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
-import { Text, View } from "react-native";
-import {
-  Button,
-  Choice,
-  Field,
-  Loading,
-  Message,
-  Screen,
-  uiStyles,
-} from "./ui";
-import { DetailSheet } from "./detail-sheet";
+import { Text } from "react-native";
+import { Button, Card, Loading, Message, Screen, uiStyles } from "./ui";
 import { useI18n } from "@/lib/i18n";
-import { itemDraftCopy } from "@/lib/item-draft-copy";
+import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import { useItemDraft } from "@/lib/use-item-draft";
 import { photoDraftRepository } from "@/lib/photo-draft-storage";
 import {
-  EXTERNAL_STORE_PAGE_SIZE,
-  readExternalStores,
+  readCentralRecipient,
   type ExternalStore,
-  type ExternalStorePage,
 } from "@/lib/external-stores";
-import { supabase, supabaseConfigured } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 
+/** Compatibility route: resolve the central recipient without a store picker. */
 export function PhotoStoreScreen() {
   const { locale, d } = useI18n();
-  const t = itemDraftCopy(locale);
-  const photo = photoDraftCopy(locale);
-  const { snapshot, setSnapshot, failed, reload } = useItemDraft();
-  const [input, setInput] = useState("");
-  const [query, setQuery] = useState("");
-  const [offset, setOffset] = useState(0);
-  const [attempt, setAttempt] = useState(0);
-  const [result, setResult] = useState<{
-    key: string;
-    page: ExternalStorePage | null;
-    error: string | null;
-  } | null>(null);
-  const requestKey = JSON.stringify([query, offset, attempt]);
-  const page =
-    result?.key === requestKey && input === query ? result.page : null;
-  const readError = !supabaseConfigured
-    ? "EXTERNAL_STORES_FAILED"
-    : result?.key === requestKey && input === query
-      ? result.error
-      : null;
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const t = centralIntakeCopy(locale),
+    photo = photoDraftCopy(locale);
+  const { snapshot, failed, reload } = useItemDraft();
+  const [recipient, setRecipient] = useState<ExternalStore | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [selectionNumber, setSelectionNumber] = useState(0);
-  const navigatedSelection = useRef(0);
-  const locked = useRef(false);
-  const alive = useRef(true);
-  const focusVersion = useRef(0);
-  const [currencyChoice, setCurrencyChoice] = useState<ExternalStore | null>(
-    null,
-  );
-  useEffect(() => {
-    if (selectionNumber === navigatedSelection.current) return;
-    // Commit the sheet's removal before freezing this route during navigation.
-    navigatedSelection.current = selectionNumber;
-    if (alive.current) router.navigate("/photo-details");
-  }, [selectionNumber]);
+  const [revision, setRevision] = useState(0);
+  const generation = useRef(0);
+  const alive = useRef(false),
+    locked = useRef(false),
+    started = useRef(false);
   useFocusEffect(
     useCallback(() => {
+      void revision;
       alive.current = true;
+      generation.current++;
+      let current = true;
+      started.current = false;
+      setLoaded(false);
+      setRecipient(null);
+      setError("");
+      void readCentralRecipient(supabase)
+        .then((store) => {
+          if (current) {
+            setRecipient(store);
+            setLoaded(true);
+          }
+        })
+        .catch(() => {
+          if (current) {
+            setRecipient(null);
+            setLoaded(true);
+            setError(t.unavailable);
+          }
+        });
       return () => {
+        current = false;
         alive.current = false;
-        focusVersion.current += 1;
+        generation.current++;
       };
-    }, []),
+    }, [revision, t.unavailable]),
   );
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setQuery(input);
-      setOffset(0);
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [input]);
-  useEffect(() => {
-    let current = true;
-    if (!supabaseConfigured) return;
-    void readExternalStores(supabase, query, offset)
-      .then((value) => {
-        if (current) setResult({ key: requestKey, page: value, error: null });
-      })
-      .catch((error) => {
-        if (current)
-          setResult({
-            key: requestKey,
-            page: null,
-            error:
-              error instanceof Error ? error.message : "EXTERNAL_STORES_FAILED",
-          });
-      });
-    return () => {
-      current = false;
-    };
-  }, [query, offset, requestKey]);
-  async function choose(store: ExternalStore, clearPrice = false) {
-    if (!snapshot || locked.current) return;
+  const changed = Boolean(
+    snapshot?.draft.store &&
+    recipient &&
+    (snapshot.draft.store.id !== recipient.id ||
+      snapshot.draft.store.currency !== recipient.currency),
+  );
+  const choose = useCallback(async () => {
+    if (!snapshot || !recipient || locked.current) return;
     locked.current = true;
-    const startedOnFocus = focusVersion.current;
+    const startedAt = generation.current;
+    const isCurrent = () => alive.current && generation.current === startedAt;
     setBusy(true);
-    setSaveError(null);
-    let refreshed = store;
+    setError("");
     try {
-      // Refresh this exact opt-in instead of trusting a previous search page.
-      const latest = (await readExternalStores(supabase, "", 0, store.id))
-        .stores[0];
-      if (!alive.current || startedOnFocus !== focusVersion.current) return;
-      if (!latest) throw new Error("STORE_NOT_RECEIVING");
-      refreshed = latest;
-      // A second policy change must not silently confirm a different currency.
-      if (clearPrice && latest.currency !== store.currency)
-        throw new Error("PRICE_CURRENCY_CHANGED");
-      const saved = await (
-        await photoDraftRepository()
-      ).selectStore(latest, snapshot.draft, clearPrice);
-      if (alive.current && startedOnFocus === focusVersion.current) {
-        setSnapshot(saved);
-        setCurrencyChoice(null);
-        setSelectionNumber((n) => n + 1);
-      }
-    } catch (error) {
-      if (alive.current && startedOnFocus === focusVersion.current) {
-        const code =
-          error instanceof Error ? error.message : "DRAFT_UNAVAILABLE";
-        if (code === "PRICE_CURRENCY_CHANGED") setCurrencyChoice(refreshed);
-        else {
-          setCurrencyChoice(null);
-          setSaveError(code);
-        }
-      }
+      const current = await readCentralRecipient(supabase);
+      if (!current || current.id !== recipient.id)
+        throw new Error("STORE_CHANGED");
+      if (!isCurrent()) return;
+      const repository = await photoDraftRepository();
+      if (!isCurrent()) return;
+      await repository.selectStore(current, snapshot.draft, changed);
+      if (isCurrent()) router.replace("/photo-details");
+    } catch {
+      if (isCurrent()) setError(t.unavailable);
     } finally {
       locked.current = false;
       if (alive.current) setBusy(false);
     }
-  }
-  const reset = () => {
-    setSaveError(null);
+  }, [snapshot, recipient, changed, t.unavailable]);
+  useEffect(() => {
+    if (
+      !loaded ||
+      !snapshot?.photos.length ||
+      !recipient ||
+      changed ||
+      busy ||
+      locked.current ||
+      started.current
+    )
+      return;
+    started.current = true;
+    void choose();
+  }, [loaded, snapshot, recipient, changed, busy, choose]);
+  function retry() {
     reload();
-    setAttempt((n) => n + 1);
-  };
+    setRevision((v) => v + 1);
+  }
   if (failed)
     return (
       <Screen topSafeArea={false}>
         <Message tone="error">{photo.error}</Message>
-        <Button label={d.retry} onPress={reload} />
+        <Button label={d.retry} onPress={retry} />
       </Screen>
     );
-  if (!snapshot)
+  if (!snapshot || !loaded)
     return (
       <Screen topSafeArea={false}>
         <Loading />
@@ -159,7 +122,6 @@ export function PhotoStoreScreen() {
   if (!snapshot.photos.length)
     return (
       <Screen topSafeArea={false}>
-        <Message>{t.noPhotos}</Message>
         <Button
           label={photo.title}
           onPress={() => router.navigate("/photo-draft")}
@@ -167,105 +129,36 @@ export function PhotoStoreScreen() {
       </Screen>
     );
   return (
-    <Screen topSafeArea={false} keyboardInsets>
-      <Text style={uiStyles.body}>{t.storeIntro}</Text>
-      <Field
-        label={d.store.search}
-        value={input}
-        maxLength={100}
-        onChangeText={(value) => {
-          setInput(value);
-        }}
-        editable={!busy}
-        returnKeyType="search"
-        autoCorrect={false}
-      />
-      {readError ? (
+    <Screen topSafeArea={false}>
+      <Card>
+        <Text style={uiStyles.heading}>Komisio</Text>
+        <Text style={uiStyles.body}>{t.intro}</Text>
+      </Card>
+      {changed ? <Message>{t.changed}</Message> : null}
+      {changed &&
+      snapshot.draft.store?.currency !== "SEK" &&
+      snapshot.draft.details.desiredPrice.trim() ? (
+        <Message>{t.clearPrice}</Message>
+      ) : null}
+      {error || !recipient ? (
         <>
-          <Message tone="error">
-            {readError === "EXTERNAL_INTAKE_UNAVAILABLE"
-              ? t.unavailable
-              : d.store.failed}
-          </Message>
+          <Message tone="error">{error || t.unavailable}</Message>
           <Button
             label={d.retry}
             variant="secondary"
-            onPress={() => setAttempt((n) => n + 1)}
+            onPress={retry}
+            disabled={busy}
           />
         </>
-      ) : !page ? (
-        <Loading />
+      ) : changed ? (
+        <Button
+          label={t.switchRecipient}
+          onPress={() => void choose()}
+          busy={busy}
+        />
       ) : (
-        <>
-          {!page.stores.length ? <Message>{t.storeEmpty}</Message> : null}
-          <View style={{ gap: 8 }}>
-            {page.stores.map((store) => (
-              <Choice
-                key={store.id}
-                listRow
-                label={`${store.name}${store.city ? ` · ${store.city}` : ""}`}
-                selected={snapshot.draft.store?.id === store.id}
-                disabled={busy}
-                onPress={() => void choose(store)}
-              />
-            ))}
-          </View>
-          {offset > 0 ? (
-            <Button
-              label={t.previous}
-              variant="text"
-              disabled={busy}
-              onPress={() =>
-                setOffset((n) => Math.max(0, n - EXTERNAL_STORE_PAGE_SIZE))
-              }
-            />
-          ) : null}
-          {page.hasMore && offset < 10000 ? (
-            <Button
-              label={t.more}
-              variant="secondary"
-              disabled={busy}
-              onPress={() => setOffset((n) => n + EXTERNAL_STORE_PAGE_SIZE)}
-            />
-          ) : null}
-        </>
+        <Loading />
       )}
-      {saveError ? (
-        <>
-          <Message tone="error">
-            {saveError === "DRAFT_CHANGED"
-              ? t.changed
-              : saveError === "STORE_NOT_RECEIVING"
-                ? t.notReceiving
-                : photo.error}
-          </Message>
-          <Button label={d.retry} variant="secondary" onPress={reset} />
-        </>
-      ) : null}
-      {busy ? <Loading /> : null}
-      {currencyChoice ? (
-        <DetailSheet
-          title={t.currencyTitle}
-          open={Boolean(currencyChoice)}
-          onClose={() => {
-            if (!busy) setCurrencyChoice(null);
-          }}
-        >
-          <Text style={uiStyles.body}>
-            {t.currencyMessage.replace(
-              "{currency}",
-              currencyChoice?.currency ?? "",
-            )}
-          </Text>
-          <Button
-            label={t.confirmCurrency}
-            busy={busy}
-            onPress={() => {
-              if (currencyChoice) void choose(currencyChoice, true);
-            }}
-          />
-        </DetailSheet>
-      ) : null}
     </Screen>
   );
 }

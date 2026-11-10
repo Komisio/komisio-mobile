@@ -13,6 +13,7 @@ export type ExternalItemCommand = {
   desiredPriceOre: string | null;
   currency: string;
   photos: string[];
+  senderCountry?: "SE";
 };
 export type ExternalAttempt = {
   version: 1;
@@ -33,6 +34,7 @@ export type ExternalOutboxStorage = {
   prune(keep: string[]): Promise<void>;
 };
 export type ExternalRequest = {
+  sender_country?: "SE" | null;
   id: string;
   tenant_id: string;
   store_name: string;
@@ -69,6 +71,7 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
   const c = value as ExternalItemCommand;
   if (
     !c ||
+    (c.senderCountry !== undefined && c.senderCountry !== "SE") ||
     c.action !== "submit" ||
     !identifier(c.requestId) ||
     !identifier(c.tenantId) ||
@@ -100,6 +103,7 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
     desiredPriceOre: c.desiredPriceOre,
     currency: c.currency,
     photos: [...c.photos],
+    ...(c.senderCountry ? { senderCountry: c.senderCountry } : {}),
   };
 }
 export function parseExternalAttempt(
@@ -151,12 +155,14 @@ export function requestMatches(
     request.notes === c.notes &&
     request.desired_price_ore === c.desiredPriceOre &&
     request.currency === c.currency &&
+    (request.sender_country ?? null) === (c.senderCountry ?? null) &&
     JSON.stringify(request.photos) === JSON.stringify(c.photos)
   );
 }
 const refusals = new Set([
   "STORE_UNAVAILABLE",
   "STORE_CHANGED",
+  "SWEDEN_REQUIRED",
   "ACTIVE_REQUEST_LIMIT",
   "PHOTO_NOT_FOUND",
   "PHOTO_LIMIT",
@@ -171,6 +177,7 @@ export function createExternalSubmission(deps: {
   lock: CommandLock;
   uuid(): string;
   preparePhoto(uri: string): Promise<Uint8Array>;
+  recipient(): Promise<{ id: string; currency: string } | null>;
   finishDraft(expected: DraftRevision, preserve: boolean): Promise<void>;
   api: ExternalRequestApi;
 }) {
@@ -205,7 +212,7 @@ export function createExternalSubmission(deps: {
   }
   return {
     load: () => run(read),
-    prepare: (snapshot: ItemDraftSnapshot) => {
+    prepare: (snapshot: ItemDraftSnapshot, senderCountry?: "SE") => {
       // Capture before asynchronous image preparation or a cross-tab lock yields.
       const frozen: ItemDraftSnapshot = {
         draft: {
@@ -246,7 +253,17 @@ export function createExternalSubmission(deps: {
           itemDetailsErrors(draft.details).length
         )
           throw new Error("DRAFT_CHANGED");
+        if (senderCountry !== "SE") throw new Error("SWEDEN_REQUIRED");
+        const recipient = await deps.recipient();
+        if (!recipient) throw new Error("STORE_UNAVAILABLE");
+        if (
+          recipient.id !== draft.store.id ||
+          recipient.currency !== "SEK" ||
+          draft.store.currency !== "SEK"
+        )
+          throw new Error("STORE_CHANGED");
         const command = parseExternalCommand({
+          senderCountry,
           action: "submit",
           requestId:
             prior?.draft.draftId === draft.draftId
@@ -302,6 +319,8 @@ export function createExternalSubmission(deps: {
             preserveDraft: !requestMatches(existing, attempt.command),
           });
         try {
+          if (attempt.command.senderCountry !== "SE")
+            throw new Error("SWEDEN_REQUIRED");
           for (let i = 0; i < attempt.command.photos.length; i++) {
             const id = attempt.command.photos[i];
             progress?.(i, attempt.command.photos.length);

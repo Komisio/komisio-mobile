@@ -180,12 +180,6 @@ export function PhotoDetailsScreen() {
         </View>
         <View style={{ flex: 1, gap: 4 }}>
           <Text style={uiStyles.rowTitle}>{snapshot.draft.store.name}</Text>
-          <Button
-            label={t.changeStore}
-            variant="text"
-            disabled={busy}
-            onPress={() => void open("/photo-store")}
-          />
         </View>
       </View>
       <Text style={uiStyles.body}>{t.detailsIntro}</Text>

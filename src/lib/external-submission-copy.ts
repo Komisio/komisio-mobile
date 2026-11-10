@@ -1,3 +1,4 @@
+import { centralIntakeCopy } from "./central-intake-copy.ts";
 import type { Locale } from "./locale";
 const sv = {
   phoneTitle: "Verifiera mobilnumret",
@@ -418,10 +419,21 @@ const it: Copy = {
 };
 const copies: Record<Locale, Copy> = { sv, en, no, da, fi, de, es, it };
 export function externalSubmissionCopy(locale: Locale) {
-  return copies[locale];
+  const c = centralIntakeCopy(locale);
+  return {
+    ...copies[locale],
+    reviewIntro: c.reviewIntro,
+    send: c.send,
+    success: c.success,
+    waiting: c.waiting,
+    unavailable: c.unavailable,
+    changed: c.changed,
+  };
 }
 export function externalSubmissionError(locale: Locale, code: string) {
-  const t = copies[locale];
+  const t = externalSubmissionCopy(locale);
+  if (code === "SWEDEN_REQUIRED")
+    return centralIntakeCopy(locale).countryRequired;
   if (code === "PHONE_INVALID") return t.phoneInvalid;
   if (code === "PHONE_CODE_INVALID") return t.codeInvalid;
   if (code === "PHONE_ALREADY_USED") return t.phoneUsed;

@@ -6,7 +6,7 @@ import { Button, Card, Loading, Message, Screen, colors, uiStyles } from "./ui";
 import { DetailSheet } from "./detail-sheet";
 import { useI18n } from "@/lib/i18n";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
-import { itemDraftCopy } from "@/lib/item-draft-copy";
+import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { MAX_DRAFT_PHOTOS, type DraftPhoto } from "@/lib/photo-draft";
 import { photoDraftRepository } from "@/lib/photo-draft-storage";
 import { pickDraftPhotos } from "@/lib/photo-draft-picker";
@@ -16,7 +16,6 @@ export function PhotoDraftScreen() {
   const { locale, d } = useI18n();
   const t = photoDraftCopy(locale);
   const [photos, setPhotos] = useState<DraftPhoto[] | null>(null);
-  const [hasRecipient, setHasRecipient] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -30,14 +29,13 @@ export function PhotoDraftScreen() {
       .then((saved) => {
         if (started === readVersion.current) {
           setPhotos(saved.photos);
-          setHasRecipient(Boolean(saved.draft.store));
         }
       })
       .catch((e: unknown) => {
         if (started === readVersion.current)
           setError(e instanceof Error ? e.message : "DRAFT_UNAVAILABLE");
       });
-  }, [setPhotos, setHasRecipient, setError]);
+  }, [setPhotos, setError]);
   useFocusEffect(
     useCallback(() => {
       alive.current = true;
@@ -149,17 +147,9 @@ export function PhotoDraftScreen() {
           {count === MAX_DRAFT_PHOTOS ? <Message>{t.limit}</Message> : null}
           {count > 0 ? (
             <Button
-              label={
-                hasRecipient
-                  ? itemDraftCopy(locale).detailsTitle
-                  : itemDraftCopy(locale).storeTitle
-              }
+              label={centralIntakeCopy(locale).continue}
               disabled={busy}
-              onPress={() =>
-                router.navigate(
-                  hasRecipient ? "/photo-details" : "/photo-store",
-                )
-              }
+              onPress={() => router.navigate("/photo-store")}
             />
           ) : null}
           {busy ? (
@@ -216,7 +206,6 @@ export function PhotoDraftScreen() {
             void update(clearDraftPhotos).then((saved) => {
               if (saved && alive.current) {
                 setConfirmClear(false);
-                setHasRecipient(false);
               }
             });
           }}
