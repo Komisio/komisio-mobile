@@ -39,7 +39,9 @@ import {
   type CompleteExternalOffer,
   type ExternalOnboarding,
 } from "@/lib/external-onboarding";
-import type { ExternalOfferDetail } from "@/lib/external-offer";
+import { offerAmount, type ExternalOfferDetail } from "@/lib/external-offer";
+import { externalHandoverCopy } from "@/lib/external-handover-copy";
+import { formattingLocale } from "@/lib/locale";
 
 export default function ExternalOnboardingScreen() {
   const { offer } = useLocalSearchParams<{ offer: string }>();
@@ -158,7 +160,7 @@ function Onboarding({ user, id }: { user: string; id: string }) {
       ) : null}
       {change.status === "conflict" ? <Message>{o.changed}</Message> : null}
       {data?.account.handover ? (
-        <Handover data={data.account} user={user} />
+        <Handover data={data.account} offer={data.offer} user={user} />
       ) : data ? (
         data.offer.canAccept || data.offer.status === "accepted" ? (
           <AccountForm
@@ -383,7 +385,15 @@ function AccountForm({
     </>
   );
 }
-function Handover({ data, user }: { data: ExternalOnboarding; user: string }) {
+function Handover({
+  data,
+  offer,
+  user,
+}: {
+  data: ExternalOnboarding;
+  offer: ExternalOfferDetail;
+  user: string;
+}) {
   const { locale, d } = useI18n(),
     t = externalOnboardingCopy(locale),
     h = data.handover!,
@@ -397,6 +407,34 @@ function Handover({ data, user }: { data: ExternalOnboarding; user: string }) {
             ? t.cancelled
             : t.handover}
       </Text>
+      {h.status === "received" &&
+      offer.guarantee &&
+      !offer.guarantee.creditedAt ? (
+        <Card>
+          <Text style={uiStyles.label}>
+            {h.items.find((item) => item.offerId === offer.id)?.description}
+          </Text>
+          <Text style={uiStyles.body}>
+            {externalHandoverCopy(locale)
+              .due.replace(
+                "{amount}",
+                offerAmount(
+                  offer.guarantee.amountOre,
+                  formattingLocale(locale),
+                ),
+              )
+              .replace(
+                "{date}",
+                new Intl.DateTimeFormat(formattingLocale(locale), {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  timeZone: "Europe/Stockholm",
+                }).format(new Date(offer.guarantee.dueAt)),
+              )}
+          </Text>
+        </Card>
+      ) : null}
       {h.status === "open" && data.qrPng ? (
         <Card>
           <Image

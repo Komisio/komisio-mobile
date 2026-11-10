@@ -199,3 +199,51 @@ test("handover progress requires real accepted and received states while old rea
       parseExternalOffer({ ...accepted, handover: { ...handover, ...patch } }),
     );
 });
+
+test("a guarantee deadline needs matching receipt evidence and the agreed amount", () => {
+  const receivedAt = "2026-11-10T12:00:00Z";
+  const accepted = {
+    ...offer,
+    status: "accepted",
+    canAccept: false,
+    canDecline: false,
+    response: { id: id(6), accepted: true, createdAt: offer.createdAt },
+    handover: {
+      id: id(7),
+      reference: "H-128",
+      status: "received",
+      receivedAt,
+      itemCount: 2,
+    },
+  };
+  const guarantee = {
+    id: id(8),
+    amountOre: offer.sellerAmountOre,
+    currency: "SEK",
+    receivedAt,
+    dueAt: "2026-12-25T12:00:00Z",
+    creditedAt: null,
+  };
+  assert.equal(parseExternalOffer(accepted).guarantee, undefined);
+  assert.equal(
+    parseExternalOffer({ ...accepted, guarantee }).guarantee?.dueAt,
+    guarantee.dueAt,
+  );
+  for (const patch of [
+    { id: "invalid" },
+    { amountOre: "1" },
+    { currency: "EUR" },
+    { receivedAt: "2026-11-11T12:00:00Z" },
+    { dueAt: "2026-12-24T12:00:00Z" },
+    { creditedAt: "not-a-date" },
+  ])
+    assert.throws(() =>
+      parseExternalOffer({
+        ...accepted,
+        guarantee: { ...guarantee, ...patch },
+      }),
+    );
+  assert.throws(() =>
+    parseExternalOffer({ ...accepted, handover: null, guarantee }),
+  );
+});

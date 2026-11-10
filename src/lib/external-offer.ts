@@ -23,6 +23,14 @@ export type ExternalOffer = {
     receivedAt: string | null;
     itemCount: number;
   } | null;
+  guarantee?: {
+    id: string;
+    amountOre: string;
+    currency: "SEK";
+    receivedAt: string;
+    dueAt: string;
+    creditedAt: string | null;
+  } | null;
 };
 export type ExternalOfferDetail = ExternalOffer & {
   agreement: {
@@ -98,6 +106,24 @@ export function parseExternalOffer(value: unknown): ExternalOffer {
       (h.itemCount as number) < 1 ||
       (h.itemCount as number) > 10 ||
       (h.status === "received" ? !date(h.receivedAt) : h.receivedAt !== null)
+    )
+      invalid();
+  }
+  if (o.guarantee != null) {
+    const g = object(o.guarantee),
+      h = object(o.handover);
+    if (
+      !isId(g.id) ||
+      g.currency !== "SEK" ||
+      g.amountOre !== o.sellerAmountOre ||
+      !date(g.receivedAt) ||
+      !date(g.dueAt) ||
+      h.status !== "received" ||
+      Date.parse(g.receivedAt as string) !==
+        Date.parse(h.receivedAt as string) ||
+      Date.parse(g.dueAt as string) - Date.parse(g.receivedAt as string) !==
+        45 * 24 * 3600000 ||
+      (g.creditedAt !== null && !date(g.creditedAt))
     )
       invalid();
   }

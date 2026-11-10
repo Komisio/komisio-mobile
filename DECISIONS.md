@@ -29,3 +29,5 @@
 
 - 2026-11-10: Central onboarding explicitly binds the SMS identity to its own seller record. Email is contact-only. Final consent atomically saves account, Swedish bank and frozen agreement evidence with a real grouped H-handover; retries retain the exact command. Ordinary email accounts stay unchanged.
 - 2026-11-10: My items uses actual linked handover state to distinguish Ready for drop-off from Received and opens accepted requests directly at account/handover. Receipt is not labelled on-sale or credited; older offer reads without progress remain compatible.
+
+- 2026-11-10: After physical receipt, the handover shows the selected item's fixed amount and server-frozen guarantee deadline in Stockholm time. Missing legacy evidence never invents a deadline; recording a guarantee is not balance credit.
