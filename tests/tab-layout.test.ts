@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
+import { hasVerifiedEmail } from "../src/lib/identity-gates.ts";
 
 const require = createRequire(import.meta.url);
 const { transformSync } = require("@babel/core");
@@ -219,6 +220,13 @@ test("all detail routes configure back navigation with their own fallback", () =
       }),
     },
     "@/lib/photo-draft-copy": { photoDraftCopy: () => ({ title: "Photos" }) },
+    "@/lib/external-submission-copy": {
+      externalSubmissionCopy: () => ({
+        phoneTitle: "Phone",
+        myRequests: "Requests",
+      }),
+    },
+    "@/lib/identity-gates": { hasVerifiedEmail },
     "@/components/push-bridge": { PushBridge: "PushBridge" },
     "expo-status-bar": { StatusBar: "StatusBar" },
     "expo-router": {
@@ -245,7 +253,12 @@ test("all detail routes configure back navigation with their own fallback", () =
       useSession: () => ({
         ready: true,
         store: {},
-        session: {},
+        session: {
+          user: {
+            email: "test@example.invalid",
+            email_confirmed_at: "2026-11-10",
+          },
+        },
         mfaRequired: false,
       }),
     },
@@ -265,7 +278,11 @@ test("all detail routes configure back navigation with their own fallback", () =
   assert.equal(bridge.type, "PushBridge");
   const stack = routesElement.type();
   assert.equal(stack.props.screenOptions.headerShown, false);
-  const screens = stack.props.children.at(-1).props.children;
+  const screens = stack.props.children.find((group: any) =>
+    [group.props.children]
+      .flat()
+      .some((screen: any) => screen.props.name === "(tabs)"),
+  ).props.children;
   assert.equal(screens[0].props.name, "(tabs)");
   assert.equal(screens[0].props.options, undefined);
   const expected: Record<string, string> = {
@@ -300,6 +317,13 @@ test("photo drafts are available in the signed app while preserving login, MFA a
       }),
     },
     "@/lib/photo-draft-copy": { photoDraftCopy: () => ({ title: "Photos" }) },
+    "@/lib/external-submission-copy": {
+      externalSubmissionCopy: () => ({
+        phoneTitle: "Phone",
+        myRequests: "Requests",
+      }),
+    },
+    "@/lib/identity-gates": { hasVerifiedEmail },
     "@/components/push-bridge": { PushBridge: "PushBridge" },
     "expo-status-bar": { StatusBar: "StatusBar" },
     "expo-router": {
@@ -352,6 +376,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "photo-store",
     "photo-details",
     "photo-review",
+    "photo-phone",
   ]);
   state = { ...state, store: {} };
   assert.deepEqual(routes(), [
@@ -360,13 +385,39 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "photo-store",
     "photo-details",
     "photo-review",
+    "photo-phone",
   ]);
-  state = { ...state, session: {}, mfaRequired: true };
+  state = {
+    ...state,
+    session: {
+      user: { email: "test@example.invalid", email_confirmed_at: "2026-11-10" },
+    },
+    mfaRequired: true,
+  };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 12);
+  assert.equal(routes().length, 14);
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
+  state = { ...state, store: null };
+  assert.ok(routes().includes("store"));
+  assert.ok(!routes().includes("(tabs)"));
+  state = {
+    ...state,
+    session: {
+      user: { phone: "46700000001", phone_confirmed_at: "2026-11-10" },
+    },
+  };
+  assert.deepEqual(routes(), [
+    "external-items",
+    "photo-draft",
+    "photo-store",
+    "photo-details",
+    "photo-review",
+    "photo-phone",
+  ]);
+  state = { ...state, mfaRequired: true };
+  assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, ready: false };
   assert.deepEqual(routes(), []);
   state = { ...state, ready: true, authFailed: true };

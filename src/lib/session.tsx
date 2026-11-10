@@ -12,6 +12,7 @@ import { secureStorage } from "./secure-storage";
 import { createAuthBootstrap } from "./auth-bootstrap";
 import { setCommandUser } from "./command-storage";
 import { sellerPush } from "./push-runtime";
+import { hasVerifiedEmail } from "./identity-gates";
 
 export type AppStore = { id: string; name: string; slug: string };
 export type SellerAccount = {
@@ -106,7 +107,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   // The seller account in the chosen store, once fully signed in.
   const accountKey =
-    session && !mfaRequired && store
+    session && hasVerifiedEmail(session.user) && !mfaRequired && store
       ? `${session.user.id}:${store.id}:${attempt}`
       : null;
   useEffect(() => {
@@ -126,8 +127,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       current = false;
     };
   }, [accountKey, store]);
-  const account =
-    lookup && lookup.key === accountKey ? lookup.account : undefined;
+  const account = !accountKey
+    ? null
+    : lookup && lookup.key === accountKey
+      ? lookup.account
+      : undefined;
 
   const chooseStore = (next: AppStore | null) => {
     setStore(next);

@@ -1,5 +1,9 @@
 # Decisions
 
+- 2026-11-10: Prepare Supabase phone verification for external requests without activating an SMS provider. Add a phone to an existing identity rather than signing it into another account; verify phone changes with a separate nonpersisting client and preserve the original MFA session.
+- 2026-11-10: Use SDK-compatible expo-image-manipulator to decode and resize upload copies within 1536 pixels before JPEG encoding. Keep camera originals and saved drafts intact. The native dependency belongs in both iOS and Android builds, without preview flags.
+- 2026-11-10: Freeze a user-bound external submission before sending images or item details. Preserve its request UUID and upload bytes across retries, reconcile unknown outcomes first, and clear only the matching draft revision after confirmed success. Existing financial-command journals stay separate.
+
 - 2026-11-10: Consume native pending photo results on each draft read, serialized with explicit reset. Android activity recreation can keep the JS runtime alive; an earlier empty result must not hide later photos, and delayed recovery must not resurrect a cleared draft.
 
 - 2026-11-09: Local draft saves serialize navigation: Back cannot open an unsaved-changes sheet during a save, and successful navigation waits until any sheet is removed. Failed saves keep the current form editable.

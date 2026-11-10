@@ -8,6 +8,8 @@ import { detailHeaderOptions } from "@/components/detail-navigation";
 import { PushBridge } from "@/components/push-bridge";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
+import { externalSubmissionCopy } from "@/lib/external-submission-copy";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
 
 function Routes() {
   const { d, locale } = useI18n();
@@ -23,66 +25,28 @@ function Routes() {
     );
   if (!ready) return <Loading />;
   const signedIn = Boolean(session) && !mfaRequired;
+  const sellerRoutes =
+    Boolean(store) && signedIn && hasVerifiedEmail(session?.user);
+  const homeRoute =
+    session && mfaRequired
+      ? "/mfa"
+      : sellerRoutes
+        ? "/(tabs)"
+        : signedIn && !hasVerifiedEmail(session?.user)
+          ? "/external-items"
+          : store
+            ? "/login"
+            : "/store";
+  const photoHome = session
+    ? sellerRoutes
+      ? "/(tabs)/items"
+      : "/external-items"
+    : store
+      ? "/login"
+      : "/store";
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={!store}>
-        <Stack.Screen name="store" />
-      </Stack.Protected>
-      <Stack.Protected guard={Boolean(store) && !session}>
-        <Stack.Screen name="login" />
-      </Stack.Protected>
-      <Stack.Protected guard={!session || (Boolean(store) && signedIn)}>
-        <Stack.Screen
-          name="photo-draft"
-          options={({ navigation }) => ({
-            ...detailHeaderOptions(
-              session ? "/(tabs)/items" : store ? "/login" : "/store",
-              d.close,
-              navigation.canGoBack(),
-            ),
-            title: photoDraftCopy(locale).title,
-          })}
-        />
-        <Stack.Screen
-          name="photo-store"
-          options={({ navigation }) => ({
-            ...detailHeaderOptions(
-              "/photo-draft",
-              d.close,
-              navigation.canGoBack(),
-            ),
-            title: itemDraftCopy(locale).storeTitle,
-          })}
-        />
-        <Stack.Screen
-          name="photo-details"
-          options={({ navigation }) => ({
-            ...detailHeaderOptions(
-              "/photo-store",
-              d.close,
-              navigation.canGoBack(),
-            ),
-            title: itemDraftCopy(locale).detailsTitle,
-          })}
-        />
-        <Stack.Screen
-          name="photo-review"
-          options={({ navigation }) => ({
-            ...detailHeaderOptions(
-              "/photo-details",
-              d.close,
-              navigation.canGoBack(),
-            ),
-            title: itemDraftCopy(locale).reviewTitle,
-          })}
-        />
-      </Stack.Protected>
-      <Stack.Protected
-        guard={Boolean(store) && Boolean(session) && mfaRequired}
-      >
-        <Stack.Screen name="mfa" />
-      </Stack.Protected>
-      <Stack.Protected guard={Boolean(store) && signedIn}>
+      <Stack.Protected guard={sellerRoutes} redirectTo={homeRoute}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
           name="notifications"
@@ -154,6 +118,93 @@ function Routes() {
             )
           }
         />
+      </Stack.Protected>
+
+      <Stack.Protected
+        redirectTo={homeRoute}
+        guard={
+          !store && !mfaRequired && (!session || hasVerifiedEmail(session.user))
+        }
+      >
+        <Stack.Screen name="store" />
+      </Stack.Protected>
+      <Stack.Protected
+        guard={Boolean(store) && !session}
+        redirectTo={homeRoute}
+      >
+        <Stack.Screen name="login" />
+      </Stack.Protected>
+      <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
+        <Stack.Screen
+          name="external-items"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              sellerRoutes ? "/(tabs)/items" : "/photo-draft",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: externalSubmissionCopy(locale).myRequests,
+          })}
+        />
+      </Stack.Protected>
+      <Stack.Protected guard={!session || signedIn} redirectTo={homeRoute}>
+        <Stack.Screen
+          name="photo-draft"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(photoHome, d.close, navigation.canGoBack()),
+            title: photoDraftCopy(locale).title,
+          })}
+        />
+        <Stack.Screen
+          name="photo-store"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/photo-draft",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: itemDraftCopy(locale).storeTitle,
+          })}
+        />
+        <Stack.Screen
+          name="photo-details"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/photo-store",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: itemDraftCopy(locale).detailsTitle,
+          })}
+        />
+        <Stack.Screen
+          name="photo-review"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/photo-details",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: itemDraftCopy(locale).reviewTitle,
+          })}
+        />
+        <Stack.Screen
+          name="photo-phone"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/photo-review",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: externalSubmissionCopy(locale).phoneTitle,
+          })}
+        />
+      </Stack.Protected>
+      <Stack.Protected
+        guard={Boolean(session) && mfaRequired}
+        redirectTo={homeRoute}
+      >
+        <Stack.Screen name="mfa" />
       </Stack.Protected>
     </Stack>
   );

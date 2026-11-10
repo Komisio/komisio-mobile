@@ -1,5 +1,6 @@
+import { useCallback, useRef, useState } from "react";
 import { Text, View } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect, usePreventRemove } from "expo-router";
 import { Button, Card, Loading, Message, Screen, uiStyles } from "./ui";
 import { PhotoDraftImage } from "./photo-draft-image";
 import { useItemDraft } from "@/lib/use-item-draft";
@@ -8,13 +9,146 @@ import { useSession } from "@/lib/session";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import { itemDetailsErrors } from "@/lib/item-draft-details";
+import {
+  externalSubmissionCopy,
+  externalSubmissionError,
+} from "@/lib/external-submission-copy";
+import { externalSubmission } from "@/lib/external-submission-runtime";
+import type { ExternalAttempt } from "@/lib/external-submission";
+import { hasVerifiedPhone } from "@/lib/identity-gates";
 
 export function PhotoReviewScreen() {
   const { locale, d } = useI18n();
   const t = itemDraftCopy(locale);
   const photo = photoDraftCopy(locale);
   const { snapshot, failed, reload } = useItemDraft();
-  const { session, store } = useSession();
+  const { session, refreshAssurance } = useSession();
+  const s = externalSubmissionCopy(locale);
+  const owner = session?.user.id;
+  const [outbox, setOutbox] = useState<{
+    owner: string;
+    attempt: ExternalAttempt | null;
+  } | null>(null);
+  const [outboxFailed, setOutboxFailed] = useState(false);
+  const [readVersion, setReadVersion] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [progress, setProgress] = useState("");
+  const locked = useRef(false),
+    active = useRef(false),
+    currentOwner = useRef(owner);
+  const disablePrevention = usePreventRemove(busy, () => {});
+  useFocusEffect(
+    useCallback(() => {
+      void readVersion;
+      currentOwner.current = owner;
+      active.current = true;
+      let current = true;
+      setOutbox(null);
+      setOutboxFailed(false);
+      setError("");
+      if (owner)
+        void externalSubmission(owner)
+          .then((c) => c.load())
+          .then((attempt) => {
+            if (current) setOutbox({ owner, attempt });
+          })
+          .catch(() => {
+            if (current) setOutboxFailed(true);
+          });
+      return () => {
+        current = false;
+        active.current = false;
+      };
+    }, [owner, readVersion]),
+  );
+  const attempt = outbox?.owner === owner ? outbox?.attempt : null;
+  const pending =
+    attempt?.state === "pending" || attempt?.state === "confirmed";
+  async function send(resume = false) {
+    if (locked.current) return;
+    if (!owner || !hasVerifiedPhone(session?.user)) {
+      router.push("/photo-phone");
+      return;
+    }
+    if (!resume && !snapshot) return;
+    locked.current = true;
+    setBusy(true);
+    setError("");
+    setProgress("");
+    const current = () => active.current && currentOwner.current === owner;
+    try {
+      const controller = await externalSubmission(owner);
+      if (!resume) await controller.prepare(snapshot!);
+      const result = await controller.resume((done, total) => {
+        if (current())
+          setProgress(
+            done < total
+              ? s.progress
+                  .replace("{done}", String(done + 1))
+                  .replace("{total}", String(total))
+              : s.send,
+          );
+      });
+      if (current()) {
+        setOutbox({ owner, attempt: result });
+        if (result.state === "complete") {
+          disablePrevention();
+          router.replace({
+            pathname: "/external-items",
+            params: { sent: result.command.requestId },
+          });
+        } else
+          setError(externalSubmissionError(locale, result.rejection ?? ""));
+      }
+    } catch (e) {
+      if (current()) {
+        setError(
+          externalSubmissionError(locale, e instanceof Error ? e.message : ""),
+        );
+        try {
+          const saved = await (await externalSubmission(owner)).load();
+          if (current()) setOutbox({ owner, attempt: saved });
+        } catch {
+          if (current()) setOutboxFailed(true);
+        }
+        if (
+          e instanceof Error &&
+          ["MFA_REQUIRED", "AUTH_REQUIRED"].includes(e.message)
+        )
+          await refreshAssurance();
+      }
+    } finally {
+      locked.current = false;
+      if (active.current) {
+        setBusy(false);
+        setProgress("");
+      }
+    }
+  }
+  if (outboxFailed)
+    return (
+      <Screen topSafeArea={false}>
+        <Message tone="error">{s.sendError}</Message>
+        <Button label={d.retry} onPress={() => setReadVersion((n) => n + 1)} />
+      </Screen>
+    );
+  if (owner && !outbox) return <Loading />;
+  if (pending)
+    return (
+      <Screen topSafeArea={false} title={s.pending}>
+        <Card>
+          <Text style={uiStyles.heading}>{attempt.command.description}</Text>
+          <Text style={uiStyles.body}>{attempt.storeName}</Text>
+        </Card>
+        <Message>
+          {attempt.state === "confirmed" ? s.success : s.sendError}
+        </Message>
+        {error ? <Message tone="error">{error}</Message> : null}
+        {progress ? <Message>{progress}</Message> : null}
+        <Button label={s.resume} busy={busy} onPress={() => void send(true)} />
+      </Screen>
+    );
   if (failed)
     return (
       <Screen topSafeArea={false}>
@@ -51,7 +185,7 @@ export function PhotoReviewScreen() {
     );
   return (
     <Screen topSafeArea={false}>
-      <Message>{photo.intro}</Message>
+      <Message>{s.reviewIntro}</Message>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
         {photos.map((p, i) => (
           <View key={p.id} style={{ width: "47%" }}>
@@ -67,6 +201,7 @@ export function PhotoReviewScreen() {
       <Button
         label={t.editPhotos}
         variant="text"
+        disabled={busy}
         onPress={() => router.navigate("/photo-draft")}
       />
       <Card>
@@ -97,6 +232,7 @@ export function PhotoReviewScreen() {
         <Button
           label={t.editDetails}
           variant="text"
+          disabled={busy}
           onPress={() => router.navigate("/photo-details")}
         />
       </Card>
@@ -108,17 +244,19 @@ export function PhotoReviewScreen() {
         <Button
           label={t.changeStore}
           variant="text"
+          disabled={busy}
           onPress={() => router.navigate("/photo-store")}
         />
       </Card>
-      <Message>{photo.saved}</Message>
+      {error ? <Message tone="error">{error}</Message> : null}
+      {attempt?.state === "rejected" ? (
+        <Message>{s.editAfterRefusal}</Message>
+      ) : null}
+      {progress ? <Message>{progress}</Message> : null}
       <Button
-        label={d.close}
-        onPress={() =>
-          router.dismissTo(
-            session ? "/(tabs)/items" : store ? "/login" : "/store",
-          )
-        }
+        label={hasVerifiedPhone(session?.user) ? s.send : s.verifyPhone}
+        busy={busy}
+        onPress={() => void send()}
       />
     </Screen>
   );
