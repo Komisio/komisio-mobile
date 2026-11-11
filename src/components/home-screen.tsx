@@ -3,12 +3,13 @@ import { router } from "expo-router";
 import { StyleSheet, Text } from "react-native";
 import { useI18n } from "@/lib/i18n";
 import { homeCopy } from "@/lib/home-copy";
+import { accountAuthCopy } from "@/lib/account-auth-copy";
 import { useSession } from "@/lib/session";
-import { ItemCard, Screen, uiStyles } from "./ui";
+import { Button, ItemCard, Screen, uiStyles } from "./ui";
 
 export function HomeScreen() {
   const { locale } = useI18n();
-  const { chooseStore } = useSession();
+  const { chooseStore, session } = useSession();
   const t = homeCopy(locale);
   return (
     <Screen brand bottomSafeArea={false}>
@@ -36,6 +37,13 @@ export function HomeScreen() {
         <Text style={uiStyles.heading}>{t.store}</Text>
         <Text style={uiStyles.note}>{t.storeHint}</Text>
       </ItemCard>
+      {!session ? (
+        <Button
+          label={accountAuthCopy(locale).link}
+          variant="text"
+          onPress={() => router.push("/account-auth")}
+        />
+      ) : null}
     </Screen>
   );
 }

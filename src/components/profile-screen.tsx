@@ -5,8 +5,8 @@ import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { pushCopy } from "@/lib/push-copy";
-import { hasVerifiedEmail, hasVerifiedPhone } from "@/lib/identity-gates";
-import { emailLoginCopy } from "@/lib/email-login-copy";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { accountAuthCopy } from "@/lib/account-auth-copy";
 import { LoginOptions } from "./login-options";
 import { PrivacyLink } from "./privacy-link";
 import {
@@ -70,12 +70,10 @@ export function ProfileScreen() {
               <Message tone="error">{d.profile.logoutFailed}</Message>
             ) : null}
           </Card>
-          {hasVerifiedPhone(session.user) ? (
-            <NavigationRow
-              label={emailLoginCopy(locale).title}
-              onPress={() => router.push("/email-login")}
-            />
-          ) : null}
+          <NavigationRow
+            label={accountAuthCopy(locale).methods}
+            onPress={() => router.push("/account-methods")}
+          />
           <NavigationRow
             label={pushCopy[locale].title}
             onPress={() => router.push("/notifications")}

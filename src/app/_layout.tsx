@@ -37,10 +37,17 @@ function Routes() {
   const photoHome = "/home/sell";
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="auth-callback" />
       <Stack.Protected guard={!mfaRequired} redirectTo={homeRoute}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="welcome" />
         <Stack.Screen name="store" />
+        <Stack.Screen
+          name="account-auth"
+          options={({ navigation }) =>
+            detailHeaderOptions("/home", d.close, navigation.canGoBack())
+          }
+        />
         <Stack.Screen
           name="login"
           options={({ navigation }) =>
@@ -112,6 +119,16 @@ function Routes() {
       </Stack.Protected>
 
       <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
+        <Stack.Screen
+          name="account-methods"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/profile",
+              d.close,
+              navigation.canGoBack(),
+            )
+          }
+        />
         <Stack.Screen
           name="email-login"
           options={({ navigation }) =>

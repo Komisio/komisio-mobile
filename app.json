@@ -9,6 +9,7 @@
     "scheme": ["komisio", "komisioapp"],
     "userInterfaceStyle": "light",
     "ios": {
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.inority.komisio",
       "supportsTablet": true,
       "config": {
@@ -35,6 +36,7 @@
       "favicon": "./assets/images/komisio-favicon.png"
     },
     "plugins": [
+      "expo-apple-authentication",
       "expo-router",
       [
         "expo-notifications",

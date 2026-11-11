@@ -52,6 +52,34 @@ See [iOS release and TestFlight](docs/ios-release.md) for environment setup,
 build/submission commands, proposed store copy and the remaining release gates.
 This configuration alone does not make the app release-ready.
 
+## Account registration and sign-in
+
+Home and Profile open the same store-independent sign-in/registration screen.
+Apple uses native Sign in with Apple on iOS; Google uses the OS authentication
+browser with S256 PKCE on iOS/Android. Email codes create or reopen an account.
+Password and SMS login remain available. Verify the phone once before the first
+central item submission. Signing up creates no store membership or seller record.
+
+Existing phone users connect another method under Profile → Sign-in methods;
+linking retains their Auth UID, items and MFA. Contact email is not an account
+merge key. An identity already owned by another account is not moved.
+
+Before distribution, configure each target Supabase project:
+
+- Deploy the platform's mobile-code auth email hook; allow
+  `<portal>/auth/callback?mobile_code=1&locale=*` while preserving existing redirects.
+- Enable the native Apple provider with client ID `com.inority.komisio`, enable
+  the matching Apple App ID capability and regenerate the signing profile.
+- Configure Google with a web OAuth client and its server-side secret. Register
+  the project's Supabase `/auth/v1/callback` URI with Google. Allow
+  `komisio://auth-callback?flow=*` in Supabase and enable manual identity linking.
+- Use a company support address for Google's consent screen. Verify real Apple
+  and Google login, cancellation, cold callbacks, existing-account linking,
+  email-code delivery and MFA on the signed TestFlight build before public release.
+
+Provider secrets are never shipped in the app. Unconfigured providers are disabled
+and email remains available. Web is a local test surface, not a deployed OAuth client.
+
 ## Photo drafts
 
 Home now provides separate Komisio and store entry points, before and after
@@ -59,7 +87,7 @@ login. The Komisio introduction keeps the bottom navigation; the photo steps
 have a Close action. The bundled `assets/photos/home-dress.png` is the
 owner-selected AI-generated hanger variant, created for Komisio in this task.
 Phone sellers can enable email/password login on the same verified identity
-under Profile → Email login, after confirming ownership of the address.
+under Profile → Sign-in methods → Email login, after confirming ownership of the address.
 
 The same native iOS/Android app offers **Photograph an item** on the store picker
 and in **My items**. `/photo-draft` works in signed builds, including TestFlight,
