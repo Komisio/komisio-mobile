@@ -168,7 +168,7 @@ export function PhotoDetailsScreen() {
   const issueText = {
     description: t.requiredDescription,
     condition: t.requiredCondition,
-    desiredPrice: t.invalidPrice,
+    desiredSellerAmount: t.invalidPrice,
   };
   return (
     <Screen topSafeArea={false} keyboardInsets>
@@ -236,11 +236,11 @@ export function PhotoDetailsScreen() {
       />
       <View style={{ gap: 6 }}>
         <Field
-          label={t.desiredPrice.replace("{currency}", currency)}
-          value={values.desiredPrice}
+          label={t.desiredSellerAmount.replace("{currency}", currency)}
+          value={values.desiredSellerAmount}
           maxLength={32}
           editable={!busy}
-          onChangeText={(value) => change("desiredPrice", value)}
+          onChangeText={(value) => change("desiredSellerAmount", value)}
           inputMode="decimal"
           keyboardType="decimal-pad"
         />

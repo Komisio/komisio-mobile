@@ -168,13 +168,17 @@ export class PhotoDraftRepository {
       const selected = parseExternalStore(store);
       const currencyChanged =
         current.store && current.store.currency !== selected.currency;
-      if (currencyChanged && current.details.desiredPrice.trim() && !clearPrice)
+      if (
+        currencyChanged &&
+        current.details.desiredSellerAmount.trim() &&
+        !clearPrice
+      )
         throw new Error("PRICE_CURRENCY_CHANGED");
       const next = {
         ...this.next(current),
         store: selected,
         details: currencyChanged
-          ? { ...current.details, desiredPrice: "" }
+          ? { ...current.details, desiredSellerAmount: "" }
           : current.details,
       };
       const photos = await this.photos(next);

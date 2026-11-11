@@ -11,9 +11,98 @@ import {
   type PushCommand,
   type DeviceState,
 } from "../src/lib/push-contract.ts";
-import { ownsPush, pushDestination } from "../src/lib/push-routing.ts";
+import {
+  ownsPush,
+  pushDestination,
+  externalPushDestination,
+} from "../src/lib/push-routing.ts";
 import { pushCopy } from "../src/lib/push-copy.ts";
 import { locales } from "../src/lib/locale.ts";
+
+test("central decision pushes resolve authenticated request/offer bindings without a store account", async () => {
+  const user = randomUUID(),
+    tenant = randomUUID(),
+    request = randomUUID(),
+    offer = randomUUID();
+  const p = parsePushData({
+    v: 2,
+    kind: "external_item_offered",
+    notificationId: randomUUID(),
+    ownerId: user,
+    tenantId: tenant,
+    requestId: request,
+    offerId: offer,
+  });
+  assert(p?.v === 2);
+  const item = async () => ({ id: request, tenant_id: tenant });
+  const readOffer = async () => ({
+    id: offer,
+    requestId: request,
+    tenantId: tenant,
+    status: "offered",
+  });
+  assert.equal(ownsPush(p, [{ tenantId: tenant, sellerId: user }]), false);
+  assert.deepEqual(await externalPushDestination(p, user, item, readOffer), {
+    pathname: "/external-offer/[offer]",
+    params: { offer },
+  });
+  assert.equal(
+    await externalPushDestination(
+      p,
+      randomUUID(),
+      async () => {
+        throw Error("must not read");
+      },
+      readOffer,
+    ),
+    null,
+  );
+  assert.equal(
+    await externalPushDestination(p, user, async () => null, readOffer),
+    null,
+  );
+  assert.equal(
+    await externalPushDestination(
+      p,
+      user,
+      async () => ({ id: request, tenant_id: randomUUID() }),
+      readOffer,
+    ),
+    null,
+  );
+  assert.equal(
+    await externalPushDestination(p, user, item, async () => ({
+      ...(await readOffer()),
+      requestId: randomUUID(),
+    })),
+    null,
+  );
+  assert.deepEqual(
+    await externalPushDestination(
+      { ...p, kind: "external_item_declined", offerId: null },
+      user,
+      item,
+      readOffer,
+    ),
+    { pathname: "/external-items", params: { request } },
+  );
+  assert.equal(
+    (
+      await externalPushDestination(p, user, item, async () => ({
+        ...(await readOffer()),
+        status: "accepted",
+      }))
+    )?.pathname,
+    "/external-onboarding/[offer]",
+  );
+  for (const patch of [
+    { offerId: null },
+    { ownerId: "bad" },
+    { requestId: "bad" },
+    { kind: "unknown" },
+  ])
+    assert.equal(parsePushData({ ...p, ...patch }), null);
+});
 
 function fixture(options: { stored?: string; platform?: "ios" | "web" } = {}) {
   let stored: string | null = options.stored ?? null;

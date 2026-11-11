@@ -39,6 +39,34 @@ const detail = {
     language: "sv",
   },
 };
+test("offer amounts render with iOS Hermes Intl capabilities", (t) => {
+  const NativeFormat = Intl.NumberFormat;
+  t.mock.method(Intl, "NumberFormat", function (locale?: string) {
+    const native = new NativeFormat(locale);
+    return {
+      format(value: number | bigint) {
+        if (typeof value === "bigint")
+          throw new TypeError("Cannot convert BigInt to number");
+        return native.format(value);
+      },
+      // Hermes on Apple platforms has no NumberFormat.formatToParts.
+    };
+  });
+  assert.equal(offerAmount("40000", "sv-SE"), "400 kr");
+  assert.equal(offerAmount("40001", "sv-SE"), "400,01 kr");
+  assert.equal(offerAmount("99999999999", "en-GB"), "999,999,999.99 SEK");
+  for (const locale of [
+    "sv-SE",
+    "en-GB",
+    "nb-NO",
+    "da-DK",
+    "fi-FI",
+    "de-DE",
+    "es-ES",
+    "it-IT",
+  ])
+    assert.doesNotThrow(() => offerAmount("1", locale));
+});
 test("offers bind a fixed positive SEK amount, 48-hour deadline and exact agreement", () => {
   assert.equal(
     parseExternalOfferDetail(detail).agreement.body,

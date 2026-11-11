@@ -1,6 +1,6 @@
 import { isId } from "./catalogue.ts";
 
-export type PushData = {
+export type SellerPushData = {
   v: 1;
   notificationId: string;
   kind: "item_registered" | "item_sold";
@@ -8,9 +8,40 @@ export type PushData = {
   sellerId: string;
   itemId: string;
 };
+export type ExternalPushData = {
+  v: 2;
+  notificationId: string;
+  kind: "external_item_offered" | "external_item_declined";
+  tenantId: string;
+  ownerId: string;
+  requestId: string;
+  offerId: string | null;
+};
+export type PushData = SellerPushData | ExternalPushData;
 export function parsePushData(input: unknown): PushData | null {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
   const d = input as Record<string, unknown>;
+  if (d.v === 2) {
+    if (
+      ![d.notificationId, d.tenantId, d.ownerId, d.requestId].every(isId) ||
+      !["external_item_offered", "external_item_declined"].includes(
+        String(d.kind),
+      ) ||
+      (d.kind === "external_item_offered"
+        ? !isId(d.offerId)
+        : d.offerId !== null)
+    )
+      return null;
+    return {
+      v: 2,
+      notificationId: String(d.notificationId),
+      tenantId: String(d.tenantId),
+      ownerId: String(d.ownerId),
+      requestId: String(d.requestId),
+      offerId: d.offerId as string | null,
+      kind: d.kind as ExternalPushData["kind"],
+    };
+  }
   if (
     d.v !== 1 ||
     !["item_registered", "item_sold"].includes(String(d.kind)) ||
@@ -22,7 +53,7 @@ export function parsePushData(input: unknown): PushData | null {
   return {
     v: 1,
     notificationId: String(d.notificationId),
-    kind: d.kind as PushData["kind"],
+    kind: d.kind as SellerPushData["kind"],
     tenantId: String(d.tenantId),
     sellerId: String(d.sellerId),
     itemId: String(d.itemId),

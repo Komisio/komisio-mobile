@@ -10,8 +10,19 @@ import {
   configurePushChannels,
   observePush,
 } from "@/lib/push-native";
-import { parsePushData, type PushData } from "@/lib/push-contract";
-import { ownsPush, pushDestination } from "@/lib/push-routing";
+import {
+  parsePushData,
+  type PushData,
+  type SellerPushData,
+} from "@/lib/push-contract";
+import { externalRequestApi } from "@/lib/external-submission-runtime";
+import { externalOfferApi } from "@/lib/external-offer-runtime";
+import { hasVerifiedPhone } from "@/lib/identity-gates";
+import {
+  ownsPush,
+  pushDestination,
+  externalPushDestination,
+} from "@/lib/push-routing";
 import { pushCopy } from "@/lib/push-copy";
 
 export function PushBridge() {
@@ -31,7 +42,7 @@ export function PushBridge() {
   const [pending, setPending] = useState<PushData | null>(null);
   const [target, setTarget] = useState<{
     user: string;
-    payload: PushData;
+    payload: SellerPushData;
     store: AppStore;
   } | null>(null);
   const [resume, setResume] = useState(0);
@@ -54,6 +65,15 @@ export function PushBridge() {
       },
       (data) => {
         const current = latest.current;
+        const payload = parsePushData(data);
+        if (payload?.v === 2)
+          return Boolean(
+            current.ready &&
+            !current.mfaRequired &&
+            hasVerifiedPhone(current.session?.user) &&
+            current.session?.user.id === payload.ownerId &&
+            sellerPush.getSnapshot().status === "on",
+          );
         return Boolean(
           current.ready &&
           !current.mfaRequired &&
@@ -95,6 +115,45 @@ export function PushBridge() {
   useEffect(() => {
     if (!user || !pending) return;
     let active = true;
+    if (pending.v === 2) {
+      // Payloads select a record; authenticated reads prove ownership and the
+      // request/offer binding before navigation. Never change the store context.
+      void (async () => {
+        if (pending.ownerId !== user) {
+          if (active) {
+            setPending(null);
+            clearPushResponse();
+          }
+          return;
+        }
+        try {
+          const destination = await externalPushDestination(
+            pending,
+            user,
+            (id) => externalRequestApi(user).lookup(id),
+            (id) => externalOfferApi(user).read(id),
+          );
+          if (
+            !active ||
+            latest.current.session?.user.id !== user ||
+            latest.current.mfaRequired
+          )
+            return;
+          setPending(null);
+          clearPushResponse();
+          if (!destination) return;
+          seen.current.add(pending.notificationId);
+          if (seen.current.size > 100)
+            seen.current.delete(seen.current.values().next().value!);
+          router.push(destination);
+        } catch {
+          /* Keep a tap pending for retry on foreground/network recovery. */
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }
     void Promise.all([
       supabase.rpc("my_seller_accounts"),
       supabase.rpc("public_app_stores"),

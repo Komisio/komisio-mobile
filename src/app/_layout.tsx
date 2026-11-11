@@ -4,7 +4,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { SessionProvider, useSession } from "@/lib/session";
 import { Button, Loading, Message, Screen } from "@/components/ui";
-import { detailHeaderOptions } from "@/components/detail-navigation";
+import {
+  detailHeaderOptions,
+  photoCloseOptions,
+} from "@/components/detail-navigation";
 import { PushBridge } from "@/components/push-bridge";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
@@ -53,16 +56,6 @@ function Routes() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={sellerRoutes} redirectTo={homeRoute}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="notifications"
-          options={({ navigation }) =>
-            detailHeaderOptions(
-              "/(tabs)/profile",
-              d.profile.back,
-              navigation.canGoBack(),
-            )
-          }
-        />
         <Stack.Screen
           name="language"
           options={({ navigation }) =>
@@ -144,9 +137,23 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
         <Stack.Screen
+          name="notifications"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              sellerRoutes ? "/(tabs)/profile" : "/external-items",
+              d.close,
+              navigation.canGoBack(),
+            )
+          }
+        />
+        <Stack.Screen
           name="external-onboarding/[offer]"
           options={({ navigation }) => ({
-            ...detailHeaderOptions("/external-items", d.close, navigation.canGoBack()),
+            ...detailHeaderOptions(
+              "/external-items",
+              d.close,
+              navigation.canGoBack(),
+            ),
             title: externalOnboardingCopy(locale).title,
           })}
         />
@@ -190,6 +197,7 @@ function Routes() {
           options={({ navigation }) => ({
             ...detailHeaderOptions(photoHome, d.close, navigation.canGoBack()),
             title: photoDraftCopy(locale).title,
+            ...photoCloseOptions(photoHome, d.close, true),
           })}
         />
         <Stack.Screen
@@ -201,6 +209,7 @@ function Routes() {
               navigation.canGoBack(),
             ),
             title: itemDraftCopy(locale).storeTitle,
+            ...photoCloseOptions(photoHome, d.close),
           })}
         />
         <Stack.Screen
@@ -212,6 +221,7 @@ function Routes() {
               navigation.canGoBack(),
             ),
             title: itemDraftCopy(locale).detailsTitle,
+            ...photoCloseOptions(photoHome, d.close),
           })}
         />
         <Stack.Screen
@@ -223,6 +233,7 @@ function Routes() {
               navigation.canGoBack(),
             ),
             title: externalSubmissionCopy(locale).send,
+            ...photoCloseOptions(photoHome, d.close),
           })}
         />
         <Stack.Screen
@@ -234,6 +245,7 @@ function Routes() {
               navigation.canGoBack(),
             ),
             title: externalSubmissionCopy(locale).phoneTitle,
+            ...photoCloseOptions(photoHome, d.close),
           })}
         />
       </Stack.Protected>

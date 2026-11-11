@@ -342,3 +342,4 @@ function Offer({ user, id }: { user: string; id: string }) {
     </Screen>
   );
 }
+export { ExternalFlowError as ErrorBoundary } from "@/components/external-flow-error";

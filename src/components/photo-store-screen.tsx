@@ -137,7 +137,7 @@ export function PhotoStoreScreen() {
       {changed ? <Message>{t.changed}</Message> : null}
       {changed &&
       snapshot.draft.store?.currency !== "SEK" &&
-      snapshot.draft.details.desiredPrice.trim() ? (
+      snapshot.draft.details.desiredSellerAmount.trim() ? (
         <Message>{t.clearPrice}</Message>
       ) : null}
       {error || !recipient ? (

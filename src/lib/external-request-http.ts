@@ -61,6 +61,8 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
     });
     if (
       typeof row.store_name !== "string" ||
+      (row.price_basis !== undefined &&
+        !["resale", "seller_amount"].includes(row.price_basis)) ||
       row.store_name.length > 200 ||
       typeof row.created_at !== "string" ||
       !Number.isFinite(Date.parse(row.created_at)) ||
@@ -80,6 +82,7 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       condition: command.condition,
       notes: command.notes,
       desired_price_ore: command.desiredPriceOre,
+      ...(row.price_basis ? { price_basis: row.price_basis } : {}),
       currency: command.currency,
       photos: command.photos,
       created_at: row.created_at,

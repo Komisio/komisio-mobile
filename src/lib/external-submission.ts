@@ -14,6 +14,7 @@ export type ExternalItemCommand = {
   currency: string;
   photos: string[];
   senderCountry?: "SE";
+  priceBasis?: "seller_amount";
 };
 export type ExternalAttempt = {
   version: 1;
@@ -43,6 +44,7 @@ export type ExternalRequest = {
   condition: ExternalItemCommand["condition"];
   notes: string;
   desired_price_ore: string | null;
+  price_basis?: "resale" | "seller_amount";
   currency: string;
   photos: string[];
   created_at: string;
@@ -72,6 +74,7 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
   if (
     !c ||
     (c.senderCountry !== undefined && c.senderCountry !== "SE") ||
+    (c.priceBasis !== undefined && c.priceBasis !== "seller_amount") ||
     c.action !== "submit" ||
     !identifier(c.requestId) ||
     !identifier(c.tenantId) ||
@@ -104,6 +107,7 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
     currency: c.currency,
     photos: [...c.photos],
     ...(c.senderCountry ? { senderCountry: c.senderCountry } : {}),
+    ...(c.priceBasis ? { priceBasis: c.priceBasis } : {}),
   };
 }
 export function parseExternalAttempt(
@@ -154,6 +158,7 @@ export function requestMatches(
     request.condition === c.condition &&
     request.notes === c.notes &&
     request.desired_price_ore === c.desiredPriceOre &&
+    (request.price_basis ?? "resale") === (c.priceBasis ?? "resale") &&
     request.currency === c.currency &&
     (request.sender_country ?? null) === (c.senderCountry ?? null) &&
     JSON.stringify(request.photos) === JSON.stringify(c.photos)
@@ -264,6 +269,7 @@ export function createExternalSubmission(deps: {
           throw new Error("STORE_CHANGED");
         const command = parseExternalCommand({
           senderCountry,
+          priceBasis: "seller_amount",
           action: "submit",
           requestId:
             prior?.draft.draftId === draft.draftId
@@ -274,7 +280,7 @@ export function createExternalSubmission(deps: {
           brand: draft.details.brand.trim(),
           condition: draft.details.condition,
           notes: draft.details.notes.trim(),
-          desiredPriceOre: requestedPriceOre(draft.details.desiredPrice),
+          desiredPriceOre: requestedPriceOre(draft.details.desiredSellerAmount),
           currency: draft.store.currency,
           photos: photos.map(() => deps.uuid()),
         });

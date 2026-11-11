@@ -526,3 +526,4 @@ function Handover({
     </>
   );
 }
+export { ExternalFlowError as ErrorBoundary } from "@/components/external-flow-error";
