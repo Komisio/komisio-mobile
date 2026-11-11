@@ -16,7 +16,7 @@ const sv = {
   review: "Redo att skicka?",
   reviewHint:
     "Komisio bedömer dina bilder. Inlämning och ersättning avtalas senare.",
-  phoneHeading: "Vilket nummer når vi dig på?",
+  phoneHeading: "Verifiera dig",
   phoneHint: "Vi skickar en kod via sms. Inget lösenord behövs.",
   whyPhone:
     "Numret skyddar mot spam och låter dig komma tillbaka till dina varor.",
@@ -52,7 +52,7 @@ const copies: Record<Locale, Copy> = {
     review: "Ready to send?",
     reviewHint:
       "Komisio assesses your photos. Handover and payment terms are agreed later.",
-    phoneHeading: "Which number can we reach you on?",
+    phoneHeading: "Verify your phone",
     phoneHint: "We send a code by text. No password needed.",
     whyPhone: "Your number prevents spam and lets you return to your items.",
     sent: "Komisio is reviewing your item",
@@ -83,7 +83,7 @@ const copies: Record<Locale, Copy> = {
     review: "Klar til å sende?",
     reviewHint:
       "Komisio vurderer bildene. Innlevering og betaling avtales senere.",
-    phoneHeading: "Hvilket nummer når vi deg på?",
+    phoneHeading: "Bekreft mobilnummeret",
     phoneHint: "Vi sender en kode på SMS. Du trenger ikke passord.",
     whyPhone:
       "Nummeret beskytter mot spam og lar deg komme tilbake til varene dine.",
@@ -115,7 +115,7 @@ const copies: Record<Locale, Copy> = {
     review: "Klar til at sende?",
     reviewHint:
       "Komisio vurderer billederne. Indlevering og betaling aftales senere.",
-    phoneHeading: "Hvilket nummer kan vi nå dig på?",
+    phoneHeading: "Bekræft mobilnummeret",
     phoneHint: "Vi sender en kode via sms. Ingen adgangskode nødvendig.",
     whyPhone:
       "Nummeret beskytter mod spam og giver adgang til dine varer igen.",
@@ -147,7 +147,7 @@ const copies: Record<Locale, Copy> = {
     review: "Valmis lähettämään?",
     reviewHint:
       "Komisio arvioi kuvasi. Luovutuksesta ja korvauksesta sovitaan myöhemmin.",
-    phoneHeading: "Mistä numerosta tavoitamme sinut?",
+    phoneHeading: "Vahvista puhelinnumerosi",
     phoneHint: "Lähetämme koodin tekstiviestillä. Et tarvitse salasanaa.",
     whyPhone:
       "Numero ehkäisee roskapostia ja antaa pääsyn tavaroihisi myöhemmin.",
@@ -185,7 +185,7 @@ const copies: Record<Locale, Copy> = {
     review: "Bereit zum Senden?",
     reviewHint:
       "Komisio beurteilt deine Fotos. Übergabe und Vergütung werden später vereinbart.",
-    phoneHeading: "Unter welcher Nummer erreichen wir dich?",
+    phoneHeading: "Mobilnummer bestätigen",
     phoneHint: "Wir senden einen Code per SMS. Kein Passwort nötig.",
     whyPhone:
       "Die Nummer schützt vor Spam und ermöglicht dir den erneuten Zugriff auf deine Artikel.",
@@ -222,7 +222,7 @@ const copies: Record<Locale, Copy> = {
     review: "¿Listo para enviar?",
     reviewHint:
       "Komisio valora tus fotos. La entrega y la compensación se acuerdan después.",
-    phoneHeading: "¿En qué número podemos localizarte?",
+    phoneHeading: "Verifica tu móvil",
     phoneHint: "Te enviamos un código por SMS. No necesitas contraseña.",
     whyPhone: "El número evita el spam y te permite volver a tus artículos.",
     sent: "Komisio está revisando tu artículo",
@@ -255,7 +255,7 @@ const copies: Record<Locale, Copy> = {
     review: "Pronto per l'invio?",
     reviewHint:
       "Komisio valuta le tue foto. Consegna e compenso si concordano in seguito.",
-    phoneHeading: "A quale numero possiamo contattarti?",
+    phoneHeading: "Verifica il cellulare",
     phoneHint: "Ti inviamo un codice via SMS. Nessuna password necessaria.",
     whyPhone:
       "Il numero protegge dallo spam e ti permette di ritrovare i tuoi articoli.",

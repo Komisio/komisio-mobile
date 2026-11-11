@@ -3,14 +3,15 @@ import type { Locale } from "./locale";
 const sv = {
   phoneTitle: "Verifiera mobilnumret",
   phoneIntro: "Bekräfta numret med en kod via sms. Inget lösenord behövs.",
-  phone: "Mobilnummer med landskod",
+  phone: "Mobilnummer",
+  callingCode: "Landskod",
   sendCode: "Skicka kod",
   code: "Kod från sms",
   verify: "Verifiera",
   resend: "Skicka ny kod",
   resendWait: "Ny kod om {seconds} s",
   existingAccount: "Numret kopplas till kontot du redan är inloggad på.",
-  phoneInvalid: "Ange mobilnumret med landskod, till exempel +46701234567.",
+  phoneInvalid: "Kontrollera landskoden och mobilnumret.",
   phoneUnavailable:
     "Det går inte att skicka eller verifiera koden just nu. Försök igen senare. Utkastet finns kvar.",
   codeInvalid: "Koden är fel eller har gått ut. Begär en ny kod.",
@@ -55,7 +56,8 @@ const en: Copy = {
   phoneTitle: "Verify your mobile number",
   phoneIntro:
     "Confirm your number with a code by text message. No password needed.",
-  phone: "Mobile number with country code",
+  phone: "Mobile number",
+  callingCode: "Country code",
   sendCode: "Send code",
   code: "Code from text message",
   verify: "Verify",
@@ -63,8 +65,7 @@ const en: Copy = {
   resendWait: "New code in {seconds} s",
   existingAccount:
     "The number will be linked to the account you are already signed in to.",
-  phoneInvalid:
-    "Enter your mobile number with country code, for example +46701234567.",
+  phoneInvalid: "Check the country code and mobile number.",
   phoneUnavailable:
     "The code cannot be sent or verified right now. Try again later. Your draft is saved.",
   codeInvalid: "The code is incorrect or has expired. Request a new code.",
@@ -107,14 +108,15 @@ const en: Copy = {
 const no: Copy = {
   phoneTitle: "Bekreft mobilnummeret",
   phoneIntro: "Bekreft nummeret med en kode på SMS. Du trenger ikke passord.",
-  phone: "Mobilnummer med landskode",
+  phone: "Mobilnummer",
+  callingCode: "Landskode",
   sendCode: "Send kode",
   code: "Kode fra SMS",
   verify: "Bekreft",
   resend: "Send ny kode",
   resendWait: "Ny kode om {seconds} s",
   existingAccount: "Nummeret knyttes til kontoen du allerede er logget inn på.",
-  phoneInvalid: "Skriv mobilnummeret med landskode, for eksempel +4791234567.",
+  phoneInvalid: "Kontroller landskoden og mobilnummeret.",
   phoneUnavailable:
     "Koden kan ikke sendes eller bekreftes akkurat nå. Prøv igjen senere. Utkastet er lagret.",
   codeInvalid: "Koden er feil eller har utløpt. Be om en ny kode.",
@@ -158,7 +160,8 @@ const da: Copy = {
   phoneTitle: "Bekræft mobilnummeret",
   phoneIntro:
     "Bekræft nummeret med en kode via sms. Ingen adgangskode er nødvendig.",
-  phone: "Mobilnummer med landekode",
+  phone: "Mobilnummer",
+  callingCode: "Landekode",
   sendCode: "Send kode",
   code: "Kode fra sms",
   verify: "Bekræft",
@@ -166,8 +169,7 @@ const da: Copy = {
   resendWait: "Ny kode om {seconds} s",
   existingAccount:
     "Nummeret knyttes til den konto, du allerede er logget ind på.",
-  phoneInvalid:
-    "Indtast mobilnummeret med landekode, for eksempel +4512345678.",
+  phoneInvalid: "Kontrollér landekoden og mobilnummeret.",
   phoneUnavailable:
     "Koden kan ikke sendes eller bekræftes lige nu. Prøv igen senere. Dit udkast er gemt.",
   codeInvalid: "Koden er forkert eller udløbet. Bed om en ny kode.",
@@ -210,14 +212,15 @@ const fi: Copy = {
   phoneTitle: "Vahvista puhelinnumero",
   phoneIntro:
     "Vahvista numerosi tekstiviestillä saapuvalla koodilla. Et tarvitse salasanaa.",
-  phone: "Puhelinnumero maakoodilla",
+  phone: "Puhelinnumero",
+  callingCode: "Maakoodi",
   sendCode: "Lähetä koodi",
   code: "Tekstiviestin koodi",
   verify: "Vahvista",
   resend: "Lähetä uusi koodi",
   resendWait: "Uusi koodi {seconds} s kuluttua",
   existingAccount: "Numero liitetään tiliin, jolle olet jo kirjautunut.",
-  phoneInvalid: "Anna puhelinnumero maakoodilla, esimerkiksi +358401234567.",
+  phoneInvalid: "Tarkista maakoodi ja puhelinnumero.",
   phoneUnavailable:
     "Koodia ei voi lähettää tai vahvistaa juuri nyt. Yritä myöhemmin uudelleen. Luonnoksesi on tallessa.",
   codeInvalid: "Koodi on väärä tai vanhentunut. Pyydä uusi koodi.",
@@ -259,7 +262,8 @@ const fi: Copy = {
 const de: Copy = {
   phoneTitle: "Mobilnummer bestätigen",
   phoneIntro: "Bestätige deine Nummer mit einem SMS-Code. Kein Passwort nötig.",
-  phone: "Mobilnummer mit Ländervorwahl",
+  phone: "Mobilnummer",
+  callingCode: "Ländervorwahl",
   sendCode: "Code senden",
   code: "Code aus der SMS",
   verify: "Bestätigen",
@@ -267,8 +271,7 @@ const de: Copy = {
   resendWait: "Neuer Code in {seconds} s",
   existingAccount:
     "Die Nummer wird mit deinem bereits angemeldeten Konto verknüpft.",
-  phoneInvalid:
-    "Gib die Mobilnummer mit Ländervorwahl ein, zum Beispiel +491701234567.",
+  phoneInvalid: "Prüfe die Ländervorwahl und die Mobilnummer.",
   phoneUnavailable:
     "Der Code kann gerade nicht gesendet oder bestätigt werden. Versuche es später erneut. Dein Entwurf bleibt gespeichert.",
   codeInvalid:
@@ -314,7 +317,8 @@ const es: Copy = {
   phoneTitle: "Verifica tu móvil",
   phoneIntro:
     "Confirma tu número con un código por SMS. No necesitas contraseña.",
-  phone: "Número de móvil con prefijo internacional",
+  phone: "Número de móvil",
+  callingCode: "Prefijo",
   sendCode: "Enviar código",
   code: "Código del SMS",
   verify: "Verificar",
@@ -322,8 +326,7 @@ const es: Copy = {
   resendWait: "Nuevo código en {seconds} s",
   existingAccount:
     "El número se vinculará a la cuenta en la que ya has iniciado sesión.",
-  phoneInvalid:
-    "Introduce el móvil con el prefijo internacional, por ejemplo +34612345678.",
+  phoneInvalid: "Comprueba el prefijo y el número de móvil.",
   phoneUnavailable:
     "Ahora no se puede enviar o verificar el código. Inténtalo más tarde. Tu borrador está guardado.",
   codeInvalid: "El código es incorrecto o ha caducado. Solicita otro código.",
@@ -368,7 +371,8 @@ const it: Copy = {
   phoneTitle: "Verifica il numero di cellulare",
   phoneIntro:
     "Conferma il numero con un codice via SMS. Non serve una password.",
-  phone: "Cellulare con prefisso internazionale",
+  phone: "Cellulare",
+  callingCode: "Prefisso",
   sendCode: "Invia codice",
   code: "Codice dell’SMS",
   verify: "Verifica",
@@ -376,8 +380,7 @@ const it: Copy = {
   resendWait: "Nuovo codice tra {seconds} s",
   existingAccount:
     "Il numero verrà collegato all’account con cui hai già effettuato l’accesso.",
-  phoneInvalid:
-    "Inserisci il cellulare con il prefisso internazionale, ad esempio +393331234567.",
+  phoneInvalid: "Controlla il prefisso e il numero di cellulare.",
   phoneUnavailable:
     "Al momento non è possibile inviare o verificare il codice. Riprova più tardi. La bozza è salvata.",
   codeInvalid: "Il codice è errato o scaduto. Richiedine uno nuovo.",
