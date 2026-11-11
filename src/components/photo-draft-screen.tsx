@@ -2,11 +2,14 @@ import { useCallback, useRef, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { Linking, Text, View } from "react-native";
 import { PhotoDraftImage } from "./photo-draft-image";
-import { Button, Card, Loading, Message, Screen, colors, uiStyles } from "./ui";
+import { Image } from "expo-image";
+import { PhotoStep } from "./photo-flow-ui";
+import { photoFlowCopy } from "@/lib/photo-flow-copy";
+import { Button, Loading, Message, Screen, colors, uiStyles } from "./ui";
 import { DetailSheet } from "./detail-sheet";
 import { useI18n } from "@/lib/i18n";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
-import { itemDraftCopy } from "@/lib/item-draft-copy";
+import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { MAX_DRAFT_PHOTOS, type DraftPhoto } from "@/lib/photo-draft";
 import { photoDraftRepository } from "@/lib/photo-draft-storage";
 import { pickDraftPhotos } from "@/lib/photo-draft-picker";
@@ -15,8 +18,8 @@ import { readDraftPhotos, clearDraftPhotos } from "@/lib/photo-draft-runtime";
 export function PhotoDraftScreen() {
   const { locale, d } = useI18n();
   const t = photoDraftCopy(locale);
+  const flow = photoFlowCopy(locale);
   const [photos, setPhotos] = useState<DraftPhoto[] | null>(null);
-  const [hasRecipient, setHasRecipient] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -30,14 +33,13 @@ export function PhotoDraftScreen() {
       .then((saved) => {
         if (started === readVersion.current) {
           setPhotos(saved.photos);
-          setHasRecipient(Boolean(saved.draft.store));
         }
       })
       .catch((e: unknown) => {
         if (started === readVersion.current)
           setError(e instanceof Error ? e.message : "DRAFT_UNAVAILABLE");
       });
-  }, [setPhotos, setHasRecipient, setError]);
+  }, [setPhotos, setError]);
   useFocusEffect(
     useCallback(() => {
       alive.current = true;
@@ -86,7 +88,7 @@ export function PhotoDraftScreen() {
           : t.error;
   return (
     <Screen topSafeArea={false}>
-      <Text style={uiStyles.body}>{t.intro}</Text>
+      <PhotoStep step={1} />
       {photos === null && !error ? <Loading /> : null}
       {photos !== null ? (
         <>
@@ -107,10 +109,47 @@ export function PhotoDraftScreen() {
             </Text>
           </View>
           {count === 0 ? (
-            <Card>
-              <Text style={uiStyles.heading}>{t.empty}</Text>
-              <Text style={uiStyles.body}>{t.tips}</Text>
-            </Card>
+            <View
+              style={{
+                backgroundColor: colors.brand,
+                borderRadius: 24,
+                padding: 24,
+                gap: 20,
+                minHeight: 220,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  padding: 16,
+                  backgroundColor: colors.accent,
+                  borderRadius: 32,
+                }}
+              >
+                <Image
+                  source={require("../../assets/icons/camera.svg")}
+                  style={{ width: 32, height: 32 }}
+                  accessible={false}
+                />
+              </View>
+              <Text
+                style={[
+                  uiStyles.heading,
+                  { color: colors.onBrand, textAlign: "center" },
+                ]}
+              >
+                {t.empty}
+              </Text>
+              <Text
+                style={[
+                  uiStyles.note,
+                  { color: colors.onBrandMuted, textAlign: "center" },
+                ]}
+              >
+                {flow.photoHint}
+              </Text>
+            </View>
           ) : (
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
               {photos.map((photo, index) => (
@@ -135,38 +174,42 @@ export function PhotoDraftScreen() {
               ))}
             </View>
           )}
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {flow.guide.map((label) => (
+              <View
+                key={label}
+                style={{
+                  backgroundColor: colors.softAccent,
+                  borderRadius: 12,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                }}
+              >
+                <Text style={uiStyles.note}>{label}</Text>
+              </View>
+            ))}
+          </View>
           <Button
             label={t.camera}
+            variant={count ? "secondary" : "primary"}
             disabled={busy || count >= MAX_DRAFT_PHOTOS}
             onPress={() => pick(true)}
           />
           <Button
             label={t.library}
-            variant="secondary"
+            variant="text"
             disabled={busy || count >= MAX_DRAFT_PHOTOS}
             onPress={() => pick(false)}
           />
           {count === MAX_DRAFT_PHOTOS ? <Message>{t.limit}</Message> : null}
           {count > 0 ? (
             <Button
-              label={
-                hasRecipient
-                  ? itemDraftCopy(locale).detailsTitle
-                  : itemDraftCopy(locale).storeTitle
-              }
+              label={centralIntakeCopy(locale).continue}
               disabled={busy}
-              onPress={() =>
-                router.navigate(
-                  hasRecipient ? "/photo-details" : "/photo-store",
-                )
-              }
+              onPress={() => router.navigate("/photo-store")}
             />
           ) : null}
-          {busy ? (
-            <Message>{t.working}</Message>
-          ) : count > 0 && !error ? (
-            <Message>{t.saved}</Message>
-          ) : null}
+          {busy ? <Message>{t.working}</Message> : null}
         </>
       ) : null}
       {error ? (
@@ -216,7 +259,6 @@ export function PhotoDraftScreen() {
             void update(clearDraftPhotos).then((saved) => {
               if (saved && alive.current) {
                 setConfirmClear(false);
-                setHasRecipient(false);
               }
             });
           }}

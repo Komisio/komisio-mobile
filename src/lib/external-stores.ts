@@ -105,3 +105,25 @@ export async function readExternalStores(
     throw new Error("INVALID_EXTERNAL_STORE");
   return page;
 }
+
+/** Read only the host-designated recipient; never fall back to a store search. */
+export async function readCentralRecipient(
+  client: RpcClient,
+): Promise<ExternalStore | null> {
+  const { data, error } = await client.rpc("public_central_app_recipient", {});
+  if (error)
+    throw new Error(
+      error.code === "PGRST202"
+        ? "EXTERNAL_INTAKE_UNAVAILABLE"
+        : "EXTERNAL_STORES_FAILED",
+    );
+  if (data === null) return null;
+  const store = parseExternalStore(data);
+  if (
+    store.currency !== "SEK" ||
+    store.country !== "SE" ||
+    store.name !== "Komisio"
+  )
+    throw new Error("INVALID_EXTERNAL_STORE");
+  return store;
+}

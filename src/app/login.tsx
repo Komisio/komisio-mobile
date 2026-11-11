@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { Button, Card, Field, Message, Screen } from "@/components/ui";
 import { PrivacyLink } from "@/components/privacy-link";
+import { PhotoDraftEntry } from "@/components/photo-draft-entry";
 
 const web = process.env.EXPO_PUBLIC_KOMISIO_WEB_URL;
 
@@ -91,6 +92,7 @@ export default function Login() {
         onPress={() => chooseStore(null)}
       />
       <PrivacyLink />
+      <PhotoDraftEntry />
     </Screen>
   );
 }

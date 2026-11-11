@@ -44,7 +44,9 @@ function screen(name: "login" | "mfa") {
         Array(size).fill(Symbol.for("react.memo_cache_sentinel")),
     },
     "react/jsx-runtime": require("react/jsx-runtime"),
-    "@/components/external-page-button": { ExternalPageButton: "ExternalPageButton" },
+    "@/components/external-page-button": {
+      ExternalPageButton: "ExternalPageButton",
+    },
     "@/components/ui": Object.fromEntries(
       ["Button", "Card", "Field", "Message", "Screen"].map((key) => [key, key]),
     ),
@@ -64,6 +66,7 @@ function screen(name: "login" | "mfa") {
       }),
     },
     "@/components/privacy-link": { PrivacyLink: "PrivacyLink" },
+    "@/components/photo-draft-entry": { PhotoDraftEntry: "PhotoDraftEntry" },
     "@/lib/session": {
       useSession: () => ({
         store: { name: "Synthetic store" },
@@ -110,7 +113,9 @@ function screen(name: "login" | "mfa") {
   const exports: { default?: () => unknown } = {};
   runInNewContext(compiled, {
     exports,
-    process: { env: { EXPO_PUBLIC_KOMISIO_WEB_URL: "https://portal.example.test" } },
+    process: {
+      env: { EXPO_PUBLIC_KOMISIO_WEB_URL: "https://portal.example.test" },
+    },
     URL,
     require: (id: string) => {
       assert.ok(Object.hasOwn(modules, id), id);
@@ -130,10 +135,16 @@ function screen(name: "login" | "mfa") {
     };
     visit(exports.default!());
     if (name === "login") {
-      assert.equal(elements.filter((el) => el.type === "PrivacyLink").length, 1);
+      assert.equal(
+        elements.filter((el) => el.type === "PrivacyLink").length,
+        1,
+      );
       const reset = elements.find((el) => el.type === "ExternalPageButton");
       assert.equal(reset?.props.label, "Forgot password");
-      assert.equal(reset?.props.url, "https://portal.example.test/reset-password");
+      assert.equal(
+        reset?.props.url,
+        "https://portal.example.test/reset-password",
+      );
     }
     const find = (type: string, label: string) => {
       const match = elements.find(

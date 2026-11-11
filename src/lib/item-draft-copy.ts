@@ -1,3 +1,4 @@
+import { centralIntakeCopy } from "./central-intake-copy.ts";
 import type { Locale } from "./locale";
 import type { ItemCondition } from "./item-draft-details";
 const sv = {
@@ -411,5 +412,14 @@ const copies: Record<Locale, Copy> = {
   },
 };
 export function itemDraftCopy(locale: Locale): Copy {
-  return copies[locale];
+  const c = centralIntakeCopy(locale);
+  return {
+    ...copies[locale],
+    storeTitle: c.title,
+    storeIntro: c.intro,
+    storeEmpty: c.unavailable,
+    unavailable: c.unavailable,
+    notReceiving: c.unavailable,
+    priceHint: c.priceHint,
+  };
 }

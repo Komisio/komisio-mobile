@@ -54,6 +54,33 @@ function fixture() {
 }
 const input = () => ({ uri: "file:///camera/photo.jpg", fileSize: 100 });
 
+test("submission completion clears only its own unchanged draft revision", async () => {
+  const f = fixture();
+  await f.repo.add([input()]);
+  const sent = await f.repo.snapshot();
+  await f.repo.finishSubmission(sent.draft);
+  assert.equal((await f.repo.snapshot()).photos.length, 0);
+  await f.repo.add([input()]);
+  const newer = await f.repo.snapshot();
+  await f.repo.finishSubmission(sent.draft);
+  assert.deepEqual(await f.repo.snapshot(), newer);
+});
+
+test("edits made during submission become a new draft without losing photos", async () => {
+  const f = fixture();
+  await f.repo.add([input()]);
+  const sent = await f.repo.snapshot();
+  await f.repo.saveDetails(
+    { ...sent.draft.details, description: "New edit" },
+    sent.draft,
+  );
+  await f.repo.finishSubmission(sent.draft);
+  const newer = await f.repo.snapshot();
+  assert.equal(newer.draft.details.description, "New edit");
+  assert.notEqual(newer.draft.draftId, sent.draft.draftId);
+  assert.deepEqual(newer.photos, sent.photos);
+});
+
 test("picker cancellation, non-images and interrupted Android results are handled explicitly", () => {
   assert.deepEqual(pickedDraftPhotos(null), []);
   assert.deepEqual(pickedDraftPhotos({ canceled: true, assets: null }), []);

@@ -1,6 +1,9 @@
 import type { CommandStorage } from "./pending-command.ts";
 
-const BANK_PREFIX = "komisio.pending.bank.v1.";
+const SENSITIVE_PREFIXES = [
+  "komisio.pending.bank.v1.",
+  "komisio.pending.onboarding.v1.",
+];
 type BrowserStorage = Pick<
   Storage,
   "length" | "key" | "getItem" | "setItem" | "removeItem"
@@ -13,8 +16,11 @@ export function createWebCommandStorage(storage: () => BrowserStorage) {
   let user: string | null = null;
   function authorize(key: string) {
     if (
-      key.startsWith(BANK_PREFIX) &&
-      (!user || !key.startsWith(`${BANK_PREFIX}${user}.`))
+      SENSITIVE_PREFIXES.some(
+        (prefix) =>
+          key.startsWith(prefix) &&
+          (!user || !key.startsWith(`${prefix}${user}.`)),
+      )
     )
       throw new Error("STORAGE");
   }
@@ -25,8 +31,12 @@ export function createWebCommandStorage(storage: () => BrowserStorage) {
     for (let i = 0; i < browser.length; i++) {
       const key = browser.key(i);
       if (
-        key?.startsWith(BANK_PREFIX) &&
-        (!next || !key.startsWith(`${BANK_PREFIX}${next}.`))
+        key &&
+        SENSITIVE_PREFIXES.some(
+          (prefix) =>
+            key.startsWith(prefix) &&
+            (!next || !key.startsWith(`${prefix}${next}.`)),
+        )
       )
         remove.push(key);
     }

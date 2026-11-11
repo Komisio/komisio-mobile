@@ -249,4 +249,24 @@ export class PhotoDraftRepository {
       return [] as DraftPhoto[];
     });
   }
+  finishSubmission(expected: DraftRevision, preserve = false) {
+    return this.run(async () => {
+      const current = parsePhotoDraft(await this.storage.read());
+      if (current.draftId !== expected.draftId) return;
+      if (preserve || current.revision !== expected.revision) {
+        // A changed draft is a new local intent; keep its photos and edits.
+        await this.storage.write({
+          ...this.next(current),
+          draftId: this.uuid(),
+        });
+        return;
+      }
+      await this.storage.write({
+        ...emptyDraft(),
+        draftId: this.uuid(),
+        revision: 1,
+      });
+      await this.cleanup([]);
+    });
+  }
 }

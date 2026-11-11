@@ -4,6 +4,7 @@ import {
   parseExternalStore,
   parseExternalStorePage,
   readExternalStores,
+  readCentralRecipient,
 } from "../src/lib/external-stores.ts";
 const store = {
   id: "00000000-0000-4000-8000-000000000001",
@@ -37,6 +38,34 @@ test("external discovery validates the limited projection without inventing coun
     { stores: null, hasMore: false },
   ])
     assert.throws(() => parseExternalStorePage(page));
+});
+test("central recipient is explicit, branded and limited to Sweden/SEK without directory fallback", async () => {
+  const calls: unknown[] = [];
+  let data: unknown = { ...store, name: "Komisio", country: "SE" };
+  const client = {
+    rpc: async (name: string, args: Record<string, unknown>) => {
+      calls.push([name, args]);
+      return { data, error: null };
+    },
+  };
+  assert.equal((await readCentralRecipient(client))?.id, store.id);
+  assert.deepEqual(calls[0], ["public_central_app_recipient", {}]);
+  for (const invalid of [
+    { ...store, country: "SE" },
+    { ...store, name: "Komisio", country: "DE" },
+    { ...store, name: "Komisio", country: "SE", currency: "EUR" },
+  ]) {
+    data = invalid;
+    await assert.rejects(readCentralRecipient(client));
+  }
+  data = null;
+  assert.equal(await readCentralRecipient(client), null);
+  await assert.rejects(
+    readCentralRecipient({
+      rpc: async () => ({ data: null, error: { code: "PGRST202" } }),
+    }),
+    /EXTERNAL_INTAKE_UNAVAILABLE/,
+  );
 });
 test("external discovery uses only the explicit opt-in RPC and verifies exact selected-store reads", async () => {
   const calls: unknown[] = [];
