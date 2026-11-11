@@ -1,7 +1,6 @@
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { homeCopy } from "@/lib/home-copy";
-import { Button } from "@/components/ui";
 import { detailHeaderOptions } from "@/components/detail-navigation";
 
 export const unstable_settings = { initialRouteName: "index" };
@@ -11,16 +10,9 @@ export default function HomeLayout() {
   const t = homeCopy(locale);
   return (
     <Stack
-      screenOptions={({ navigation }) => ({
-        ...detailHeaderOptions("/home", t.home, navigation.canGoBack()),
-        headerRight: () => (
-          <Button
-            label={t.home}
-            variant="text"
-            onPress={() => router.dismissTo("/home")}
-          />
-        ),
-      })}
+      screenOptions={({ navigation }) =>
+        detailHeaderOptions("/home", t.home, navigation.canGoBack())
+      }
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="sell" />

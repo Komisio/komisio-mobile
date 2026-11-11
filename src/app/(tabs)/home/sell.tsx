@@ -1,16 +1,14 @@
 import { router } from "expo-router";
 import { Image } from "expo-image";
 import { Pressable, Text, View } from "react-native";
-import { Button, Card, Screen, colors, uiStyles } from "@/components/ui";
+import { Card, Screen, colors, uiStyles } from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
 import { photoFlowCopy } from "@/lib/photo-flow-copy";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
-import { useSession } from "@/lib/session";
 
 export default function Welcome() {
   const { locale } = useI18n();
   const t = photoFlowCopy(locale);
-  const { session } = useSession();
   return (
     <Screen topSafeArea={false} bottomSafeArea={false}>
       <Text accessibilityRole="header" style={uiStyles.title}>
@@ -90,18 +88,6 @@ export default function Welcome() {
       <Text style={[uiStyles.note, { textAlign: "center" }]}>
         {t.accountHint}
       </Text>
-      <Button
-        label={t.myItems}
-        variant="secondary"
-        onPress={() =>
-          session
-            ? router.push("/external-items")
-            : router.push({
-                pathname: "/photo-phone",
-                params: { destination: "requests" },
-              })
-        }
-      />
     </Screen>
   );
 }

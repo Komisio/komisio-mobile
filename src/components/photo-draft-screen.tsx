@@ -174,21 +174,7 @@ export function PhotoDraftScreen() {
               ))}
             </View>
           )}
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {flow.guide.map((label) => (
-              <View
-                key={label}
-                style={{
-                  backgroundColor: colors.softAccent,
-                  borderRadius: 12,
-                  paddingVertical: 8,
-                  paddingHorizontal: 12,
-                }}
-              >
-                <Text style={uiStyles.note}>{label}</Text>
-              </View>
-            ))}
-          </View>
+          <Text style={uiStyles.note}>{t.tips}</Text>
           <Button
             label={t.camera}
             variant={count ? "secondary" : "primary"}
