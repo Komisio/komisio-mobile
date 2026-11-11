@@ -4,7 +4,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
 import { createCataloguePager } from "@/lib/catalogue";
 import { readCatalogue } from "@/lib/catalogue-api";
-import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import {
   Button,
@@ -28,7 +27,6 @@ export function StoreCatalogue({
   name: string;
 }) {
   const { d } = useI18n();
-  const { chooseStore } = useSession();
   const t = d.catalogue;
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
@@ -146,7 +144,9 @@ export function StoreCatalogue({
                 <Button
                   label={d.login.changeStore}
                   variant="secondary"
-                  onPress={() => chooseStore(null)}
+                  onPress={() => {
+                    router.push("/home/stores");
+                  }}
                 />
               )}
             </View>

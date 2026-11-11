@@ -50,6 +50,12 @@ function nodes(element: any): any[] {
 test("profile exposes one store action, language detail, financial links and logout beside identity", async () => {
   const actions: unknown[] = [];
   const screen = compile("../src/components/profile-screen.tsx", {
+    "@/lib/identity-gates": {
+      hasVerifiedEmail: () => true,
+      hasVerifiedPhone: () => false,
+    },
+    "@/lib/email-login-copy": { emailLoginCopy: () => ({}) },
+    "./login-options": { LoginOptions: "LoginOptions" },
     "@/lib/push-copy": { pushCopy },
     react: { useState: (value: unknown) => [value, () => {}] },
     "react-native": {
@@ -112,7 +118,7 @@ test("profile exposes one store action, language detail, financial links and log
   buttons[0].props.onPress();
   await Promise.resolve();
   assert.deepEqual(actions, [
-    null,
+    "/home/stores",
     "/language",
     "/notifications",
     "/bank-account",

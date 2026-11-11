@@ -54,6 +54,13 @@ This configuration alone does not make the app release-ready.
 
 ## Photo drafts
 
+Home now provides separate Komisio and store entry points, before and after
+login. The Komisio introduction keeps the bottom navigation; the photo steps
+have a Close action. The bundled `assets/photos/home-dress.png` is the
+owner-selected AI-generated hanger variant, created for Komisio in this task.
+Phone sellers can enable email/password login on the same verified identity
+under Profile → Email login, after confirming ownership of the address.
+
 The same native iOS/Android app offers **Photograph an item** on the store picker
 and in **My items**. `/photo-draft` works in signed builds, including TestFlight,
 without development flags. Existing authentication and MFA guards still apply.

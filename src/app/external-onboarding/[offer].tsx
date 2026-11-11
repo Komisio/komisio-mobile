@@ -23,7 +23,8 @@ import {
 import { ExternalItemPhoto } from "@/components/external-item-photo";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
-import { hasVerifiedPhone } from "@/lib/identity-gates";
+import { hasVerifiedEmail, hasVerifiedPhone } from "@/lib/identity-gates";
+import { emailLoginCopy } from "@/lib/email-login-copy";
 import { isId } from "@/lib/catalogue";
 import { createScopedRead } from "@/lib/scoped-read";
 import {
@@ -65,7 +66,7 @@ function Onboarding({ user, id }: { user: string; id: string }) {
   const { locale, d } = useI18n(),
     t = externalOnboardingCopy(locale),
     o = externalOfferCopy(locale);
-  const { refreshAssurance } = useSession();
+  const { refreshAssurance, session } = useSession();
   const read = useMemo(
     () =>
       createScopedRead(async () => {
@@ -176,6 +177,20 @@ function Onboarding({ user, id }: { user: string; id: string }) {
             {data.offer.status === "expired" ? o.expired : o.changed}
           </Message>
         )
+      ) : null}
+      {data?.account.account &&
+      data.account.handover &&
+      !hasVerifiedEmail(session?.user) ? (
+        <Button
+          label={emailLoginCopy(locale).title}
+          variant="secondary"
+          onPress={() =>
+            router.push({
+              pathname: "/email-login",
+              params: { email: data.account.account!.email },
+            })
+          }
+        />
       ) : null}
       <Button
         label={o.back}

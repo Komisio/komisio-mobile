@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
@@ -66,7 +66,7 @@ function BankAccount({
 }) {
   const { d } = useI18n(),
     t = d.bank;
-  const { chooseStore, signOut, refreshAssurance } = useSession();
+  const { signOut, refreshAssurance } = useSession();
   const read = useMemo(
     () => createScopedRead((signal) => readBank(tenant, seller, signal)),
     [tenant, seller],
@@ -206,7 +206,9 @@ function BankAccount({
           {bank.failure === "denied" ? (
             <Button
               label={d.login.changeStore}
-              onPress={() => chooseStore(null)}
+              onPress={() => {
+                router.push("/home/stores");
+              }}
             />
           ) : null}
         </>

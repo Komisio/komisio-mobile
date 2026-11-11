@@ -5,6 +5,9 @@ import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { pushCopy } from "@/lib/push-copy";
+import { hasVerifiedEmail, hasVerifiedPhone } from "@/lib/identity-gates";
+import { emailLoginCopy } from "@/lib/email-login-copy";
+import { LoginOptions } from "./login-options";
 import { PrivacyLink } from "./privacy-link";
 import {
   Button,
@@ -19,9 +22,10 @@ import {
 
 export function ProfileScreen() {
   const { d, locale } = useI18n();
-  const { session, store, chooseStore, signOut } = useSession();
+  const { session, store, signOut } = useSession();
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const storeAccount = Boolean(store && hasVerifiedEmail(session?.user));
   const logout = async () => {
     if (busy) return;
     setBusy(true);
@@ -36,36 +40,56 @@ export function ProfileScreen() {
   };
   return (
     <Screen title={d.tabs.profile} bottomSafeArea={false}>
-      <Card>
-        <View style={styles.account}>
-          <View style={styles.identity}>
-            <SettingIcon source={require("../../assets/icons/profile.svg")} />
-            <View style={styles.identityText}>
-              <Text style={styles.caption}>{d.profile.signedInAs}</Text>
-              <Text selectable style={styles.email}>
-                {session?.user.email}
-              </Text>
+      {!session ? (
+        <LoginOptions />
+      ) : (
+        <>
+          <Card>
+            <View style={styles.account}>
+              <View style={styles.identity}>
+                <SettingIcon
+                  source={require("../../assets/icons/profile.svg")}
+                />
+                <View style={styles.identityText}>
+                  <Text style={styles.caption}>{d.profile.signedInAs}</Text>
+                  <Text selectable style={styles.email}>
+                    {session.user.email || session.user.phone}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.logout}>
+                <Button
+                  label={d.account.logout}
+                  variant="text"
+                  busy={busy}
+                  onPress={() => void logout()}
+                />
+              </View>
             </View>
-          </View>
-          <View style={styles.logout}>
-            <Button
-              label={d.account.logout}
-              variant="text"
-              busy={busy}
-              onPress={() => void logout()}
+            {failed ? (
+              <Message tone="error">{d.profile.logoutFailed}</Message>
+            ) : null}
+          </Card>
+          {hasVerifiedPhone(session.user) ? (
+            <NavigationRow
+              label={emailLoginCopy(locale).title}
+              onPress={() => router.push("/email-login")}
             />
-          </View>
-        </View>
-        {failed ? (
-          <Message tone="error">{d.profile.logoutFailed}</Message>
-        ) : null}
-      </Card>
+          ) : null}
+          <NavigationRow
+            label={pushCopy[locale].title}
+            onPress={() => router.push("/notifications")}
+          />
+        </>
+      )}
       <View style={styles.group}>
         <SettingRow
           label={d.profile.store}
           value={store?.name ?? d.store.title}
           icon={require("../../assets/icons/store.svg")}
-          onPress={() => chooseStore(null)}
+          onPress={() => {
+            router.push("/home/stores");
+          }}
         />
         <SettingRow
           label={d.language}
@@ -74,20 +98,18 @@ export function ProfileScreen() {
           onPress={() => router.push("/language")}
         />
       </View>
-      <View style={styles.group}>
-        <NavigationRow
-          label={pushCopy[locale].title}
-          onPress={() => router.push("/notifications")}
-        />
-        <NavigationRow
-          label={d.bank.title}
-          onPress={() => router.push("/bank-account")}
-        />
-        <NavigationRow
-          label={d.agreement.title}
-          onPress={() => router.push("/agreement")}
-        />
-      </View>
+      {storeAccount ? (
+        <View style={styles.group}>
+          <NavigationRow
+            label={d.bank.title}
+            onPress={() => router.push("/bank-account")}
+          />
+          <NavigationRow
+            label={d.agreement.title}
+            onPress={() => router.push("/agreement")}
+          />
+        </View>
+      ) : null}
       <PrivacyLink />
     </Screen>
   );

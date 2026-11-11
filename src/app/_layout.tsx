@@ -33,29 +33,20 @@ function Routes() {
   const signedIn = Boolean(session) && !mfaRequired;
   const sellerRoutes =
     Boolean(store) && signedIn && hasVerifiedEmail(session?.user);
-  const homeRoute =
-    session && mfaRequired
-      ? "/mfa"
-      : sellerRoutes
-        ? "/(tabs)"
-        : signedIn && !hasVerifiedEmail(session?.user)
-          ? "/external-items"
-          : store
-            ? "/login"
-            : session
-              ? "/store"
-              : "/welcome";
-  const photoHome = session
-    ? sellerRoutes
-      ? "/(tabs)/items"
-      : "/external-items"
-    : store
-      ? "/login"
-      : "/welcome";
+  const homeRoute = session && mfaRequired ? "/mfa" : "/home";
+  const photoHome = "/home/sell";
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={sellerRoutes} redirectTo={homeRoute}>
+      <Stack.Protected guard={!mfaRequired} redirectTo={homeRoute}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="store" />
+        <Stack.Screen
+          name="login"
+          options={({ navigation }) =>
+            detailHeaderOptions("/home", d.close, navigation.canGoBack())
+          }
+        />
         <Stack.Screen
           name="language"
           options={({ navigation }) =>
@@ -66,6 +57,8 @@ function Routes() {
             )
           }
         />
+      </Stack.Protected>
+      <Stack.Protected guard={sellerRoutes} redirectTo={homeRoute}>
         <Stack.Screen
           name="catalogue/[tenant]/[item]"
           options={({ navigation }) =>
@@ -118,24 +111,17 @@ function Routes() {
         />
       </Stack.Protected>
 
-      <Stack.Protected guard={!session && !store} redirectTo={homeRoute}>
-        <Stack.Screen name="welcome" />
-      </Stack.Protected>
-      <Stack.Protected
-        redirectTo={homeRoute}
-        guard={
-          !store && !mfaRequired && (!session || hasVerifiedEmail(session.user))
-        }
-      >
-        <Stack.Screen name="store" />
-      </Stack.Protected>
-      <Stack.Protected
-        guard={Boolean(store) && !session}
-        redirectTo={homeRoute}
-      >
-        <Stack.Screen name="login" />
-      </Stack.Protected>
       <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
+        <Stack.Screen
+          name="email-login"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/profile",
+              d.close,
+              navigation.canGoBack(),
+            )
+          }
+        />
         <Stack.Screen
           name="notifications"
           options={({ navigation }) =>
@@ -172,7 +158,7 @@ function Routes() {
           name="external-items"
           options={({ navigation }) => ({
             ...detailHeaderOptions(
-              sellerRoutes ? "/(tabs)/items" : "/photo-draft",
+              "/(tabs)/items",
               d.close,
               navigation.canGoBack(),
             ),

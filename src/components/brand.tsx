@@ -16,6 +16,7 @@ export function Brand() {
 }
 
 const icons = {
+  home: require("../../assets/icons/home.svg"),
   store: require("../../assets/icons/store.svg"),
   items: require("../../assets/icons/items.svg"),
   overview: require("../../assets/icons/overview.svg"),

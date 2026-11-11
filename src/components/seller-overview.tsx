@@ -2,7 +2,6 @@ import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useI18n } from "@/lib/i18n";
-import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
 import { readSellerOverview } from "@/lib/seller-overview-api";
 import { formatPrice } from "@/lib/catalogue";
@@ -28,7 +27,6 @@ export function SellerOverviewScreen({
   storeName: string;
 }) {
   const { d, locale } = useI18n();
-  const { chooseStore } = useSession();
   const t = d.overview;
   const read = useMemo(
     () =>
@@ -69,7 +67,9 @@ export function SellerOverviewScreen({
             <Button
               label={d.login.changeStore}
               variant="secondary"
-              onPress={() => chooseStore(null)}
+              onPress={() => {
+                router.push("/home/stores");
+              }}
             />
           ) : null}
         </>

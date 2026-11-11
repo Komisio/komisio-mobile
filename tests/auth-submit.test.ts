@@ -22,6 +22,13 @@ function screen(name: "login" | "mfa") {
     });
   };
   const modules: Record<string, unknown> = {
+    "expo-router": {
+      router: { replace() {}, push() {} },
+      Redirect: "Redirect",
+    },
+    "@/lib/home-copy": { homeCopy: () => ({}) },
+    "@/lib/email-login-copy": { emailLoginCopy: () => ({}) },
+    "@/lib/identity-gates": { hasVerifiedEmail: () => false },
     react: {
       useState(initial: unknown) {
         const index = cursor++;

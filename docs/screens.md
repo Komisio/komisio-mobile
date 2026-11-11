@@ -1,5 +1,25 @@
 # Screen list for version 1
 
+Owner update, 2026-11-11: Home is shared by guests, phone sellers and existing
+store sellers. It uses the approved green-dress-on-hanger photo and offers
+"Sell through Komisio" and "Sell through a store". The Komisio introduction
+and ordinary store picker/catalogue are nested under Home, with the bottom
+tabs retained. Home remains reachable without restarting; photo steps keep
+their explicit Close action. My items and Profile are available to guests
+with sign-in actions. Existing verified store accounts retain Overview,
+Money, catalogue, bank details and agreements behind the existing gates.
+
+Phone sellers can add and verify an email address and choose a password from
+Profile, or after completing handover onboarding. The existing SMS Auth user
+owns both credentials; contact email never links or merges accounts. Email
+confirmation finishes in the browser, followed by password setup in the app.
+Subsequent email/password login does not send an SMS. Conflicting addresses,
+pending MFA and changed sessions fail closed. SMS remains a login alternative.
+The backend first-email mail-hook fix in Komisio/komisio#822 is required.
+
+The earlier version-1 review below remains the reference for ordinary store
+features; the later central photo-submission and Home decisions extend it.
+
 The owner reviewed the earlier Komisio app screen by screen on 2026-10-28 and
 decided per screen what to keep, change, remove or postpone. This file is the
 result and the basis for building version 1. Screen IDs (S01, S02, …) are the

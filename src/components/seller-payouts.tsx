@@ -42,7 +42,7 @@ export function SellerPayouts({
 }) {
   const { d, locale } = useI18n(),
     t = d.payouts;
-  const { chooseStore, signOut, refreshAssurance } = useSession();
+  const { signOut, refreshAssurance } = useSession();
   const [page, setPage] = useState(0),
     [view, setView] = useState<"request" | "history">("request");
   const [amount, setAmount] = useState("");
@@ -191,7 +191,9 @@ export function SellerPayouts({
           {state.failure === "denied" ? (
             <Button
               label={d.login.changeStore}
-              onPress={() => chooseStore(null)}
+              onPress={() => {
+                router.push("/home/stores");
+              }}
             />
           ) : null}
         </>
