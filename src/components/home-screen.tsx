@@ -3,10 +3,12 @@ import { router } from "expo-router";
 import { StyleSheet, Text } from "react-native";
 import { useI18n } from "@/lib/i18n";
 import { homeCopy } from "@/lib/home-copy";
+import { useSession } from "@/lib/session";
 import { ItemCard, Screen, uiStyles } from "./ui";
 
 export function HomeScreen() {
   const { locale } = useI18n();
+  const { chooseStore } = useSession();
   const t = homeCopy(locale);
   return (
     <Screen brand bottomSafeArea={false}>
@@ -20,7 +22,13 @@ export function HomeScreen() {
       <Text accessibilityRole="header" style={uiStyles.title}>
         {t.title}
       </Text>
-      <ItemCard label={t.komisio} onPress={() => router.push("/home/sell")}>
+      <ItemCard
+        label={t.komisio}
+        onPress={() => {
+          chooseStore(null);
+          router.push("/home/sell");
+        }}
+      >
         <Text style={uiStyles.heading}>{t.komisio}</Text>
         <Text style={uiStyles.note}>{t.komisioHint}</Text>
       </ItemCard>

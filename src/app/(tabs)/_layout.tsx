@@ -79,7 +79,12 @@ export default function TabsLayout() {
           tabBarButtonTestID: "tab-home",
           tabBarIcon: (props) => <TabIcon name="home" {...props} />,
         }}
-        listeners={{ tabPress: () => router.navigate("/home") }}
+        listeners={{
+          tabPress: (event) => {
+            event.preventDefault();
+            router.navigate("/home");
+          },
+        }}
       />
       <Tabs.Screen
         name="items"
