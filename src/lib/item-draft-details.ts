@@ -10,26 +10,35 @@ export type ItemDraftDetails = {
   brand: string;
   condition: ItemCondition | null;
   notes: string;
-  desiredPrice: string;
+  desiredSellerAmount: string;
 };
 export const emptyItemDetails = (): ItemDraftDetails => ({
   description: "",
   brand: "",
   condition: null,
   notes: "",
-  desiredPrice: "",
+  desiredSellerAmount: "",
 });
 
 /** Partial text is durable too; completion is validated separately before review. */
 export function parseItemDraftDetails(value: unknown): ItemDraftDetails {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw new Error("DRAFT_UNAVAILABLE");
-  const v = value as Record<string, unknown>;
+  const old = value as Record<string, unknown>;
+  // Preserve old photos/details, but never reinterpret a resale wish as pay.
+  const v = {
+    ...old,
+    desiredSellerAmount:
+      old.desiredSellerAmount === undefined &&
+      typeof old.desiredPrice === "string"
+        ? ""
+        : old.desiredSellerAmount,
+  } as Record<string, unknown>;
   const limits = {
     description: 160,
     brand: 100,
     notes: 1000,
-    desiredPrice: 32,
+    desiredSellerAmount: 32,
   };
   for (const [field, max] of Object.entries(limits))
     if (
@@ -47,7 +56,7 @@ export function parseItemDraftDetails(value: unknown): ItemDraftDetails {
     description: v.description as string,
     brand: v.brand as string,
     notes: v.notes as string,
-    desiredPrice: v.desiredPrice as string,
+    desiredSellerAmount: v.desiredSellerAmount as string,
     condition: v.condition as ItemCondition | null,
   };
 }
@@ -65,14 +74,14 @@ export function requestedPriceOre(input: string): string | null {
 }
 export function itemDetailsErrors(
   details: ItemDraftDetails,
-): ("description" | "condition" | "desiredPrice")[] {
-  const errors: ("description" | "condition" | "desiredPrice")[] = [];
+): ("description" | "condition" | "desiredSellerAmount")[] {
+  const errors: ("description" | "condition" | "desiredSellerAmount")[] = [];
   if (!details.description.trim()) errors.push("description");
   if (!details.condition) errors.push("condition");
   try {
-    requestedPriceOre(details.desiredPrice);
+    requestedPriceOre(details.desiredSellerAmount);
   } catch {
-    errors.push("desiredPrice");
+    errors.push("desiredSellerAmount");
   }
   return errors;
 }

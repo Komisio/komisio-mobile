@@ -233,13 +233,16 @@ export function PhotoReviewScreen() {
                 {details.notes}
               </Text>
             ) : null}
-            {details.desiredPrice.trim() ? (
+            {details.desiredSellerAmount.trim() ? (
               <>
                 <Text style={uiStyles.body}>
-                  {t.desiredPrice.replace("{currency}", draft.store.currency)}
+                  {t.desiredSellerAmount.replace(
+                    "{currency}",
+                    draft.store.currency,
+                  )}
                 </Text>
                 <Text selectable style={uiStyles.rowTitle}>
-                  {details.desiredPrice} {draft.store.currency}
+                  {details.desiredSellerAmount} {draft.store.currency}
                 </Text>
               </>
             ) : null}

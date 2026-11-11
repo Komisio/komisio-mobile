@@ -9,6 +9,19 @@ import { parsePushData } from "../src/lib/push-contract.ts";
 import { ownsPush, pushDestination } from "../src/lib/push-routing.ts";
 const require = createRequire(import.meta.url);
 function compile(file: string, modules: Record<string, unknown>) {
+  modules = {
+    "@/lib/external-submission-runtime": {
+      externalRequestApi: () => ({ lookup: async () => null }),
+    },
+    "@/lib/external-offer-runtime": {
+      externalOfferApi: () => ({ read: async () => null }),
+    },
+    "@/lib/identity-gates": {
+      hasVerifiedPhone: (user: any) =>
+        Boolean(user?.phone_confirmed_at && user?.phone),
+    },
+    ...modules,
+  };
   const { code } = require("@babel/core").transformSync(
     readFileSync(new URL(file, import.meta.url), "utf8"),
     {

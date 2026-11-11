@@ -26,12 +26,17 @@ import { useItemDraft } from "@/lib/use-item-draft";
 import { PhotoCapacity } from "./photo-flow-ui";
 import { ExternalItemRow } from "./external-item-row";
 import { photoFlowCopy } from "@/lib/photo-flow-copy";
+import { sellerPush } from "@/lib/push-runtime";
+import { pushCopy } from "@/lib/push-copy";
 
 export function ExternalItemsScreen() {
   const { locale, d } = useI18n(),
     t = externalSubmissionCopy(locale);
   const { session, store, signOut, refreshAssurance } = useSession();
-  const { sent } = useLocalSearchParams<{ sent?: string }>();
+  const { sent, request } = useLocalSearchParams<{
+    sent?: string;
+    request?: string;
+  }>();
   const owner = session?.user.id,
     verified = hasVerifiedPhone(session?.user);
   const { snapshot } = useItemDraft();
@@ -58,11 +63,21 @@ export function ExternalItemsScreen() {
         externalSubmission(owner).then((c) => c.load()),
       ])
         .then(async ([data, attempt]) => {
+          if (request) {
+            const selected = await externalRequestApi(owner).lookup(request);
+            if (selected)
+              data.requests = [
+                selected,
+                ...data.requests.filter((r) => r.id !== selected.id),
+              ].slice(0, 25);
+          }
           if (current) {
             setPage({ owner, data, offers: null });
             setPending(
               attempt?.state === "pending" || attempt?.state === "confirmed",
             );
+            if (data.requests.length)
+              void sellerPush.requestInitialPermission(owner);
           }
           try {
             const offers = await externalOfferApi(owner).list(
@@ -98,7 +113,7 @@ export function ExternalItemsScreen() {
     return () => {
       current = false;
     };
-  }, [owner, verified, offset, t.loadError, refreshAssurance]);
+  }, [owner, verified, offset, request, t.loadError, refreshAssurance]);
   const stop = useRef<(() => void) | null>(null);
   const refresh = useCallback(() => {
     stop.current?.();
@@ -209,6 +224,13 @@ export function ExternalItemsScreen() {
             />
           ) : null}
         </>
+      ) : null}
+      {data?.requests.length ? (
+        <Button
+          label={pushCopy[locale].title}
+          variant="text"
+          onPress={() => router.push("/notifications")}
+        />
       ) : null}
       {store && hasVerifiedEmail(session?.user) ? (
         <Button

@@ -28,8 +28,16 @@ const details = {
   brand: "",
   condition: "good" as const,
   notes: "Small mark",
-  desiredPrice: "1000,50",
+  desiredSellerAmount: "1000,50",
 };
+test("legacy resale wishes are cleared without losing the saved item details", () => {
+  const { desiredSellerAmount: _, ...rest } = details;
+  assert.deepEqual(parseItemDraftDetails({ ...rest, desiredPrice: "1000" }), {
+    ...rest,
+    desiredSellerAmount: "",
+  });
+  assert.equal(parseItemDraftDetails(details).desiredSellerAmount, "1000,50");
+});
 function fixture() {
   let saved: unknown = { version: 1, photoIds: [firstPhoto] };
   let sequence = 10;
@@ -116,7 +124,7 @@ test("changing currency requires explicit price clearing and never converts an a
   );
   assert.deepEqual((await f.repo.snapshot()).draft, current.draft);
   current = await f.repo.selectStore(euro, current.draft, true);
-  assert.equal(current.draft.details.desiredPrice, "");
+  assert.equal(current.draft.details.desiredSellerAmount, "");
   assert.equal(current.draft.details.description, "Jacket");
 });
 test("price wishes use exact minor-unit strings and partial drafts remain editable", () => {
@@ -143,12 +151,15 @@ test("price wishes use exact minor-unit strings and partial drafts remain editab
     "description",
     "condition",
   ]);
-  assert.deepEqual(itemDetailsErrors({ ...details, desiredPrice: "oops" }), [
-    "desiredPrice",
-  ]);
   assert.deepEqual(
-    parseItemDraftDetails({ ...emptyItemDetails(), desiredPrice: "unfinished" })
-      .desiredPrice,
+    itemDetailsErrors({ ...details, desiredSellerAmount: "oops" }),
+    ["desiredSellerAmount"],
+  );
+  assert.deepEqual(
+    parseItemDraftDetails({
+      ...emptyItemDetails(),
+      desiredSellerAmount: "unfinished",
+    }).desiredSellerAmount,
     "unfinished",
   );
   assert.throws(() =>

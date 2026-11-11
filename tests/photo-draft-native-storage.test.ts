@@ -178,7 +178,7 @@ test("installed v1 native drafts survive metadata upgrade and interrupted replac
     brand: "",
     condition: "good" as const,
     notes: "Small mark",
-    desiredPrice: "1000,50",
+    desiredSellerAmount: "1000,50",
   };
   const saved = await repo.saveDetails(details, selected.draft);
   f.files.set(primary, { text: "broken", size: 6 });

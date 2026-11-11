@@ -1,6 +1,6 @@
 import { router, type Href } from "expo-router";
 import { Image } from "expo-image";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import { colors } from "./theme";
 
 export function detailHeaderOptions(
@@ -45,7 +45,37 @@ export function detailHeaderOptions(
   };
 }
 
+/** Always visible, including a photo flow opened as the root after SMS login. */
+export function photoCloseOptions(
+  home: Href,
+  label: string,
+  firstStep = false,
+) {
+  return {
+    ...(firstStep ? { headerLeft: () => null, headerBackVisible: false } : {}),
+    headerRight: () => (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        onPress={() => router.dismissTo(home)}
+        style={({ pressed }) => [styles.close, pressed && { opacity: 0.6 }]}
+      >
+        <Text style={{ color: colors.brand, fontSize: 16, fontWeight: "600" }}>
+          {label}
+        </Text>
+      </Pressable>
+    ),
+  };
+}
+
 const styles = StyleSheet.create({
+  close: {
+    minHeight: 48,
+    minWidth: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
   back: {
     minWidth: 48,
     minHeight: 48,

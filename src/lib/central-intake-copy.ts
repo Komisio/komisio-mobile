@@ -18,7 +18,7 @@ const copies = {
     success: "Skickat till Komisio",
     waiting: "Väntar på Komisio",
     priceHint:
-      "Komisio bedömer varan och lämnar ett separat erbjudande till dig.",
+      "Komisio bedömer varan och ger dig ett erbjudande som du kan tacka ja eller nej till.",
   },
   en: {
     title: "Komisio",
@@ -37,7 +37,8 @@ const copies = {
     send: "Send to Komisio",
     success: "Sent to Komisio",
     waiting: "Waiting for Komisio",
-    priceHint: "Komisio assesses the item and makes you a separate offer.",
+    priceHint:
+      "Komisio assesses the item and makes you an offer you can accept or decline.",
   },
   no: {
     title: "Komisio",

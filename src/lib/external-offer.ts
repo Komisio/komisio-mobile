@@ -205,11 +205,11 @@ export function offerAmount(ore: string, locale: string) {
   if (!/^[1-9]\d{0,10}$/.test(ore)) invalid();
   const minor = BigInt(ore),
     fraction = minor % 100n;
-  const whole = new Intl.NumberFormat(locale).format(minor / 100n);
-  const decimal =
-    new Intl.NumberFormat(locale)
-      .formatToParts(1.1)
-      .find((p) => p.type === "decimal")?.value ?? ",";
+  // Hermes Intl cannot format BigInt and iOS has no formatToParts. The
+  // validated whole amount is below 1e9, so this integer conversion is exact.
+  const formatter = new Intl.NumberFormat(locale);
+  const whole = formatter.format(Number(minor / 100n));
+  const decimal = formatter.format(1.1).replace(/[0-9]/g, "");
   return `${whole}${fraction ? decimal + String(fraction).padStart(2, "0") : ""} ${locale.startsWith("sv") ? "kr" : "SEK"}`;
 }
 /** Server time plus elapsed monotonic time; a wrong device clock cannot extend an offer. */

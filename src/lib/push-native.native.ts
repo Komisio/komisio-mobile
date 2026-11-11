@@ -22,6 +22,11 @@ async function channels() {
     importance: AndroidImportance.DEFAULT,
     sound: "sale.wav",
   });
+  await Notifications.setNotificationChannelAsync("komisio-requests-v1", {
+    name: "Komisio",
+    importance: AndroidImportance.DEFAULT,
+    sound: "default",
+  });
 }
 export async function pushPermission(
   request: boolean,

@@ -178,11 +178,13 @@ test("native back is preserved with history; direct links retain an accessible e
         canGoBack: () => hasHistory,
         back: () => actions.push("back"),
         replace: (route: string) => actions.push(route),
+        dismissTo: (route: string) => actions.push(`close:${route}`),
       },
     },
     "expo-image": { Image: "Image" },
     "react-native": {
       Pressable: "Pressable",
+      Text: "Text",
       StyleSheet: { create: (value: unknown) => value },
     },
     "./theme": { colors: {} },
@@ -208,11 +210,26 @@ test("native back is preserved with history; direct links retain an accessible e
   hasHistory = true;
   button.props.onPress();
   assert.deepEqual(actions, ["/(tabs)/profile", "back"]);
+  for (const home of [
+    "/welcome",
+    "/login",
+    "/external-items",
+    "/(tabs)/items",
+  ]) {
+    const close = header.photoCloseOptions(home, "Stäng").headerRight();
+    assert.equal(close.props.children.props.children, "Stäng");
+    assert.equal(close.props.accessibilityLabel, "Stäng");
+    assert.equal(close.props.style({ pressed: false })[0].minHeight, 48);
+    close.props.onPress();
+    assert.equal(actions.at(-1), `close:${home}`);
+  }
 });
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
-    "@/lib/external-onboarding-copy": { externalOnboardingCopy: () => ({ title: "Account" }) },
+    "@/lib/external-onboarding-copy": {
+      externalOnboardingCopy: () => ({ title: "Account" }),
+    },
     "@/lib/external-offer-copy": {
       externalOfferCopy: () => ({ title: "Offer" }),
     },
@@ -299,7 +316,7 @@ test("all detail routes configure back navigation with their own fallback", () =
     agreement: "/(tabs)/profile",
     "bank-account": "/(tabs)/profile",
   };
-  assert.equal(screens.length, 8);
+  assert.equal(screens.length, 7);
   for (const screen of screens.slice(1)) {
     for (const canGoBack of [true, false]) {
       const options = screen.props.options({
@@ -314,7 +331,9 @@ test("all detail routes configure back navigation with their own fallback", () =
 test("photo drafts are available in the signed app while preserving login, MFA and seller guards", () => {
   let state: Record<string, unknown> = { ready: true };
   const layout = compile("../src/app/_layout.tsx", {
-    "@/lib/external-onboarding-copy": { externalOnboardingCopy: () => ({ title: "Account" }) },
+    "@/lib/external-onboarding-copy": {
+      externalOnboardingCopy: () => ({ title: "Account" }),
+    },
     "@/lib/external-offer-copy": {
       externalOfferCopy: () => ({ title: "Offer" }),
     },
@@ -420,6 +439,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     },
   };
   assert.deepEqual(routes(), [
+    "notifications",
     "external-onboarding/[offer]",
     "external-offer/[offer]",
     "external-items",

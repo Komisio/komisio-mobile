@@ -18,7 +18,7 @@ export const pushCopy: Record<Locale, Copy> = {
   sv: {
     title: "Notiser",
     intro:
-      "Få en notis när dina varor registreras eller säljs. Gäller butiker som har aktiverat notiser.",
+      "Få besked om dina förfrågningar till Komisio. Du kan också få notiser när varor registreras eller säljs i butiker som har aktiverat det.",
     on: "På för den här telefonen",
     off: "Av för den här telefonen",
     enable: "Aktivera notiser",
@@ -34,7 +34,7 @@ export const pushCopy: Record<Locale, Copy> = {
   en: {
     title: "Notifications",
     intro:
-      "Get notified when your items are registered or sold. Available for stores that enable notifications.",
+      "Get updates on your requests to Komisio. You can also receive item registration and sale notifications from stores that enable them.",
     on: "On for this phone",
     off: "Off for this phone",
     enable: "Enable notifications",
@@ -51,7 +51,7 @@ export const pushCopy: Record<Locale, Copy> = {
   no: {
     title: "Varsler",
     intro:
-      "Få et varsel når varene dine registreres eller selges. Gjelder butikker som har aktivert varsler.",
+      "Få svar på forespørslene dine til Komisio. Du kan også få varsler når varer registreres eller selges i butikker som har aktivert dette.",
     on: "På for denne telefonen",
     off: "Av for denne telefonen",
     enable: "Aktiver varsler",
@@ -68,7 +68,7 @@ export const pushCopy: Record<Locale, Copy> = {
   da: {
     title: "Notifikationer",
     intro:
-      "Få en notifikation, når dine varer registreres eller sælges. Gælder butikker, der har aktiveret notifikationer.",
+      "Få svar på dine forespørgsler til Komisio. Du kan også få notifikationer, når varer registreres eller sælges i butikker, der har aktiveret det.",
     on: "Til på denne telefon",
     off: "Fra på denne telefon",
     enable: "Aktivér notifikationer",
@@ -85,7 +85,7 @@ export const pushCopy: Record<Locale, Copy> = {
   fi: {
     title: "Ilmoitukset",
     intro:
-      "Saat ilmoituksen, kun tuotteesi rekisteröidään tai myydään. Koskee liikkeitä, jotka ovat ottaneet ilmoitukset käyttöön.",
+      "Saat vastaukset Komisiolle lähettämiisi pyyntöihin. Voit myös saada ilmoituksia tuotteiden rekisteröinnistä ja myynnistä liikkeiltä, jotka ovat ottaneet ne käyttöön.",
     on: "Käytössä tässä puhelimessa",
     off: "Pois käytöstä tässä puhelimessa",
     enable: "Ota ilmoitukset käyttöön",
@@ -101,7 +101,7 @@ export const pushCopy: Record<Locale, Copy> = {
   de: {
     title: "Mitteilungen",
     intro:
-      "Erhalte eine Mitteilung, wenn deine Artikel erfasst oder verkauft werden. Gilt für Geschäfte, die Mitteilungen aktiviert haben.",
+      "Erhalte Antworten auf deine Anfragen an Komisio. Geschäfte können dich außerdem über die Erfassung und den Verkauf deiner Artikel benachrichtigen.",
     on: "Für dieses Telefon aktiviert",
     off: "Für dieses Telefon deaktiviert",
     enable: "Mitteilungen aktivieren",
@@ -118,7 +118,7 @@ export const pushCopy: Record<Locale, Copy> = {
   es: {
     title: "Notificaciones",
     intro:
-      "Recibe una notificación cuando se registren o vendan tus artículos. Disponible en tiendas que activen las notificaciones.",
+      "Recibe respuestas a tus solicitudes a Komisio. También puedes recibir avisos de registro y venta de las tiendas que los activen.",
     on: "Activadas en este teléfono",
     off: "Desactivadas en este teléfono",
     enable: "Activar notificaciones",
@@ -135,7 +135,7 @@ export const pushCopy: Record<Locale, Copy> = {
   it: {
     title: "Notifiche",
     intro:
-      "Ricevi una notifica quando i tuoi articoli vengono registrati o venduti. Disponibile nei negozi che attivano le notifiche.",
+      "Ricevi risposte alle tue richieste a Komisio. Puoi anche ricevere notifiche di registrazione e vendita dai negozi che le attivano.",
     on: "Attive su questo telefono",
     off: "Disattivate su questo telefono",
     enable: "Attiva notifiche",
