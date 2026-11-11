@@ -1,5 +1,8 @@
 # Decisions
 
+- 2026-11-11: Offer store-independent account creation with Apple, Google and email codes; retain password/SMS login and one-time phone verification before submission. Provider linking must retain the authenticated user and MFA; never merge seller records by contact email.
+- 2026-11-11: Add SDK-compatible expo-apple-authentication for native Apple sign-in. Google uses the existing system authentication browser with PKCE on iOS/Android. Keep provider results isolated until identity checks pass; keys and provider secrets remain server-side.
+
 - 2026-11-11: Show an editable calling code separately from the phone number, defaulted from device region with Sweden fallback. Use libphonenumber-js/min for national-prefix and pasted international-number handling; it adds no native module. Region is a suggestion, not residence or identity evidence.
 
 - 2026-11-10: Show real fixed-SEK offers with server-timed 48-hour expiry and frozen store terms. Responses use the existing owner/project-bound command journal. Read confirmations before updating status; acceptance alone creates no seller, handover or credit.

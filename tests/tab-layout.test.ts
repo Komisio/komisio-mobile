@@ -306,9 +306,9 @@ test("all detail routes configure back navigation with their own fallback", () =
   assert.equal(bridge.type, "PushBridge");
   const stack = routesElement.type();
   assert.equal(stack.props.screenOptions.headerShown, false);
-  const screens = stack.props.children.flatMap((group: any) =>
-    [group.props.children].flat(),
-  );
+  const screens = stack.props.children
+    .filter((group: any) => group.props.children)
+    .flatMap((group: any) => [group.props.children].flat());
   assert.equal(screens[0].props.name, "(tabs)");
   assert.equal(screens[0].props.options, undefined);
   const expected: Record<string, string> = {
@@ -318,6 +318,8 @@ test("all detail routes configure back navigation with their own fallback", () =
     language: "/(tabs)/profile",
     notifications: "/(tabs)/profile",
     "email-login": "/(tabs)/profile",
+    "account-methods": "/(tabs)/profile",
+    "account-auth": "/home",
     agreement: "/(tabs)/profile",
     "bank-account": "/(tabs)/profile",
   };
@@ -411,6 +413,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "(tabs)",
     "welcome",
     "store",
+    "account-auth",
     "login",
     "language",
     "photo-draft",
@@ -431,7 +434,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 21);
+  assert.equal(routes().length, 23);
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
   state = { ...state, store: null };
@@ -448,8 +451,10 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "(tabs)",
     "welcome",
     "store",
+    "account-auth",
     "login",
     "language",
+    "account-methods",
     "email-login",
     "notifications",
     "external-onboarding/[offer]",

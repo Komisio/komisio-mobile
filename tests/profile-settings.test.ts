@@ -54,7 +54,9 @@ test("profile exposes one store action, language detail, financial links and log
       hasVerifiedEmail: () => true,
       hasVerifiedPhone: () => false,
     },
-    "@/lib/email-login-copy": { emailLoginCopy: () => ({}) },
+    "@/lib/account-auth-copy": {
+      accountAuthCopy: () => ({ methods: "Sign-in methods" }),
+    },
     "./login-options": { LoginOptions: "LoginOptions" },
     "@/lib/push-copy": { pushCopy },
     react: { useState: (value: unknown) => [value, () => {}] },
@@ -120,6 +122,7 @@ test("profile exposes one store action, language detail, financial links and log
   assert.deepEqual(actions, [
     "/home/stores",
     "/language",
+    "/account-methods",
     "/notifications",
     "/bank-account",
     "/agreement",
