@@ -1,16 +1,24 @@
 import { Tabs } from "expo-router/tabs";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Text, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useI18n } from "@/lib/i18n";
 import { colors } from "@/components/ui";
 import { TabIcon } from "@/components/brand";
+import { useSession } from "@/lib/session";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { homeCopy } from "@/lib/home-copy";
 
-// Version 1 seller tabs (docs/screens.md): the store (S10–S12), my items
-// (S19, S20), overview (S22 + S51), money (payouts) and
-// profile (S21, S25).
+export const unstable_settings = { initialRouteName: "home" };
+
+// Home is available before and after login; store tabs keep their account gate.
 export default function TabsLayout() {
   const { d, locale } = useI18n();
+  const { store, session, mfaRequired } = useSession();
+  const storeViews = Boolean(
+    store && hasVerifiedEmail(session?.user) && !mfaRequired,
+  );
   const { bottom } = useSafeAreaInsets();
   const { fontScale, width } = useWindowDimensions();
   const layoutKey = `${width}:${fontScale}:${locale}`;
@@ -63,13 +71,15 @@ export default function TabsLayout() {
         ),
       }}
     >
+      <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: d.tabs.store,
-          tabBarButtonTestID: "tab-store",
-          tabBarIcon: (props) => <TabIcon name="store" {...props} />,
+          title: homeCopy(locale).home,
+          tabBarButtonTestID: "tab-home",
+          tabBarIcon: (props) => <TabIcon name="home" {...props} />,
         }}
+        listeners={{ tabPress: () => router.navigate("/home") }}
       />
       <Tabs.Screen
         name="items"
@@ -83,6 +93,7 @@ export default function TabsLayout() {
         name="overview"
         options={{
           title: d.tabs.overview,
+          href: storeViews ? undefined : null,
           tabBarButtonTestID: "tab-overview",
           tabBarIcon: (props) => <TabIcon name="overview" {...props} />,
         }}
@@ -91,6 +102,7 @@ export default function TabsLayout() {
         name="money"
         options={{
           title: d.tabs.money,
+          href: storeViews ? undefined : null,
           tabBarButtonTestID: "tab-money",
           tabBarIcon: (props) => <TabIcon name="money" {...props} />,
         }}

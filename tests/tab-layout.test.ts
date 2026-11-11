@@ -91,6 +91,12 @@ test("tabs reserve the home inset once and grow/shrink with measured labels", ()
   let locale = "sv";
   let measured = { key: "", height: 0 };
   const tabs = compile("../src/app/(tabs)/_layout.tsx", {
+    "expo-router": { router: { navigate() {} } },
+    "@/lib/session": {
+      useSession: () => ({ store: {}, session: { user: {} } }),
+    },
+    "@/lib/identity-gates": { hasVerifiedEmail: () => true },
+    "@/lib/home-copy": { homeCopy: () => ({ home: "Hem" }) },
     react: {
       useState: () => [
         measured,
@@ -124,7 +130,7 @@ test("tabs reserve the home inset once and grow/shrink with measured labels", ()
   assert.equal(options().tabBarStyle.backgroundColor, "sage");
   assert.equal(options().tabBarStyle.paddingBottom, 34);
   assert.equal(options().tabBarActiveBackgroundColor, undefined);
-  assert.equal(tabs.default().props.children.length, 5);
+  assert.equal(tabs.default().props.children.length, 6);
   const label = options().tabBarLabel({
     children: "Mina varor",
     color: "green",
@@ -300,11 +306,9 @@ test("all detail routes configure back navigation with their own fallback", () =
   assert.equal(bridge.type, "PushBridge");
   const stack = routesElement.type();
   assert.equal(stack.props.screenOptions.headerShown, false);
-  const screens = stack.props.children.find((group: any) =>
-    [group.props.children]
-      .flat()
-      .some((screen: any) => screen.props.name === "(tabs)"),
-  ).props.children;
+  const screens = stack.props.children.flatMap((group: any) =>
+    [group.props.children].flat(),
+  );
   assert.equal(screens[0].props.name, "(tabs)");
   assert.equal(screens[0].props.options, undefined);
   const expected: Record<string, string> = {
@@ -313,11 +317,15 @@ test("all detail routes configure back navigation with their own fallback", () =
     "my-items/[tenant]/[item]": "/(tabs)/items",
     language: "/(tabs)/profile",
     notifications: "/(tabs)/profile",
+    "email-login": "/(tabs)/profile",
     agreement: "/(tabs)/profile",
     "bank-account": "/(tabs)/profile",
   };
-  assert.equal(screens.length, 7);
-  for (const screen of screens.slice(1)) {
+  for (const name of Object.keys(expected))
+    assert.ok(screens.some((screen: any) => screen.props.name === name));
+  for (const screen of screens.filter(
+    (screen: any) => screen.props.name in expected,
+  )) {
     for (const canGoBack of [true, false]) {
       const options = screen.props.options({
         navigation: { canGoBack: () => canGoBack },
@@ -399,24 +407,21 @@ test("photo drafts are available in the signed app while preserving login, MFA a
       );
   }
   state = { ready: true, store: null, session: null, mfaRequired: false };
-  assert.deepEqual(routes(), [
+  const publicRoutes = [
+    "(tabs)",
     "welcome",
     "store",
-    "photo-draft",
-    "photo-store",
-    "photo-details",
-    "photo-review",
-    "photo-phone",
-  ]);
-  state = { ...state, store: {} };
-  assert.deepEqual(routes(), [
     "login",
+    "language",
     "photo-draft",
     "photo-store",
     "photo-details",
     "photo-review",
     "photo-phone",
-  ]);
+  ];
+  assert.deepEqual(routes(), publicRoutes);
+  state = { ...state, store: {} };
+  assert.deepEqual(routes(), publicRoutes);
   state = {
     ...state,
     session: {
@@ -426,12 +431,13 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 17);
+  assert.equal(routes().length, 21);
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
   state = { ...state, store: null };
   assert.ok(routes().includes("store"));
-  assert.ok(!routes().includes("(tabs)"));
+  assert.ok(routes().includes("(tabs)"));
+  assert.ok(!routes().includes("bank-account"));
   state = {
     ...state,
     session: {
@@ -439,6 +445,12 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     },
   };
   assert.deepEqual(routes(), [
+    "(tabs)",
+    "welcome",
+    "store",
+    "login",
+    "language",
+    "email-login",
     "notifications",
     "external-onboarding/[offer]",
     "external-offer/[offer]",

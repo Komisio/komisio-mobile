@@ -1,18 +1,22 @@
 import { useRef, useState } from "react";
+import { Redirect, router } from "expo-router";
 import { ExternalPageButton } from "@/components/external-page-button";
 import { supabase } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { Button, Card, Field, Message, Screen } from "@/components/ui";
 import { PrivacyLink } from "@/components/privacy-link";
-import { PhotoDraftEntry } from "@/components/photo-draft-entry";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { homeCopy } from "@/lib/home-copy";
+import { emailLoginCopy } from "@/lib/email-login-copy";
 
 const web = process.env.EXPO_PUBLIC_KOMISIO_WEB_URL;
 
 // S02: email and password. Activation and password reset finish on the web.
 export default function Login() {
-  const { d } = useI18n();
-  const { store, chooseStore } = useSession();
+  const { d, locale } = useI18n();
+  const t = homeCopy(locale);
+  const { store, session, signOut, refreshAssurance } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -39,6 +43,9 @@ export default function Login() {
               ? d.login.failed
               : d.login.offline,
         );
+      else {
+        await refreshAssurance();
+      }
     } catch {
       setError(d.login.offline);
     } finally {
@@ -47,8 +54,43 @@ export default function Login() {
     }
   };
 
+  if (session && hasVerifiedEmail(session.user))
+    return <Redirect href={store ? "/home/shop" : "/(tabs)/items"} />;
+  if (session)
+    return (
+      <Screen title={t.login} topSafeArea={false}>
+        <Message>{t.storeAccount}</Message>
+        <Button
+          label={emailLoginCopy(locale).title}
+          onPress={() => router.push("/email-login")}
+        />
+        <Button
+          label={t.switchAccount}
+          variant="secondary"
+          busy={busy}
+          onPress={() => {
+            if (submitting.current) return;
+            submitting.current = true;
+            setBusy(true);
+            void signOut()
+              .catch(() => setError(d.login.offline))
+              .finally(() => {
+                submitting.current = false;
+                setBusy(false);
+              });
+          }}
+        />
+        {error ? <Message tone="error">{error}</Message> : null}
+      </Screen>
+    );
+
   return (
-    <Screen brand title={d.login.title} intro={store?.name}>
+    <Screen
+      title={d.login.title}
+      intro={store?.name}
+      topSafeArea={false}
+      keyboardInsets
+    >
       <Card>
         <Field
           label={d.login.email}
@@ -78,7 +120,7 @@ export default function Login() {
           onPress={submit}
         />
       </Card>
-      <Message>{d.login.firstTime}</Message>
+      {store ? <Message>{d.login.firstTime}</Message> : null}
       {web ? (
         <ExternalPageButton
           label={d.login.forgot}
@@ -87,12 +129,25 @@ export default function Login() {
         />
       ) : null}
       <Button
-        label={d.login.changeStore}
+        label={t.smsLogin}
         variant="secondary"
-        onPress={() => chooseStore(null)}
+        onPress={() =>
+          router.push({
+            pathname: "/photo-phone",
+            params: { destination: "requests" },
+          })
+        }
       />
+      {store ? (
+        <Button
+          label={d.login.changeStore}
+          variant="secondary"
+          onPress={() => {
+            router.replace("/home/stores");
+          }}
+        />
+      ) : null}
       <PrivacyLink />
-      <PhotoDraftEntry />
     </Screen>
   );
 }

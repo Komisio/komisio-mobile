@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "@/components/pending-discard";
 import { SellerGate } from "@/components/seller-gate";
@@ -60,7 +60,7 @@ function AgreementRead({
   seller: string;
 }) {
   const { d, locale } = useI18n();
-  const { chooseStore, signOut, refreshAssurance } = useSession();
+  const { signOut, refreshAssurance } = useSession();
   const t = d.agreement;
   const a = d.agreementAccept;
   const writer = useMemo(
@@ -240,7 +240,9 @@ function AgreementRead({
           {state.failure === "denied" ? (
             <Button
               label={d.login.changeStore}
-              onPress={() => chooseStore(null)}
+              onPress={() => {
+                router.push("/home/stores");
+              }}
             />
           ) : null}
         </>

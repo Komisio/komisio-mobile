@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { router } from "expo-router";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { Button, Loading, Message, Screen } from "./ui";
@@ -14,7 +15,7 @@ export function SellerGate({
   bottomSafeArea?: boolean;
   topSafeArea?: boolean;
 }) {
-  const { account, store, retryAccount, chooseStore } = useSession();
+  const { account, store, retryAccount } = useSession();
   const { d } = useI18n();
   if (account === undefined) return <Loading />;
   if (account === "failed")
@@ -38,7 +39,12 @@ export function SellerGate({
         <Message>
           {d.account.missing.replace("{store}", store?.name ?? "")}
         </Message>
-        <Button label={d.login.changeStore} onPress={() => chooseStore(null)} />
+        <Button
+          label={d.login.changeStore}
+          onPress={() => {
+            router.push("/home/stores");
+          }}
+        />
       </Screen>
     );
   return children;

@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { Button, Loading, Message, Screen } from "./ui";
@@ -6,7 +7,7 @@ import { Button, Loading, Message, Screen } from "./ui";
 // seller account in the chosen store.
 export function Placeholder({ title }: { title: string }) {
   const { d } = useI18n();
-  const { account, store, chooseStore, retryAccount } = useSession();
+  const { account, store, retryAccount } = useSession();
   if (account === undefined) return <Loading />;
   return (
     <Screen title={title}>
@@ -25,7 +26,9 @@ export function Placeholder({ title }: { title: string }) {
           <Button
             label={d.login.changeStore}
             variant="secondary"
-            onPress={() => chooseStore(null)}
+            onPress={() => {
+              router.push("/home/stores");
+            }}
           />
         </>
       )}

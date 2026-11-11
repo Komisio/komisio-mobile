@@ -14,7 +14,6 @@ import {
   type SellerItem,
 } from "@/lib/seller-items";
 import { useI18n } from "@/lib/i18n";
-import { useSession } from "@/lib/session";
 import { DetailSheet } from "./detail-sheet";
 import { PhotoDraftEntry } from "./photo-draft-entry";
 import {
@@ -38,7 +37,6 @@ export function SellerItems({
   seller: string;
 }) {
   const { d, locale } = useI18n();
-  const { chooseStore } = useSession();
   const t = d.items;
   const { filter: requestedFilter } = useLocalSearchParams<{
     filter?: string;
@@ -212,7 +210,9 @@ export function SellerItems({
                 <Button
                   label={d.login.changeStore}
                   variant="secondary"
-                  onPress={() => chooseStore(null)}
+                  onPress={() => {
+                    router.push("/home/stores");
+                  }}
                 />
               )}
             </View>

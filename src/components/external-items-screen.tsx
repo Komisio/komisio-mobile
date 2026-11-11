@@ -29,7 +29,7 @@ import { photoFlowCopy } from "@/lib/photo-flow-copy";
 import { sellerPush } from "@/lib/push-runtime";
 import { pushCopy } from "@/lib/push-copy";
 
-export function ExternalItemsScreen() {
+export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
   const { locale, d } = useI18n(),
     t = externalSubmissionCopy(locale);
   const { session, store, signOut, refreshAssurance } = useSession();
@@ -128,7 +128,11 @@ export function ExternalItemsScreen() {
   const data = page && page.owner === owner ? page.data : null;
   if (!verified)
     return (
-      <Screen topSafeArea={false}>
+      <Screen
+        title={photoFlowCopy(locale).myItems}
+        topSafeArea={inTab}
+        bottomSafeArea={!inTab}
+      >
         <Message>{t.phoneIntro}</Message>
         <Button
           label={t.verifyPhone}
@@ -143,7 +147,9 @@ export function ExternalItemsScreen() {
     );
   return (
     <Screen
-      topSafeArea={false}
+      title={inTab ? photoFlowCopy(locale).myItems : undefined}
+      topSafeArea={inTab}
+      bottomSafeArea={!inTab}
       refresh={{
         refreshing: !data && !error,
         onRefresh: refresh,
@@ -236,7 +242,12 @@ export function ExternalItemsScreen() {
         <Button
           label={t.toStore}
           variant="text"
-          onPress={() => router.dismissTo("/(tabs)/items")}
+          onPress={() =>
+            router.replace({
+              pathname: "/(tabs)/items",
+              params: { source: "store" },
+            })
+          }
         />
       ) : null}
       <Button

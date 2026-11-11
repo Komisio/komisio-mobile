@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { ErrorBoundaryProps } from "expo-router";
+import { router, type ErrorBoundaryProps } from "expo-router";
+import { homeCopy } from "@/lib/home-copy";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { externalSubmissionCopy } from "@/lib/external-submission-copy";
@@ -14,6 +15,10 @@ export function ExternalFlowError({ retry }: ErrorBoundaryProps) {
   return (
     <Screen title="Komisio">
       <Message tone="error">{t.loadError}</Message>
+      <Button
+        label={homeCopy(locale).home}
+        onPress={() => router.replace("/home")}
+      />
       <Button
         label={d.retry}
         busy={busy}
