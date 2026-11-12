@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-12: Keep offer consent compact: open the offer's frozen agreement from a small link in a dismissible native sheet. Reading or closing terms never grants consent; the existing checkbox and version-bound completion command remain required.
+
 - 2026-11-12: Upload central AI photos after phone verification; run analysis only on explicit request after all uploads finish. Keep analysis retries user/project-bound and preserve manual details and compensation wishes. Submission retains its independent image journal and command identity.
 
 - 2026-11-12: Use SDK-compatible expo-camera for consecutive still photos on iOS and Android. Save each shot to the existing private draft before the next capture; retain the eight-photo limit and library picker. Request no microphone access. AI remains a separate explicit action.

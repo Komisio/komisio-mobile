@@ -21,6 +21,7 @@ import {
   uiStyles,
 } from "@/components/ui";
 import { ExternalItemPhoto } from "@/components/external-item-photo";
+import { OfferAgreementLink } from "@/components/offer-agreement-link";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { hasVerifiedEmail, hasVerifiedPhone } from "@/lib/identity-gates";
@@ -356,19 +357,8 @@ function AccountForm({
           </View>
         </>
       ) : (
-        <Card>
-          <Text accessibilityRole="header" style={uiStyles.heading}>
-            {offer.agreement.title}
-          </Text>
-          <Text style={uiStyles.note}>
-            {d.agreement.version.replace(
-              "{version}",
-              String(offer.agreement.version),
-            )}
-          </Text>
-          <Text selectable style={uiStyles.body}>
-            {offer.agreement.body}
-          </Text>
+        <View style={{ gap: 8 }}>
+          <OfferAgreementLink agreement={offer.agreement} />
           <Choice
             role="checkbox"
             listRow
@@ -377,7 +367,7 @@ function AccountForm({
             disabled={disabled || busy}
             onPress={() => setAgreed((v) => !v)}
           />
-        </Card>
+        </View>
       )}
       {error ? <Message tone="error">{error}</Message> : null}
       <Button
