@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-12: Upload central AI photos after phone verification; run analysis only on explicit request after all uploads finish. Keep analysis retries user/project-bound and preserve manual details and compensation wishes. Submission retains its independent image journal and command identity.
+
 - 2026-11-12: Use SDK-compatible expo-camera for consecutive still photos on iOS and Android. Save each shot to the existing private draft before the next capture; retain the eight-photo limit and library picker. Request no microphone access. AI remains a separate explicit action.
 
 - 2026-11-11: Offer store-independent account creation with Apple, Google and email codes; retain password/SMS login and one-time phone verification before submission. Provider linking must retain the authenticated user and MFA; never merge seller records by contact email.

@@ -27,6 +27,8 @@ import {
 import { useItemDraft } from "@/lib/use-item-draft";
 import { photoDraftRepository } from "@/lib/photo-draft-storage";
 import type { ItemDraftSnapshot } from "@/lib/photo-draft";
+import { PhotoAnalysisPanel } from "./photo-analysis-panel";
+import { applyPhotoSuggestion } from "@/lib/photo-analysis";
 
 export function PhotoDetailsScreen() {
   const { locale, d } = useI18n();
@@ -177,6 +179,14 @@ export function PhotoDetailsScreen() {
       <Text accessibilityRole="header" style={uiStyles.title}>
         {flow.details}
       </Text>
+      <PhotoAnalysisPanel
+        snapshot={snapshot}
+        disabled={busy}
+        onVerify={() => void open("/photo-phone?destination=details")}
+        onSuggestion={(output) =>
+          setValues((current) => applyPhotoSuggestion(current, output))
+        }
+      />
       <Field
         label={t.description}
         value={values.description}

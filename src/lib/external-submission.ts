@@ -27,9 +27,9 @@ export type ExternalAttempt = {
   rejection: string | null;
   preserveDraft: boolean;
 };
-export type ExternalOutboxStorage = {
+export type ExternalOutboxStorage<T = ExternalAttempt> = {
   read(): Promise<unknown>;
-  write(attempt: ExternalAttempt): Promise<void>;
+  write(attempt: T): Promise<void>;
   putPhoto(id: string, bytes: Uint8Array): Promise<void>;
   photo(id: string): Promise<Uint8Array>;
   prune(keep: string[]): Promise<void>;
@@ -182,6 +182,7 @@ export function createExternalSubmission(deps: {
   lock: CommandLock;
   uuid(): string;
   preparePhoto(uri: string): Promise<Uint8Array>;
+  cachedPhotos?(snapshot: ItemDraftSnapshot): Promise<Uint8Array[] | null>;
   recipient(): Promise<{ id: string; currency: string } | null>;
   finishDraft(expected: DraftRevision, preserve: boolean): Promise<void>;
   api: ExternalRequestApi;
@@ -267,6 +268,9 @@ export function createExternalSubmission(deps: {
           draft.store.currency !== "SEK"
         )
           throw new Error("STORE_CHANGED");
+        const cached = await deps.cachedPhotos?.(frozen);
+        if (cached && cached.length !== photos.length)
+          throw new Error("DRAFT_CHANGED");
         const command = parseExternalCommand({
           senderCountry,
           priceBasis: "seller_amount",
@@ -298,7 +302,7 @@ export function createExternalSubmission(deps: {
         for (let i = 0; i < photos.length; i++)
           await deps.storage.putPhoto(
             command.photos[i],
-            await deps.preparePhoto(photos[i].uri),
+            cached ? cached[i] : await deps.preparePhoto(photos[i].uri),
           );
         await deps.storage.write(next);
         try {

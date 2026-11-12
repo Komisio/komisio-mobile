@@ -39,7 +39,11 @@ export function PhotoPhoneScreen({ embedded = false }: { embedded?: boolean }) {
   const { session, refreshAssurance } = useSession();
   const { destination } = useLocalSearchParams<{ destination?: string }>();
   const target =
-    destination === "requests" ? "/external-items" : "/photo-review";
+    destination === "requests"
+      ? "/external-items"
+      : destination === "details"
+        ? "/photo-details"
+        : "/photo-review";
   const [phone, setPhone] = useState(() =>
     initialPhoneEntry(getLocales()[0]?.regionCode, session?.user.phone),
   );
