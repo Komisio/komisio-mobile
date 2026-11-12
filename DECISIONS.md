@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-12: Owner replaces the central welcome page with direct photo capture. Step 2 automatically uploads and analyzes for phone-verified users; reuse the bound journal on return/retry, preserve manual details, and retain explicit verification and manual entry when AI is unavailable.
+
 - 2026-11-12: Upload central AI photos after phone verification; run analysis only on explicit request after all uploads finish. Keep analysis retries user/project-bound and preserve manual details and compensation wishes. Submission retains its independent image journal and command identity.
 
 - 2026-11-12: Use SDK-compatible expo-camera for consecutive still photos on iOS and Android. Save each shot to the existing private draft before the next capture; retain the eight-photo limit and library picker. Request no microphone access. AI remains a separate explicit action.

@@ -27,7 +27,7 @@ export function HomeScreen() {
         label={t.komisio}
         onPress={() => {
           chooseStore(null);
-          router.push("/home/sell");
+          router.push("/photo-draft");
         }}
       >
         <Text style={uiStyles.heading}>{t.komisio}</Text>

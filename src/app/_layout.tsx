@@ -34,7 +34,7 @@ function Routes() {
   const sellerRoutes =
     Boolean(store) && signedIn && hasVerifiedEmail(session?.user);
   const homeRoute = session && mfaRequired ? "/mfa" : "/home";
-  const photoHome = "/home/sell";
+  const photoHome = "/home";
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="auth-callback" />
