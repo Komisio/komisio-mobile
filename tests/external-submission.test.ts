@@ -14,6 +14,23 @@ const id = (n: number) =>
   `f6200000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const ownerId = id(1),
   binding = "synthetic project and endpoint";
+
+test("AI-prepared image bytes are copied to independent submission photo IDs", async () => {
+  const f = fixture();
+  const jpeg = new Uint8Array([255, 216, 255, 9]);
+  const controller = createExternalSubmission({
+    ...f.deps,
+    preparePhoto: async () => {
+      throw Error("unexpected re-encoding");
+    },
+    cachedPhotos: async () => [jpeg],
+  });
+  const attempt = await controller.prepare(snapshot(), "SE");
+  assert.notEqual(attempt.command.photos[0], snapshot().photos[0].id);
+  assert.deepEqual(await f.storage.photo(attempt.command.photos[0]), jpeg);
+  await controller.resume();
+  assert.equal(f.calls.filter((c) => c === "submit").length, 1);
+});
 function snapshot(): ItemDraftSnapshot {
   return {
     draft: {

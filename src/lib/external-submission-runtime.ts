@@ -11,6 +11,7 @@ import { createExternalSubmission } from "./external-submission";
 import { externalOutboxStorage } from "./external-outbox-storage";
 import { prepareExternalPhoto } from "./external-image";
 import { photoDraftRepository } from "./photo-draft-storage";
+import { photoAnalysis } from "./photo-analysis-runtime";
 
 const endpoint = externalItemsEndpoint(process.env.EXPO_PUBLIC_KOMISIO_WEB_URL);
 const binding = JSON.stringify([
@@ -47,6 +48,17 @@ export function externalSubmission(ownerId: string) {
             lock: commandLock,
             uuid: randomUUID,
             preparePhoto: prepareExternalPhoto,
+            cachedPhotos: async (snapshot) => {
+              try {
+                // Copy prepared bytes into the independent submission journal.
+                // Analysis cleanup must never invalidate a pending submission.
+                return await (
+                  await photoAnalysis(ownerId)
+                ).cachedPhotos(snapshot);
+              } catch {
+                return null;
+              }
+            },
             recipient: () => readCentralRecipient(supabase),
             finishDraft: async (expected, preserve) => {
               const { data, error } = await supabase.auth.getSession();
