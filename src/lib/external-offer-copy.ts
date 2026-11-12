@@ -15,7 +15,7 @@ const copy = {
     yes: "Tacka ja",
     no: "Tacka nej",
     terms: "Läs säljaravtalet",
-    agree: "Jag godkänner detta erbjudande och säljaravtalet.",
+    agree: "Jag godkänner detta erbjudande och säljaravtalet",
     confirm: "Godkänn erbjudandet",
     accepted: "Du har tackat ja",
     acceptedText:
