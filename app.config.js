@@ -4,6 +4,16 @@ module.exports = ({ config }) => ({
   plugins: [
     ...(config.plugins ?? []),
     [
+      "expo-camera",
+      {
+        cameraPermission:
+          "Komisio använder kameran för att du ska kunna fotografera dina varor.",
+        microphonePermission: false,
+        recordAudioAndroid: false,
+        barcodeScannerEnabled: false,
+      },
+    ],
+    [
       "expo-image-picker",
       {
         cameraPermission:

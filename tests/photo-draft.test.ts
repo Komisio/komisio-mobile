@@ -54,6 +54,17 @@ function fixture() {
 }
 const input = () => ({ uri: "file:///camera/photo.jpg", fileSize: 100 });
 
+test("a delayed camera shot cannot resurrect a cleared draft or append to another revision", async () => {
+  const f = fixture();
+  const empty = await f.repo.snapshot();
+  await f.repo.add([input()], empty.draft);
+  const first = await f.repo.snapshot();
+  await f.repo.clear();
+  await assert.rejects(f.repo.add([input()], first.draft), /DRAFT_CHANGED/);
+  assert.equal((await f.repo.snapshot()).photos.length, 0);
+  await assert.rejects(f.repo.add([input()], empty.draft), /DRAFT_CHANGED/);
+});
+
 test("submission completion clears only its own unchanged draft revision", async () => {
   const f = fixture();
   await f.repo.add([input()]);

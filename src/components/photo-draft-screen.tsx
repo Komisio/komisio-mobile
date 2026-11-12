@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { Linking, Text, View } from "react-native";
 import { PhotoDraftImage } from "./photo-draft-image";
+import { PhotoCapture } from "./photo-capture";
 import { Image } from "expo-image";
 import { PhotoStep } from "./photo-flow-ui";
 import { photoFlowCopy } from "@/lib/photo-flow-copy";
@@ -23,6 +24,7 @@ export function PhotoDraftScreen() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const locked = useRef(false);
   const alive = useRef(true);
   const readVersion = useRef(0);
@@ -45,6 +47,7 @@ export function PhotoDraftScreen() {
       alive.current = true;
       load();
       return () => {
+        setCameraOpen(false);
         readVersion.current += 1;
         alive.current = false;
       };
@@ -71,6 +74,10 @@ export function PhotoDraftScreen() {
   }
   function pick(camera: boolean) {
     if (!photos) return;
+    if (camera) {
+      setCameraOpen(true);
+      return;
+    }
     void update(() =>
       pickDraftPhotos(camera, MAX_DRAFT_PHOTOS - photos.length).then(
         async (inputs) => (await photoDraftRepository()).add(inputs),
@@ -88,6 +95,16 @@ export function PhotoDraftScreen() {
           : t.error;
   return (
     <Screen topSafeArea={false}>
+      {cameraOpen && photos ? (
+        <PhotoCapture
+          photos={photos}
+          onSaved={setPhotos}
+          onClose={() => {
+            setCameraOpen(false);
+            load();
+          }}
+        />
+      ) : null}
       <PhotoStep step={1} />
       {photos === null && !error ? <Loading /> : null}
       {photos !== null ? (

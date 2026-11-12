@@ -70,6 +70,7 @@ for (const platform of ["apple", "android"]) {
       (m: { packageName: string }) => m.packageName,
     );
     for (const retained of [
+      "expo-camera",
       "expo-image-picker",
       "expo-file-system",
       "expo-notifications",
