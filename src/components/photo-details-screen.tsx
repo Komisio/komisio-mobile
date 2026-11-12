@@ -13,7 +13,6 @@ import {
 } from "./ui";
 import { DetailSheet } from "./detail-sheet";
 import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
-import { photoFlowCopy } from "@/lib/photo-flow-copy";
 import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { useI18n } from "@/lib/i18n";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
@@ -34,7 +33,6 @@ export function PhotoDetailsScreen() {
   const { locale, d } = useI18n();
   const t = itemDraftCopy(locale);
   const photo = photoDraftCopy(locale);
-  const flow = photoFlowCopy(locale);
   const [values, setValues] = useState<ItemDraftDetails>(emptyItemDetails);
   const [busy, setBusy] = useState(false);
   const locked = useRef(false);
@@ -176,16 +174,14 @@ export function PhotoDetailsScreen() {
     <Screen topSafeArea={false} keyboardInsets>
       <PhotoStep step={2} />
       <PhotoStrip photos={snapshot.photos} />
-      <Text accessibilityRole="header" style={uiStyles.title}>
-        {flow.details}
-      </Text>
       <PhotoAnalysisPanel
         snapshot={snapshot}
         disabled={busy}
         onVerify={() => void open("/photo-phone?destination=details")}
-        onSuggestion={(output) =>
-          setValues((current) => applyPhotoSuggestion(current, output))
-        }
+        onSuggestion={(output) => {
+          if (!locked.current && alive.current)
+            setValues((current) => applyPhotoSuggestion(current, output));
+        }}
       />
       <Field
         label={t.description}

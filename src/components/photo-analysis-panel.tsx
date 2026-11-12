@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { ActivityIndicator, Text, View } from "react-native";
 import { useSession } from "@/lib/session";
 import { hasVerifiedPhone } from "@/lib/identity-gates";
 import { useI18n } from "@/lib/i18n";
@@ -57,65 +58,55 @@ function Worker({
   t: ReturnType<typeof photoAnalysisCopy>;
 }) {
   const [phase, setPhase] = useState<
-    "uploading" | "uploaded" | "analyzing" | "error"
+    "uploading" | "analyzing" | "settled" | "error"
   >("uploading");
   const [progress, setProgress] = useState(0),
     [error, setError] = useState("");
   const [result, setResult] = useState<PhotoAnalysisResult | null>(null);
   const [retry, setRetry] = useState(0);
-  const locked = useRef(false),
-    alive = useRef(true);
+  // The keyed worker owns one image set; saving details must not restart it.
+  const [input] = useState(snapshot);
+  const apply = useRef(onSuggestion);
   useEffect(() => {
-    alive.current = true;
-    return () => {
-      alive.current = false;
-    };
-  }, []);
-  useEffect(() => {
-    if (!user) return;
-    let current = true;
-    void photoAnalysis(user)
-      .then((c) =>
-        c.upload(snapshot, language, (done) => {
-          if (current) setProgress(done);
-        }),
-      )
-      .then(() => {
-        if (current) {
-          setPhase("uploaded");
-          setError("");
+    apply.current = onSuggestion;
+  }, [onSuggestion]);
+  useFocusEffect(
+    useCallback(() => {
+      void retry; // Explicit retry starts the same journal-bound operation again.
+      if (!user) return;
+      let current = true;
+      setPhase("uploading");
+      setError("");
+      setResult(null);
+      async function prepare() {
+        try {
+          const controller = await photoAnalysis(user!);
+          if (!current) return;
+          await controller.upload(input, language, (done) => {
+            if (current) setProgress(done);
+          });
+          if (!current) return;
+          setPhase("analyzing");
+          // The existing journal reads/replays the same analysis on retry or return.
+          const result = await controller.analyze(input, language);
+          if (!current) return;
+          setResult(result);
+          setPhase("settled");
+          if (result.status === "ready" && result.output)
+            apply.current(result.output);
+        } catch (e) {
+          if (current) {
+            setPhase("error");
+            setError(e instanceof Error ? e.message : "");
+          }
         }
-      })
-      .catch((e) => {
-        if (current) {
-          setPhase("error");
-          setError(e instanceof Error ? e.message : "");
-        }
-      });
-    return () => {
-      current = false;
-    };
-  }, [user, snapshot, language, retry]);
-  async function analyze() {
-    if (!user || locked.current || phase !== "uploaded") return;
-    locked.current = true;
-    setPhase("analyzing");
-    setError("");
-    try {
-      const result = await (
-        await photoAnalysis(user)
-      ).analyze(snapshot, language);
-      if (!alive.current) return;
-      setResult(result);
-      if (result.status === "ready" && result.output)
-        onSuggestion(result.output);
-    } catch (e) {
-      if (alive.current) setError(e instanceof Error ? e.message : "");
-    } finally {
-      locked.current = false;
-      if (alive.current) setPhase("uploaded");
-    }
-  }
+      }
+      void prepare();
+      return () => {
+        current = false;
+      };
+    }, [user, input, language, retry]),
+  );
   const unavailable = [
     "ASSISTANCE_DISABLED",
     "AI_CREDITS_EXHAUSTED",
@@ -132,23 +123,29 @@ function Worker({
         backgroundColor: colors.softAccent,
       }}
     >
-      <Text style={uiStyles.rowTitle}>{t.title}</Text>
       {!user ? (
         <Button label={t.verify} disabled={disabled} onPress={onVerify} />
       ) : (
         <>
-          {phase === "uploading" ? (
-            <Text accessibilityLiveRegion="polite" style={uiStyles.note}>
-              {t.uploading
-                .replace(
-                  "{done}",
-                  String(Math.min(progress + 1, snapshot.photos.length)),
-                )
-                .replace("{total}", String(snapshot.photos.length))}
-            </Text>
-          ) : null}
-          {phase === "uploaded" && !result && !error ? (
-            <Text style={uiStyles.note}>{t.uploaded}</Text>
+          {phase === "uploading" || phase === "analyzing" ? (
+            <View
+              style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
+            >
+              <ActivityIndicator color={colors.brand} />
+              <Text
+                accessibilityLiveRegion="polite"
+                style={[uiStyles.note, { flex: 1 }]}
+              >
+                {phase === "analyzing"
+                  ? t.analyzing
+                  : t.uploading
+                      .replace(
+                        "{done}",
+                        String(Math.min(progress + 1, input.photos.length)),
+                      )
+                      .replace("{total}", String(input.photos.length))}
+              </Text>
+            </View>
           ) : null}
           {result ? (
             <Message>
@@ -164,28 +161,19 @@ function Worker({
               {unavailable ? t.unavailable : t.error}
             </Message>
           ) : null}
-          {phase === "error" ? (
+          {phase === "error" && !unavailable ? (
             <Button
               label={t.retry}
               disabled={disabled}
               onPress={() => {
-                setPhase("uploading");
-                setError("");
                 setRetry((n) => n + 1);
               }}
             />
-          ) : result?.status !== "ready" && result?.status !== "failed" ? (
+          ) : result?.status === "pending" ? (
             <Button
-              label={
-                phase === "analyzing"
-                  ? t.analyzing
-                  : result?.status === "pending"
-                    ? t.check
-                    : t.analyze
-              }
-              busy={phase === "analyzing"}
-              disabled={disabled || phase !== "uploaded" || unavailable}
-              onPress={() => void analyze()}
+              label={t.check}
+              disabled={disabled}
+              onPress={() => setRetry((n) => n + 1)}
             />
           ) : null}
         </>
