@@ -13,9 +13,9 @@ import {
 } from "./central-shipping";
 const base = externalItemsEndpoint(process.env.EXPO_PUBLIC_KOMISIO_WEB_URL);
 const endpoint = base ? `${base}/shipping` : null;
-function transport(user: string) {
+export function shippingTransport(user: string, suffix = "") {
   return {
-    endpoint,
+    endpoint: endpoint ? `${endpoint}${suffix}` : null,
     user,
     request: (url: string, init: RequestInit) => fetch(url, init),
     session: async () => {
@@ -28,7 +28,7 @@ function transport(user: string) {
 }
 export async function readShipping(user: string, offer: string) {
   return parseShippingState(
-    await createExternalPhoneRead(transport(user))({
+    await createExternalPhoneRead(shippingTransport(user))({
       action: "read",
       offerId: offer,
     }),
@@ -48,6 +48,6 @@ export function shippingWriter(user: string, offer: string) {
     lock: commandLock,
     parse: (value) => parseBookParcel(value, offer),
     send: (command) =>
-      sendMobileCommand(command, transport(user), shippingOutcome),
+      sendMobileCommand(command, shippingTransport(user), shippingOutcome),
   });
 }

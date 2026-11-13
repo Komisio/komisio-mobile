@@ -93,14 +93,20 @@ test("onboarding bank payloads share logout and identity-switch cleanup", async 
   await assert.rejects(f.store.commands.getItem(key));
 });
 
-test("shipping addresses are removed on browser logout and cannot be restored by a stale writer", async () => {
-  const f = fixture(),
-    key = "komisio.pending.shipping.v1.user.offer";
-  f.store.setUser("user");
-  await f.store.commands.setItem(key, "synthetic address");
-  f.store.setUser("user");
-  assert.equal(await f.store.commands.getItem(key), "synthetic address");
-  f.store.setUser(null);
-  assert.equal(f.values.has(key), false);
-  await assert.rejects(f.store.commands.setItem(key, "stale address"));
-});
+for (const key of [
+  "komisio.pending.shipping.v1.user.offer",
+  "komisio.pending.shipping-address.v1.user.tenant.seller",
+])
+  test(`shipping address journal ${key} is removed on logout and cannot be restored by a stale writer`, async () => {
+    const f = fixture(),
+      other = "other";
+    f.store.setUser("user");
+    await f.store.commands.setItem(key, "synthetic address");
+    f.store.setUser("user");
+    assert.equal(await f.store.commands.getItem(key), "synthetic address");
+    f.store.setUser(null);
+    assert.equal(f.values.has(key), false);
+    await assert.rejects(f.store.commands.setItem(key, "stale address"));
+    f.store.setUser(other);
+    await assert.rejects(f.store.commands.getItem(key));
+  });

@@ -113,3 +113,34 @@ test("unconfirmed bookings retain intent; a duplicate uses the existing parcel",
   });
   assert.equal(shippingOutcome(200, { id: offer }, id).kind, "unknown");
 });
+test("new bookings omit measurements without estimates and old queued requests still parse", () => {
+  const { weightG, lengthMm, widthMm, heightMm, ...simple } = command;
+  assert.deepEqual(parseBookParcel(simple, offer), simple);
+  assert.deepEqual(parseBookParcel(command, offer), command);
+  for (const extra of [
+    { weightG },
+    { lengthMm },
+    { widthMm, heightMm },
+    { weightG: null, lengthMm: null, widthMm: null, heightMm: null },
+  ])
+    assert.throws(() => parseBookParcel({ ...simple, ...extra }, offer));
+  assert.equal(parseShippingState(state, offer).measurementsOptional, false);
+  const unknown = {
+    ...state,
+    measurementsOptional: true,
+    parcel: {
+      ...state.parcel,
+      weightG: null,
+      lengthMm: null,
+      widthMm: null,
+      heightMm: null,
+    },
+  };
+  assert.equal(parseShippingState(unknown, offer).parcel?.weightG, null);
+  assert.throws(() =>
+    parseShippingState(
+      { ...unknown, parcel: { ...unknown.parcel, weightG: 1000 } },
+      offer,
+    ),
+  );
+});

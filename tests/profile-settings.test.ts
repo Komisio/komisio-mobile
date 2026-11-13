@@ -58,6 +58,9 @@ test("profile exposes one store action, language detail, financial links and log
       accountAuthCopy: () => ({ methods: "Sign-in methods" }),
     },
     "./login-options": { LoginOptions: "LoginOptions" },
+    "./central-shipping-address": {
+      CentralShippingAddress: "CentralShippingAddress",
+    },
     "@/lib/push-copy": { pushCopy },
     react: { useState: (value: unknown) => [value, () => {}] },
     "react-native": {
