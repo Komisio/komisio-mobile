@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { Text, View } from "react-native";
-import { Image } from "expo-image";
 import {
   Stack,
   router,
@@ -21,6 +20,8 @@ import {
   uiStyles,
 } from "@/components/ui";
 import { ExternalItemPhoto } from "@/components/external-item-photo";
+import { CentralShipping } from "@/components/central-shipping";
+import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { OfferAgreementLink } from "@/components/offer-agreement-link";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
@@ -34,7 +35,6 @@ import {
 } from "@/lib/external-onboarding-runtime";
 import { externalOnboardingCopy } from "@/lib/external-onboarding-copy";
 import { externalOfferCopy } from "@/lib/external-offer-copy";
-import { weekdays, type Weekday } from "@/lib/store-info";
 import { localBankDetails } from "@/lib/bank-account";
 import {
   parseCompleteExternalOffer,
@@ -137,7 +137,11 @@ function Onboarding({ user, id }: { user: string; id: string }) {
       }}
     >
       <Stack.Screen
-        options={{ title: data?.account.handover ? t.handover : t.title }}
+        options={{
+          title: data?.account.handover
+            ? centralShippingCopy(locale).title
+            : t.title,
+        }}
       />
       {state.status === "failed" ? (
         <>
@@ -399,10 +403,9 @@ function Handover({
   offer: ExternalOfferDetail;
   user: string;
 }) {
-  const { locale, d } = useI18n(),
+  const { locale } = useI18n(),
     t = externalOnboardingCopy(locale),
-    h = data.handover!,
-    address = data.store.address;
+    h = data.handover!;
   return (
     <>
       <Text accessibilityRole="header" style={uiStyles.heading}>
@@ -410,7 +413,7 @@ function Handover({
           ? t.received
           : h.status === "cancelled"
             ? t.cancelled
-            : t.handover}
+            : centralShippingCopy(locale).title}
       </Text>
       {h.status === "received" &&
       offer.guarantee &&
@@ -440,26 +443,6 @@ function Handover({
           </Text>
         </Card>
       ) : null}
-      {h.status === "open" && data.qrPng ? (
-        <Card>
-          <Image
-            source={{ uri: data.qrPng }}
-            accessibilityLabel={h.reference}
-            style={{ width: 220, height: 220, alignSelf: "center" }}
-            contentFit="contain"
-            cachePolicy="none"
-          />
-          <Text
-            selectable
-            style={[uiStyles.heading, { textAlign: "center", fontSize: 28 }]}
-          >
-            {h.reference}
-          </Text>
-          <Text style={[uiStyles.note, { textAlign: "center" }]}>
-            {t.showCode}
-          </Text>
-        </Card>
-      ) : null}
       <Card>
         <Text style={uiStyles.label}>
           {h.itemCount === 1
@@ -482,51 +465,9 @@ function Handover({
             </View>
           </View>
         ))}
-        {h.status === "open" && h.itemCount > 1 ? (
-          <Text style={uiStyles.note}>{t.together}</Text>
-        ) : null}
       </Card>
       {h.status === "open" ? (
-        <Card>
-          <Text selectable style={uiStyles.body}>
-            {address?.street
-              ? [
-                  address.street,
-                  [address.postalCode, address.city].filter(Boolean).join(" "),
-                ]
-                  .filter(Boolean)
-                  .join("\n")
-              : t.addressMissing}
-          </Text>
-          {data.store.openingHours.length ? (
-            <>
-              <Text style={uiStyles.label}>{t.hours}</Text>
-              {[...data.store.openingHours]
-                .sort(
-                  (a, b) =>
-                    weekdays.indexOf(a.day as Weekday) -
-                    weekdays.indexOf(b.day as Weekday),
-                )
-                .map((h) => (
-                  <View
-                    key={h.day}
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      gap: 12,
-                    }}
-                  >
-                    <Text style={uiStyles.body}>
-                      {d.storeInfo.days[h.day as Weekday]}
-                    </Text>
-                    <Text style={uiStyles.body}>
-                      {h.opens}–{h.closes}
-                    </Text>
-                  </View>
-                ))}
-            </>
-          ) : null}
-        </Card>
+        <CentralShipping user={user} offer={offer.id} itemCount={h.itemCount} />
       ) : null}
     </>
   );

@@ -3,13 +3,14 @@ import type { CommandStorage } from "./pending-command.ts";
 const SENSITIVE_PREFIXES = [
   "komisio.pending.bank.v1.",
   "komisio.pending.onboarding.v1.",
+  "komisio.pending.shipping.v1.",
 ];
 type BrowserStorage = Pick<
   Storage,
   "length" | "key" | "getItem" | "setItem" | "removeItem"
 >;
 
-/** Keep replay IDs for payouts/agreements; erase sensitive bank payloads on logout.
+/** Keep replay IDs for payouts/agreements; erase bank/address payloads on logout.
  * The guard also prevents a stale mounted writer from recreating them afterwards.
  * Web storage is not encrypted; native commands use SecureStore instead. */
 export function createWebCommandStorage(storage: () => BrowserStorage) {
