@@ -133,80 +133,86 @@ export function CentralShipping({
   if (!state.data) return withItemPreview(<Loading />);
   if (parcel)
     return (
-      <Card>
-        <Text accessibilityRole="header" style={uiStyles.heading}>
-          {t.packageTitle.replace("{reference}", parcel.reference)}
-        </Text>
-        {parcel.items.length ? (
-          <>
-            <Text style={uiStyles.label}>
-              {t.contents.replace("{count}", String(parcel.items.length))}
-            </Text>
-            {parcel.items.map((i) => (
-              <Text key={i.offerId} style={uiStyles.body}>
-                {i.description}
+      <>
+        {parcel.items.length === 0 ? itemPreview : null}
+        <Card>
+          <Text accessibilityRole="header" style={uiStyles.heading}>
+            {t.packageTitle.replace("{reference}", parcel.reference)}
+          </Text>
+          {parcel.items.length ? (
+            <>
+              <Text style={uiStyles.label}>
+                {t.contents.replace("{count}", String(parcel.items.length))}
               </Text>
-            ))}
-          </>
-        ) : null}
-        {parcel.environment === "sandbox" ? (
-          <Message>{t.sandbox}</Message>
-        ) : null}
-        {parcel.status === "booked" && parcel.booking ? (
-          <>
-            <Text accessibilityRole="header" style={uiStyles.heading}>
-              {t.code}
-            </Text>
-            {parcel.items.length > 1 ? (
+              {parcel.items.map((i) => (
+                <Text key={i.offerId} style={uiStyles.body}>
+                  {i.description}
+                </Text>
+              ))}
+            </>
+          ) : null}
+          {parcel.environment === "sandbox" ? (
+            <Message>{t.sandbox}</Message>
+          ) : null}
+          {parcel.status === "booked" && parcel.booking ? (
+            <>
+              <Text accessibilityRole="header" style={uiStyles.heading}>
+                {t.code}
+              </Text>
+              {parcel.items.length > 1 ? (
+                <Message>
+                  {t.sharedCode.replace("{count}", String(parcel.items.length))}
+                </Message>
+              ) : null}
+              <Image
+                source={{ uri: parcel.booking.qrPng }}
+                accessibilityLabel={t.code}
+                style={{
+                  width: 220,
+                  height: 220,
+                  alignSelf: "center",
+                  maxWidth: "100%",
+                }}
+                contentFit="contain"
+                cachePolicy="none"
+              />
+              <Text
+                selectable
+                style={[uiStyles.label, { textAlign: "center" }]}
+              >
+                {parcel.booking.returnId}
+              </Text>
+              <Text style={uiStyles.body}>{t.instructions}</Text>
+              <ExternalPageButton
+                label={t.tracking}
+                url={parcelTrackingUrl(parcel)}
+                variant="secondary"
+              />
+            </>
+          ) : (
+            <>
               <Message>
-                {t.sharedCode.replace("{count}", String(parcel.items.length))}
+                {parcel.status === "pending" ? t.pending : t.review}
               </Message>
-            ) : null}
-            <Image
-              source={{ uri: parcel.booking.qrPng }}
-              accessibilityLabel={t.code}
-              style={{
-                width: 220,
-                height: 220,
-                alignSelf: "center",
-                maxWidth: "100%",
-              }}
-              contentFit="contain"
-              cachePolicy="none"
-            />
-            <Text selectable style={[uiStyles.label, { textAlign: "center" }]}>
-              {parcel.booking.returnId}
-            </Text>
-            <Text style={uiStyles.body}>{t.instructions}</Text>
-            <ExternalPageButton
-              label={t.tracking}
-              url={parcelTrackingUrl(parcel)}
-              variant="secondary"
-            />
-          </>
-        ) : (
-          <>
-            <Message>
-              {parcel.status === "pending" ? t.pending : t.review}
-            </Message>
-            <Button
-              label={d.retry}
-              busy={busy}
-              onPress={() =>
-                void (pending ? finish(writer.retry()) : read.refresh())
-              }
-            />
-          </>
-        )}
-        <Text style={uiStyles.label}>{t.recipient}</Text>
-        <Text selectable style={uiStyles.body}>
-          {parcel.recipient.name}
-          {"\n"}
-          {parcel.recipient.street}
-          {"\n"}
-          {parcel.recipient.postalCode} {parcel.recipient.city}
-        </Text>
-      </Card>
+              <Button
+                label={d.retry}
+                busy={busy}
+                onPress={() =>
+                  void (pending ? finish(writer.retry()) : read.refresh())
+                }
+              />
+            </>
+          )}
+          <Text style={uiStyles.label}>{t.recipient}</Text>
+          <Text selectable style={uiStyles.body}>
+            {parcel.recipient.name}
+            {"\n"}
+            {parcel.recipient.street}
+            {"\n"}
+            {parcel.recipient.postalCode} {parcel.recipient.city}
+          </Text>
+        </Card>
+      </>
     );
   if (itemCount !== 1) return withItemPreview(<Message>{t.grouped}</Message>);
   if (
