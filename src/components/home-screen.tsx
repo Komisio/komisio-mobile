@@ -25,6 +25,7 @@ export function HomeScreen() {
       </Text>
       <ItemCard
         label={t.komisio}
+        tone="soft"
         onPress={() => {
           chooseStore(null);
           router.push("/photo-draft");
@@ -33,7 +34,11 @@ export function HomeScreen() {
         <Text style={uiStyles.heading}>{t.komisio}</Text>
         <Text style={uiStyles.note}>{t.komisioHint}</Text>
       </ItemCard>
-      <ItemCard label={t.store} onPress={() => router.push("/home/stores")}>
+      <ItemCard
+        label={t.store}
+        tone="soft"
+        onPress={() => router.push("/home/stores")}
+      >
         <Text style={uiStyles.heading}>{t.store}</Text>
         <Text style={uiStyles.note}>{t.storeHint}</Text>
       </ItemCard>

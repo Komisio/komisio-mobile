@@ -144,3 +144,59 @@ test("new bookings omit measurements without estimates and old queued requests s
     ),
   );
 });
+
+test("parcel selection is exact and rejects duplicates, missing anchor and legacy measurements", () => {
+  const second = "f7800000-0000-4000-8000-000000000402";
+  const { weightG, lengthMm, widthMm, heightMm, ...simple } = command;
+  const grouped = { ...simple, offerIds: [offer, second] };
+  assert.deepEqual(parseBookParcel(grouped, offer), grouped);
+  for (const offerIds of [
+    [],
+    [second],
+    [offer, offer],
+    [offer, null],
+    Array(11).fill(offer),
+  ])
+    assert.throws(() => parseBookParcel({ ...simple, offerIds }, offer));
+  assert.throws(() =>
+    parseBookParcel({ ...command, offerIds: [offer, second] }, offer),
+  );
+  const item = {
+    offerId: offer,
+    handoverId: id,
+    description: "Jacket",
+    reference: "H-1",
+    status: "open",
+  };
+  const other = {
+    ...item,
+    offerId: second,
+    handoverId: second,
+    description: "Dress",
+    reference: "H-2",
+  };
+  const read = {
+    ...state,
+    bundlingAvailable: true,
+    eligibleItems: [],
+    parcel: { ...state.parcel, items: [item, other] },
+  };
+  assert.equal(parseShippingState(read, offer).parcel?.items.length, 2);
+  assert.equal(
+    parseShippingState({ ...read, offerId: second }, second).parcel?.id,
+    id,
+  );
+  assert.throws(() =>
+    parseShippingState(
+      { ...read, parcel: { ...read.parcel, items: [other] } },
+      offer,
+    ),
+  );
+  assert.throws(() =>
+    parseShippingState(
+      { ...read, eligibleItems: [{ ...item, status: "received" }] },
+      offer,
+    ),
+  );
+  assert.equal(parseShippingState(state, offer).bundlingAvailable, false);
+});

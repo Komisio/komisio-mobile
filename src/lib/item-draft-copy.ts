@@ -13,6 +13,7 @@ const sv = {
   choose: "Välj {name}",
   detailsTitle: "Om varan",
   detailsIntro: "Beskriv varan kort och visa gärna eventuella skador på bild.",
+  keyboardDone: "Klar",
   description: "Vad är det?",
   brand: "Märke (valfritt)",
   condition: "Skick",
@@ -68,6 +69,7 @@ const copies: Record<Locale, Copy> = {
     choose: "Choose {name}",
     detailsTitle: "About the item",
     detailsIntro: "Describe the item briefly and include photos of any damage.",
+    keyboardDone: "Done",
     description: "What is it?",
     brand: "Brand (optional)",
     condition: "Condition",
@@ -119,6 +121,7 @@ const copies: Record<Locale, Copy> = {
     detailsTitle: "Om varen",
     detailsIntro:
       "Beskriv varen kort og legg gjerne ved bilder av eventuelle skader.",
+    keyboardDone: "Ferdig",
     description: "Hva er det?",
     brand: "Merke (valgfritt)",
     condition: "Tilstand",
@@ -170,6 +173,7 @@ const copies: Record<Locale, Copy> = {
     detailsTitle: "Om varen",
     detailsIntro:
       "Beskriv varen kort og tilføj gerne billeder af eventuelle skader.",
+    keyboardDone: "F\u00e6rdig",
     description: "Hvad er det?",
     brand: "Mærke (valgfrit)",
     condition: "Stand",
@@ -222,6 +226,7 @@ const copies: Record<Locale, Copy> = {
     detailsTitle: "Tietoa tuotteesta",
     detailsIntro:
       "Kuvaile tuote lyhyesti ja lisää kuvia mahdollisista vaurioista.",
+    keyboardDone: "Valmis",
     description: "Mikä tuote on kyseessä?",
     brand: "Merkki (valinnainen)",
     condition: "Kunto",
@@ -274,6 +279,7 @@ const copies: Record<Locale, Copy> = {
     detailsTitle: "Zum Artikel",
     detailsIntro:
       "Beschreibe den Artikel kurz und zeige mögliche Schäden auf Fotos.",
+    keyboardDone: "Fertig",
     description: "Was ist es?",
     brand: "Marke (optional)",
     condition: "Zustand",
@@ -326,6 +332,7 @@ const copies: Record<Locale, Copy> = {
     detailsTitle: "Sobre el artículo",
     detailsIntro:
       "Describe brevemente el artículo y añade fotos de los posibles daños.",
+    keyboardDone: "Listo",
     description: "¿Qué es?",
     brand: "Marca (opcional)",
     condition: "Estado",
@@ -377,6 +384,7 @@ const copies: Record<Locale, Copy> = {
     detailsTitle: "Informazioni sull'articolo",
     detailsIntro:
       "Descrivi brevemente l'articolo e aggiungi foto di eventuali danni.",
+    keyboardDone: "Fine",
     description: "Di che cosa si tratta?",
     brand: "Marca (facoltativa)",
     condition: "Condizioni",

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { Text } from "react-native";
 import { Image } from "expo-image";
@@ -15,17 +16,19 @@ import {
 import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { shippingAddressCopy } from "@/lib/shipping-address-copy";
 import { CentralShippingAddress } from "./central-shipping-address";
-import { Button, Card, Loading, Message, uiStyles } from "./ui";
+import { Button, Card, Choice, Loading, Message, uiStyles } from "./ui";
 import { ExternalPageButton } from "./external-page-button";
 
 export function CentralShipping({
   user,
   offer,
   itemCount,
+  itemPreview,
 }: {
   user: string;
   offer: string;
   itemCount: number;
+  itemPreview?: ReactNode;
 }) {
   const { locale, d } = useI18n(),
     t = centralShippingCopy(locale),
@@ -63,6 +66,18 @@ export function CentralShipping({
     writer.getState,
   );
   const [invalid, setInvalid] = useState(false);
+  const [selection, setSelection] = useState<{ offer: string; ids: string[] }>({
+    offer,
+    ids: [],
+  });
+  const additional = selection.offer === offer ? selection.ids : [];
+  const eligible = state.data?.eligibleItems ?? [];
+  const selected = [
+    offer,
+    ...additional.filter(
+      (id) => id !== offer && eligible.some((i) => i.offerId === id),
+    ),
+  ];
   useFocusEffect(
     useCallback(() => {
       void read.refresh();
@@ -88,6 +103,7 @@ export function CentralShipping({
           action: "book",
           requestId: randomUUID(),
           offerId: offer,
+          ...(state.data?.bundlingAvailable ? { offerIds: selected } : {}),
           address,
         },
         offer,
@@ -101,84 +117,117 @@ export function CentralShipping({
   const parcel = state.data?.parcel;
   const pending = ["pending", "blocked", "cleanup"].includes(change.status);
   const busy = change.status === "busy";
+  const withItemPreview = (content: ReactNode) => (
+    <>
+      {itemPreview}
+      {content}
+    </>
+  );
   if (state.status === "failed")
-    return (
+    return withItemPreview(
       <Card>
         <Message tone="error">{t.error}</Message>
         <Button label={d.retry} onPress={() => void read.refresh()} />
-      </Card>
+      </Card>,
     );
-  if (!state.data) return <Loading />;
+  if (!state.data) return withItemPreview(<Loading />);
   if (parcel)
     return (
-      <Card>
-        {parcel.environment === "sandbox" ? (
-          <Message>{t.sandbox}</Message>
-        ) : null}
-        {parcel.status === "booked" && parcel.booking ? (
-          <>
-            <Text accessibilityRole="header" style={uiStyles.heading}>
-              {t.code}
-            </Text>
-            <Image
-              source={{ uri: parcel.booking.qrPng }}
-              accessibilityLabel={t.code}
-              style={{
-                width: 220,
-                height: 220,
-                alignSelf: "center",
-                maxWidth: "100%",
-              }}
-              contentFit="contain"
-              cachePolicy="none"
-            />
-            <Text selectable style={[uiStyles.label, { textAlign: "center" }]}>
-              {parcel.booking.returnId}
-            </Text>
-            <Text style={uiStyles.body}>{t.instructions}</Text>
-            <ExternalPageButton
-              label={t.tracking}
-              url={parcelTrackingUrl(parcel)}
-              variant="secondary"
-            />
-          </>
-        ) : (
-          <>
-            <Message>
-              {parcel.status === "pending" ? t.pending : t.review}
-            </Message>
-            <Button
-              label={d.retry}
-              busy={busy}
-              onPress={() =>
-                void (pending ? finish(writer.retry()) : read.refresh())
-              }
-            />
-          </>
-        )}
-        <Text selectable style={uiStyles.note}>
-          {parcel.reference}
-        </Text>
-        <Text style={uiStyles.label}>{t.recipient}</Text>
-        <Text selectable style={uiStyles.body}>
-          {parcel.recipient.name}
-          {"\n"}
-          {parcel.recipient.street}
-          {"\n"}
-          {parcel.recipient.postalCode} {parcel.recipient.city}
-        </Text>
-      </Card>
+      <>
+        {parcel.items.length === 0 ? itemPreview : null}
+        <Card>
+          <Text accessibilityRole="header" style={uiStyles.heading}>
+            {t.packageTitle.replace("{reference}", parcel.reference)}
+          </Text>
+          {parcel.items.length ? (
+            <>
+              <Text style={uiStyles.label}>
+                {t.contents.replace("{count}", String(parcel.items.length))}
+              </Text>
+              {parcel.items.map((i) => (
+                <Text key={i.offerId} style={uiStyles.body}>
+                  {i.description}
+                </Text>
+              ))}
+            </>
+          ) : null}
+          {parcel.environment === "sandbox" ? (
+            <Message>{t.sandbox}</Message>
+          ) : null}
+          {parcel.status === "booked" && parcel.booking ? (
+            <>
+              <Text accessibilityRole="header" style={uiStyles.heading}>
+                {t.code}
+              </Text>
+              {parcel.items.length > 1 ? (
+                <Message>
+                  {t.sharedCode.replace("{count}", String(parcel.items.length))}
+                </Message>
+              ) : null}
+              <Image
+                source={{ uri: parcel.booking.qrPng }}
+                accessibilityLabel={t.code}
+                style={{
+                  width: 220,
+                  height: 220,
+                  alignSelf: "center",
+                  maxWidth: "100%",
+                }}
+                contentFit="contain"
+                cachePolicy="none"
+              />
+              <Text
+                selectable
+                style={[uiStyles.label, { textAlign: "center" }]}
+              >
+                {parcel.booking.returnId}
+              </Text>
+              <Text style={uiStyles.body}>{t.instructions}</Text>
+              <ExternalPageButton
+                label={t.tracking}
+                url={parcelTrackingUrl(parcel)}
+                variant="secondary"
+              />
+            </>
+          ) : (
+            <>
+              <Message>
+                {parcel.status === "pending" ? t.pending : t.review}
+              </Message>
+              <Button
+                label={d.retry}
+                busy={busy}
+                onPress={() =>
+                  void (pending ? finish(writer.retry()) : read.refresh())
+                }
+              />
+            </>
+          )}
+          <Text style={uiStyles.label}>{t.recipient}</Text>
+          <Text selectable style={uiStyles.body}>
+            {parcel.recipient.name}
+            {"\n"}
+            {parcel.recipient.street}
+            {"\n"}
+            {parcel.recipient.postalCode} {parcel.recipient.city}
+          </Text>
+        </Card>
+      </>
     );
-  if (itemCount !== 1) return <Message>{t.grouped}</Message>;
-  if (!state.data.available || !state.data.measurementsOptional)
-    return (
+  if (itemCount !== 1) return withItemPreview(<Message>{t.grouped}</Message>);
+  if (
+    !state.data.available ||
+    !state.data.measurementsOptional ||
+    (state.data.bundlingAvailable && !eligible.some((i) => i.offerId === offer))
+  )
+    return withItemPreview(
       <Card>
         <Message>{t.unavailable}</Message>
         <Button label={d.retry} onPress={() => void read.refresh()} />
-      </Card>
+      </Card>,
     );
   if (pending)
-    return (
+    return withItemPreview(
       <Card>
         <Message>{t.pending}</Message>
         <Button
@@ -186,11 +235,43 @@ export function CentralShipping({
           busy={busy}
           onPress={() => void finish(writer.retry())}
         />
-      </Card>
+      </Card>,
     );
-  return (
+  return withItemPreview(
     <>
       <Text style={uiStyles.body}>{t.intro}</Text>
+      {state.data.bundlingAvailable && eligible.length > 1 ? (
+        <Card>
+          <Text accessibilityRole="header" style={uiStyles.heading}>
+            {t.selectItems}
+          </Text>
+          <Text style={uiStyles.note}>{t.selectionHint}</Text>
+          {eligible.map((i) => (
+            <Choice
+              key={i.offerId}
+              role="checkbox"
+              listRow
+              label={i.description}
+              selected={selected.includes(i.offerId)}
+              disabled={busy || i.offerId === offer}
+              onPress={() =>
+                setSelection((current) => {
+                  const ids = current.offer === offer ? current.ids : [];
+                  return {
+                    offer,
+                    ids: ids.includes(i.offerId)
+                      ? ids.filter((id) => id !== i.offerId)
+                      : [...ids, i.offerId],
+                  };
+                })
+              }
+            />
+          ))}
+          <Text style={uiStyles.label}>
+            {t.selectedCount.replace("{count}", String(selected.length))}
+          </Text>
+        </Card>
+      ) : null}
       <CentralShippingAddress user={user} disabled={busy}>
         {(address) => (
           <>
@@ -207,8 +288,9 @@ export function CentralShipping({
                     : t.error}
               </Message>
             ) : null}
+            {selected.length > 1 ? <Message>{t.packTogether}</Message> : null}
             <Button
-              label={t.book}
+              label={selected.length > 1 ? t.bookTogether : t.book}
               busy={busy}
               disabled={
                 ![
@@ -224,6 +306,6 @@ export function CentralShipping({
           </>
         )}
       </CentralShippingAddress>
-    </>
+    </>,
   );
 }

@@ -16,16 +16,26 @@ export type BookParcel = {
   action: "book";
   requestId: string;
   offerId: string;
+  offerIds?: string[];
   address: ShippingAddress;
   weightG?: number;
   lengthMm?: number;
   widthMm?: number;
   heightMm?: number;
 };
+export type ParcelItem = {
+  offerId: string;
+  description: string;
+  handoverId: string;
+  reference: string;
+  status: "open" | "received" | "cancelled";
+};
 export type ShippingState = {
   offerId: string;
   available: boolean;
   measurementsOptional: boolean;
+  bundlingAvailable: boolean;
+  eligibleItems: ParcelItem[];
   parcel: null | {
     id: string;
     reference: string;
@@ -38,6 +48,7 @@ export type ShippingState = {
     heightMm: number | null;
     status: "pending" | "needs_review" | "booked";
     createdAt: string;
+    items: ParcelItem[];
     booking: null | {
       bookingId: string;
       returnId: string;
@@ -117,6 +128,7 @@ export function parseBookParcel(value: unknown, offer: string): BookParcel {
           "action",
           "requestId",
           "offerId",
+          "offerIds",
           "address",
           "weightG",
           "lengthMm",
@@ -128,7 +140,36 @@ export function parseBookParcel(value: unknown, offer: string): BookParcel {
     invalid();
   address(v.address);
   measurements(v);
+  if (
+    v.offerIds !== undefined &&
+    (!Array.isArray(v.offerIds) ||
+      v.offerIds.length < 1 ||
+      v.offerIds.length > 10 ||
+      !v.offerIds.every(isId) ||
+      !v.offerIds.includes(offer) ||
+      new Set(v.offerIds).size !== v.offerIds.length ||
+      v.weightG !== undefined)
+  )
+    invalid();
   return v as unknown as BookParcel;
+}
+function parcelItems(value: unknown): ParcelItem[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.length > 10) invalid();
+  for (const entry of value) {
+    const i = object(entry);
+    if (
+      !isId(i.offerId) ||
+      !isId(i.handoverId) ||
+      !text(i.description, 160) ||
+      typeof i.reference !== "string" ||
+      !/^H-[1-9][0-9]{0,11}$/.test(i.reference) ||
+      !["open", "received", "cancelled"].includes(String(i.status))
+    )
+      invalid();
+  }
+  if (new Set(value.map((i) => i.offerId)).size !== value.length) invalid();
+  return value as ParcelItem[];
 }
 export function parseShippingState(
   value: unknown,
@@ -142,6 +183,13 @@ export function parseShippingState(
     typeof v.measurementsOptional !== "boolean"
   )
     invalid();
+  if (
+    v.bundlingAvailable !== undefined &&
+    typeof v.bundlingAvailable !== "boolean"
+  )
+    invalid();
+  const eligibleItems = parcelItems(v.eligibleItems);
+  if (eligibleItems.some((i) => i.status !== "open")) invalid();
   if (v.parcel !== null) {
     const p = object(v.parcel);
     if (
@@ -157,6 +205,9 @@ export function parseShippingState(
     address(p.sender, true);
     address(p.recipient, true);
     measurements(p, true);
+    const items = parcelItems(p.items);
+    if (p.items !== undefined && !items.some((i) => i.offerId === offer))
+      invalid();
     if (p.status === "booked") {
       const b = object(p.booking);
       if (
@@ -173,6 +224,12 @@ export function parseShippingState(
   return {
     ...v,
     measurementsOptional: v.measurementsOptional === true,
+    bundlingAvailable: v.bundlingAvailable === true,
+    eligibleItems,
+    parcel:
+      v.parcel === null
+        ? null
+        : { ...object(v.parcel), items: parcelItems(object(v.parcel).items) },
   } as unknown as ShippingState;
 }
 /** A carrier-owned URL, never a URL supplied by an API reply. */

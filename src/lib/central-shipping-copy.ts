@@ -2,8 +2,12 @@ import type { Locale } from "./locale";
 
 const sv = {
   title: "Skicka till Komisio",
-  intro:
-    "Packa en vara per paket. Komisio betalar frakten – ditt avtalade belopp påverkas inte.",
+  intro: "Komisio betalar frakten. Ditt avtalade belopp påverkas inte.",
+  selectItems: "Välj varor till paketet",
+  selectionHint:
+    "Den här varan ingår. Lägg till fler godkända varor som du vill skicka samtidigt.",
+  selectedCount: "{count} varor i ett paket",
+  contents: "Paketets innehåll ({count})",
   address: "Din avsändaradress i Sverige",
   street: "Gatuadress",
   postalCode: "Postnummer",
@@ -26,7 +30,13 @@ const sv = {
     "Bokningen behöver kontrolleras. Uppdatera för att hämta resultatet. Boka inte en ny frakt på egen hand.",
   review:
     "Vi behöver kontrollera bokningen hos PostNord. Kontakta Komisio och ange paketreferensen nedan innan du skickar.",
-  code: "Din fraktkod hos PostNord",
+  packageTitle: "Paket {reference}",
+  sharedCode:
+    "Alla {count} varor ska ligga i ett gemensamt paket. Samma QR-kod visas från varje vara och gäller bara detta paket.",
+  packTogether:
+    "Packa de valda varorna tillsammans i ett paket. Du får en gemensam fraktkod.",
+  bookTogether: "Hämta kod för ett paket",
+  code: "Fraktkod för paketet",
   instructions:
     "Ta med det förslutna paketet till ett PostNord-ombud och visa koden. Ombudet skriver ut fraktetiketten. Spara inlämningskvittot.",
   tracking: "Spåra paketet",
@@ -40,8 +50,12 @@ const copy: Record<Locale, Copy> = {
   sv,
   en: {
     title: "Ship to Komisio",
-    intro:
-      "Pack one item per parcel. Komisio pays for shipping – your agreed amount stays the same.",
+    intro: "Komisio pays for shipping. Your agreed amount stays the same.",
+    selectItems: "Choose items for the parcel",
+    selectionHint:
+      "This item is included. Add other accepted items to send together.",
+    selectedCount: "{count} items in one parcel",
+    contents: "Parcel contents ({count})",
     address: "Your sender address in Sweden",
     street: "Street address",
     postalCode: "Postal code",
@@ -64,7 +78,13 @@ const copy: Record<Locale, Copy> = {
       "The booking needs checking. Refresh to get the result. Do not book another shipment yourself.",
     review:
       "We need to check the booking with PostNord. Contact Komisio with the parcel reference below before shipping.",
-    code: "Your PostNord shipping code",
+    packageTitle: "Parcel {reference}",
+    sharedCode:
+      "Pack all {count} items in one parcel. Each item shows the same QR code, which is only for this parcel.",
+    packTogether:
+      "Pack the selected items together in one parcel. You will receive one shared shipping code.",
+    bookTogether: "Get code for one parcel",
+    code: "Shipping code for this parcel",
     instructions:
       "Take the sealed parcel to a PostNord service point and show this code. They will print the shipping label. Keep the drop-off receipt.",
     tracking: "Track parcel",
@@ -75,8 +95,12 @@ const copy: Record<Locale, Copy> = {
   },
   no: {
     title: "Send til Komisio",
-    intro:
-      "Pakk én vare per pakke. Komisio betaler frakten – det avtalte beløpet ditt endres ikke.",
+    intro: "Komisio betaler frakten. Det avtalte beløpet ditt endres ikke.",
+    selectItems: "Velg varer til pakken",
+    selectionHint:
+      "Denne varen er med. Legg til flere godkjente varer du vil sende sammen.",
+    selectedCount: "{count} varer i én pakke",
+    contents: "Pakkens innhold ({count})",
     address: "Din avsenderadresse i Sverige",
     street: "Gateadresse",
     postalCode: "Postnummer",
@@ -99,7 +123,13 @@ const copy: Record<Locale, Copy> = {
       "Bestillingen må kontrolleres. Oppdater for å hente resultatet. Ikke bestill en ny frakt selv.",
     review:
       "Vi må kontrollere bestillingen hos PostNord. Kontakt Komisio med pakkereferansen nedenfor før du sender.",
-    code: "Din fraktkode hos PostNord",
+    packageTitle: "Pakke {reference}",
+    sharedCode:
+      "Alle {count} varene skal ligge i én felles pakke. Den samme QR-koden vises fra hver vare og gjelder bare denne pakken.",
+    packTogether:
+      "Pakk de valgte varene sammen i én pakke. Du får én felles fraktkode.",
+    bookTogether: "Hent kode for én pakke",
+    code: "Fraktkode for pakken",
     instructions:
       "Ta den lukkede pakken til et PostNord-utleveringssted og vis koden. De skriver ut fraktetiketten. Ta vare på innleveringskvitteringen.",
     tracking: "Spor pakken",
@@ -110,8 +140,12 @@ const copy: Record<Locale, Copy> = {
   },
   da: {
     title: "Send til Komisio",
-    intro:
-      "Pak én vare pr. pakke. Komisio betaler fragten – dit aftalte beløb ændres ikke.",
+    intro: "Komisio betaler fragten. Dit aftalte beløb ændres ikke.",
+    selectItems: "Vælg varer til pakken",
+    selectionHint:
+      "Denne vare er med. Tilføj flere godkendte varer, du vil sende sammen.",
+    selectedCount: "{count} varer i én pakke",
+    contents: "Pakkens indhold ({count})",
     address: "Din afsenderadresse i Sverige",
     street: "Adresse",
     postalCode: "Postnummer",
@@ -134,7 +168,13 @@ const copy: Record<Locale, Copy> = {
       "Bestillingen skal kontrolleres. Opdater for at hente resultatet. Bestil ikke selv en ny fragt.",
     review:
       "Vi skal kontrollere bestillingen hos PostNord. Kontakt Komisio med pakkereferencen nedenfor, før du sender.",
-    code: "Din fragtkode hos PostNord",
+    packageTitle: "Pakke {reference}",
+    sharedCode:
+      "Alle {count} varer skal ligge i én fælles pakke. Samme QR-kode vises fra hver vare og gælder kun denne pakke.",
+    packTogether:
+      "Pak de valgte varer sammen i én pakke. Du får én fælles fragtkode.",
+    bookTogether: "Hent kode til én pakke",
+    code: "Fragtkode til pakken",
     instructions:
       "Tag den lukkede pakke til et PostNord-indleveringssted, og vis koden. De udskriver fragtetiketten. Gem indleveringskvitteringen.",
     tracking: "Spor pakken",
@@ -145,8 +185,12 @@ const copy: Record<Locale, Copy> = {
   },
   fi: {
     title: "Lähetä Komisioon",
-    intro:
-      "Pakkaa yksi tuote pakettia kohden. Komisio maksaa toimituksen – sovittu korvauksesi ei muutu.",
+    intro: "Komisio maksaa toimituksen. Sovittu korvauksesi ei muutu.",
+    selectItems: "Valitse paketin tuotteet",
+    selectionHint:
+      "Tämä tuote on mukana. Lisää muita hyväksyttyjä tuotteita samaan lähetykseen.",
+    selectedCount: "{count} tuotetta yhdessä paketissa",
+    contents: "Paketin sisältö ({count})",
     address: "Lähettäjän osoitteesi Ruotsissa",
     street: "Katuosoite",
     postalCode: "Postinumero",
@@ -169,7 +213,13 @@ const copy: Record<Locale, Copy> = {
       "Varaus täytyy tarkistaa. Päivitä tuloksen hakemiseksi. Älä varaa itse uutta lähetystä.",
     review:
       "Meidän täytyy tarkistaa varaus PostNordilta. Ota yhteyttä Komisioon alla olevalla pakettiviitteellä ennen lähettämistä.",
-    code: "PostNordin lähetyskoodisi",
+    packageTitle: "Paketti {reference}",
+    sharedCode:
+      "Pakkaa kaikki {count} tuotetta yhteen pakettiin. Jokaisen tuotteen kohdalla näkyy sama QR-koodi, joka koskee vain tätä pakettia.",
+    packTogether:
+      "Pakkaa valitut tuotteet samaan pakettiin. Saat yhden yhteisen lähetyskoodin.",
+    bookTogether: "Hae koodi yhdelle paketille",
+    code: "Tämän paketin lähetyskoodi",
     instructions:
       "Vie suljettu paketti PostNordin palvelupisteeseen ja näytä koodi. Palvelupiste tulostaa osoitekortin. Säilytä lähetyskuitti.",
     tracking: "Seuraa pakettia",
@@ -180,8 +230,12 @@ const copy: Record<Locale, Copy> = {
   },
   de: {
     title: "An Komisio senden",
-    intro:
-      "Packe einen Artikel pro Paket. Komisio zahlt den Versand – dein vereinbarter Betrag bleibt gleich.",
+    intro: "Komisio zahlt den Versand. Dein vereinbarter Betrag bleibt gleich.",
+    selectItems: "Artikel für das Paket wählen",
+    selectionHint:
+      "Dieser Artikel ist dabei. Füge weitere angenommene Artikel für den gemeinsamen Versand hinzu.",
+    selectedCount: "{count} Artikel in einem Paket",
+    contents: "Paketinhalt ({count})",
     address: "Deine Absenderadresse in Schweden",
     street: "Straße und Hausnummer",
     postalCode: "Postleitzahl",
@@ -204,7 +258,13 @@ const copy: Record<Locale, Copy> = {
       "Die Buchung muss geprüft werden. Aktualisiere für das Ergebnis. Buche nicht selbst einen weiteren Versand.",
     review:
       "Wir müssen die Buchung bei PostNord prüfen. Kontaktiere Komisio vor dem Versand mit der folgenden Paketreferenz.",
-    code: "Dein PostNord-Versandcode",
+    packageTitle: "Paket {reference}",
+    sharedCode:
+      "Verpacke alle {count} Artikel in einem gemeinsamen Paket. Bei jedem Artikel erscheint derselbe QR-Code, der nur für dieses Paket gilt.",
+    packTogether:
+      "Verpacke die ausgewählten Artikel gemeinsam in einem Paket. Du erhältst einen gemeinsamen Versandcode.",
+    bookTogether: "Code für ein Paket abrufen",
+    code: "Versandcode für dieses Paket",
     instructions:
       "Bringe das verschlossene Paket zu einer PostNord-Annahmestelle und zeige den Code. Dort wird das Versandetikett gedruckt. Bewahre den Einlieferungsbeleg auf.",
     tracking: "Paket verfolgen",
@@ -215,8 +275,12 @@ const copy: Record<Locale, Copy> = {
   },
   es: {
     title: "Enviar a Komisio",
-    intro:
-      "Empaqueta un artículo por paquete. Komisio paga el envío; tu importe acordado no cambia.",
+    intro: "Komisio paga el envío. Tu importe acordado no cambia.",
+    selectItems: "Elige los artículos del paquete",
+    selectionHint:
+      "Este artículo está incluido. Añade otros artículos aceptados para enviarlos juntos.",
+    selectedCount: "{count} artículos en un paquete",
+    contents: "Contenido del paquete ({count})",
     address: "Tu dirección de remitente en Suecia",
     street: "Dirección",
     postalCode: "Código postal",
@@ -239,7 +303,13 @@ const copy: Record<Locale, Copy> = {
       "La reserva debe comprobarse. Actualiza para obtener el resultado. No reserves otro envío por tu cuenta.",
     review:
       "Debemos comprobar la reserva con PostNord. Contacta con Komisio con la referencia siguiente antes de enviar.",
-    code: "Tu código de envío de PostNord",
+    packageTitle: "Paquete {reference}",
+    sharedCode:
+      "Coloca los {count} artículos en un único paquete. Cada artículo muestra el mismo código QR, válido solo para este paquete.",
+    packTogether:
+      "Coloca los artículos seleccionados juntos en un único paquete. Recibirás un solo código de envío.",
+    bookTogether: "Obtener código para un paquete",
+    code: "Código de envío de este paquete",
     instructions:
       "Lleva el paquete cerrado a un punto de PostNord y muestra el código. Allí imprimirán la etiqueta. Guarda el resguardo de entrega.",
     tracking: "Seguir paquete",
@@ -251,8 +321,12 @@ const copy: Record<Locale, Copy> = {
   },
   it: {
     title: "Spedisci a Komisio",
-    intro:
-      "Imballa un articolo per pacco. Komisio paga la spedizione: l’importo concordato non cambia.",
+    intro: "Komisio paga la spedizione. Il tuo importo concordato non cambia.",
+    selectItems: "Scegli gli articoli del pacco",
+    selectionHint:
+      "Questo articolo è incluso. Aggiungi altri articoli accettati da spedire insieme.",
+    selectedCount: "{count} articoli in un pacco",
+    contents: "Contenuto del pacco ({count})",
     address: "Il tuo indirizzo di mittente in Svezia",
     street: "Indirizzo",
     postalCode: "CAP",
@@ -275,7 +349,13 @@ const copy: Record<Locale, Copy> = {
       "La prenotazione va verificata. Aggiorna per vedere il risultato. Non prenotare un’altra spedizione autonomamente.",
     review:
       "Dobbiamo verificare la prenotazione con PostNord. Contatta Komisio con il riferimento seguente prima di spedire.",
-    code: "Il tuo codice di spedizione PostNord",
+    packageTitle: "Pacco {reference}",
+    sharedCode:
+      "Metti tutti i {count} articoli in un unico pacco. Ogni articolo mostra lo stesso codice QR, valido solo per questo pacco.",
+    packTogether:
+      "Imballa insieme gli articoli selezionati in un unico pacco. Riceverai un solo codice di spedizione.",
+    bookTogether: "Ottieni il codice per un pacco",
+    code: "Codice di spedizione del pacco",
     instructions:
       "Porta il pacco chiuso a un punto PostNord e mostra il codice. Stamperanno l’etichetta. Conserva la ricevuta di consegna.",
     tracking: "Traccia il pacco",
