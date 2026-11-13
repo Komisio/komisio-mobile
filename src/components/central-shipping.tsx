@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { Text } from "react-native";
 import { Image } from "expo-image";
@@ -22,10 +23,12 @@ export function CentralShipping({
   user,
   offer,
   itemCount,
+  itemPreview,
 }: {
   user: string;
   offer: string;
   itemCount: number;
+  itemPreview?: ReactNode;
 }) {
   const { locale, d } = useI18n(),
     t = centralShippingCopy(locale),
@@ -114,17 +117,26 @@ export function CentralShipping({
   const parcel = state.data?.parcel;
   const pending = ["pending", "blocked", "cleanup"].includes(change.status);
   const busy = change.status === "busy";
+  const withItemPreview = (content: ReactNode) => (
+    <>
+      {itemPreview}
+      {content}
+    </>
+  );
   if (state.status === "failed")
-    return (
+    return withItemPreview(
       <Card>
         <Message tone="error">{t.error}</Message>
         <Button label={d.retry} onPress={() => void read.refresh()} />
-      </Card>
+      </Card>,
     );
-  if (!state.data) return <Loading />;
+  if (!state.data) return withItemPreview(<Loading />);
   if (parcel)
     return (
       <Card>
+        <Text accessibilityRole="header" style={uiStyles.heading}>
+          {t.packageTitle.replace("{reference}", parcel.reference)}
+        </Text>
         {parcel.items.length ? (
           <>
             <Text style={uiStyles.label}>
@@ -145,6 +157,11 @@ export function CentralShipping({
             <Text accessibilityRole="header" style={uiStyles.heading}>
               {t.code}
             </Text>
+            {parcel.items.length > 1 ? (
+              <Message>
+                {t.sharedCode.replace("{count}", String(parcel.items.length))}
+              </Message>
+            ) : null}
             <Image
               source={{ uri: parcel.booking.qrPng }}
               accessibilityLabel={t.code}
@@ -181,9 +198,6 @@ export function CentralShipping({
             />
           </>
         )}
-        <Text selectable style={uiStyles.note}>
-          {parcel.reference}
-        </Text>
         <Text style={uiStyles.label}>{t.recipient}</Text>
         <Text selectable style={uiStyles.body}>
           {parcel.recipient.name}
@@ -194,20 +208,20 @@ export function CentralShipping({
         </Text>
       </Card>
     );
-  if (itemCount !== 1) return <Message>{t.grouped}</Message>;
+  if (itemCount !== 1) return withItemPreview(<Message>{t.grouped}</Message>);
   if (
     !state.data.available ||
     !state.data.measurementsOptional ||
     (state.data.bundlingAvailable && !eligible.some((i) => i.offerId === offer))
   )
-    return (
+    return withItemPreview(
       <Card>
         <Message>{t.unavailable}</Message>
         <Button label={d.retry} onPress={() => void read.refresh()} />
-      </Card>
+      </Card>,
     );
   if (pending)
-    return (
+    return withItemPreview(
       <Card>
         <Message>{t.pending}</Message>
         <Button
@@ -215,9 +229,9 @@ export function CentralShipping({
           busy={busy}
           onPress={() => void finish(writer.retry())}
         />
-      </Card>
+      </Card>,
     );
-  return (
+  return withItemPreview(
     <>
       <Text style={uiStyles.body}>{t.intro}</Text>
       {state.data.bundlingAvailable && eligible.length > 1 ? (
@@ -268,8 +282,9 @@ export function CentralShipping({
                     : t.error}
               </Message>
             ) : null}
+            {selected.length > 1 ? <Message>{t.packTogether}</Message> : null}
             <Button
-              label={t.book}
+              label={selected.length > 1 ? t.bookTogether : t.book}
               busy={busy}
               disabled={
                 ![
@@ -285,6 +300,6 @@ export function CentralShipping({
           </>
         )}
       </CentralShippingAddress>
-    </>
+    </>,
   );
 }

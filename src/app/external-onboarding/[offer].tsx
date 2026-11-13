@@ -406,6 +406,31 @@ function Handover({
   const { locale } = useI18n(),
     t = externalOnboardingCopy(locale),
     h = data.handover!;
+  const itemPreview = (
+    <Card>
+      <Text style={uiStyles.label}>
+        {h.itemCount === 1
+          ? t.single
+          : t.grouped.replace("{count}", String(h.itemCount))}
+      </Text>
+      {h.items.map((i) => (
+        <View
+          key={i.offerId}
+          style={{ flexDirection: "row", gap: 12, alignItems: "center" }}
+        >
+          <ExternalItemPhoto
+            owner={user}
+            photo={i.photoId}
+            label={i.description}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={uiStyles.itemName}>{i.description}</Text>
+            {i.brand ? <Text style={uiStyles.note}>{i.brand}</Text> : null}
+          </View>
+        </View>
+      ))}
+    </Card>
+  );
   return (
     <>
       <Text accessibilityRole="header" style={uiStyles.heading}>
@@ -443,32 +468,16 @@ function Handover({
           </Text>
         </Card>
       ) : null}
-      <Card>
-        <Text style={uiStyles.label}>
-          {h.itemCount === 1
-            ? t.single
-            : t.grouped.replace("{count}", String(h.itemCount))}
-        </Text>
-        {h.items.map((i) => (
-          <View
-            key={i.offerId}
-            style={{ flexDirection: "row", gap: 12, alignItems: "center" }}
-          >
-            <ExternalItemPhoto
-              owner={user}
-              photo={i.photoId}
-              label={i.description}
-            />
-            <View style={{ flex: 1 }}>
-              <Text style={uiStyles.itemName}>{i.description}</Text>
-              {i.brand ? <Text style={uiStyles.note}>{i.brand}</Text> : null}
-            </View>
-          </View>
-        ))}
-      </Card>
       {h.status === "open" ? (
-        <CentralShipping user={user} offer={offer.id} itemCount={h.itemCount} />
-      ) : null}
+        <CentralShipping
+          user={user}
+          offer={offer.id}
+          itemCount={h.itemCount}
+          itemPreview={itemPreview}
+        />
+      ) : (
+        itemPreview
+      )}
     </>
   );
 }

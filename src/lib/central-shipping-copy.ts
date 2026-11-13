@@ -30,7 +30,13 @@ const sv = {
     "Bokningen behöver kontrolleras. Uppdatera för att hämta resultatet. Boka inte en ny frakt på egen hand.",
   review:
     "Vi behöver kontrollera bokningen hos PostNord. Kontakta Komisio och ange paketreferensen nedan innan du skickar.",
-  code: "Din fraktkod hos PostNord",
+  packageTitle: "Paket {reference}",
+  sharedCode:
+    "Alla {count} varor ska ligga i ett gemensamt ytterpaket. Samma QR-kod visas från varje vara och gäller bara detta paket.",
+  packTogether:
+    "Packa de valda varorna tillsammans i ett ytterpaket. Du får en gemensam fraktkod.",
+  bookTogether: "Hämta kod för ett paket",
+  code: "Fraktkod för paketet",
   instructions:
     "Ta med det förslutna paketet till ett PostNord-ombud och visa koden. Ombudet skriver ut fraktetiketten. Spara inlämningskvittot.",
   tracking: "Spåra paketet",
@@ -72,7 +78,13 @@ const copy: Record<Locale, Copy> = {
       "The booking needs checking. Refresh to get the result. Do not book another shipment yourself.",
     review:
       "We need to check the booking with PostNord. Contact Komisio with the parcel reference below before shipping.",
-    code: "Your PostNord shipping code",
+    packageTitle: "Parcel {reference}",
+    sharedCode:
+      "Pack all {count} items in one outer parcel. Each item shows the same QR code, which is only for this parcel.",
+    packTogether:
+      "Pack the selected items together in one outer parcel. You will receive one shared shipping code.",
+    bookTogether: "Get code for one parcel",
+    code: "Shipping code for this parcel",
     instructions:
       "Take the sealed parcel to a PostNord service point and show this code. They will print the shipping label. Keep the drop-off receipt.",
     tracking: "Track parcel",
@@ -111,7 +123,13 @@ const copy: Record<Locale, Copy> = {
       "Bestillingen må kontrolleres. Oppdater for å hente resultatet. Ikke bestill en ny frakt selv.",
     review:
       "Vi må kontrollere bestillingen hos PostNord. Kontakt Komisio med pakkereferansen nedenfor før du sender.",
-    code: "Din fraktkode hos PostNord",
+    packageTitle: "Pakke {reference}",
+    sharedCode:
+      "Alle {count} varene skal ligge i én felles ytterpakke. Den samme QR-koden vises fra hver vare og gjelder bare denne pakken.",
+    packTogether:
+      "Pakk de valgte varene sammen i én ytterpakke. Du får én felles fraktkode.",
+    bookTogether: "Hent kode for én pakke",
+    code: "Fraktkode for pakken",
     instructions:
       "Ta den lukkede pakken til et PostNord-utleveringssted og vis koden. De skriver ut fraktetiketten. Ta vare på innleveringskvitteringen.",
     tracking: "Spor pakken",
@@ -150,7 +168,13 @@ const copy: Record<Locale, Copy> = {
       "Bestillingen skal kontrolleres. Opdater for at hente resultatet. Bestil ikke selv en ny fragt.",
     review:
       "Vi skal kontrollere bestillingen hos PostNord. Kontakt Komisio med pakkereferencen nedenfor, før du sender.",
-    code: "Din fragtkode hos PostNord",
+    packageTitle: "Pakke {reference}",
+    sharedCode:
+      "Alle {count} varer skal ligge i én fælles yderpakke. Samme QR-kode vises fra hver vare og gælder kun denne pakke.",
+    packTogether:
+      "Pak de valgte varer sammen i én yderpakke. Du får én fælles fragtkode.",
+    bookTogether: "Hent kode til én pakke",
+    code: "Fragtkode til pakken",
     instructions:
       "Tag den lukkede pakke til et PostNord-indleveringssted, og vis koden. De udskriver fragtetiketten. Gem indleveringskvitteringen.",
     tracking: "Spor pakken",
@@ -189,7 +213,13 @@ const copy: Record<Locale, Copy> = {
       "Varaus täytyy tarkistaa. Päivitä tuloksen hakemiseksi. Älä varaa itse uutta lähetystä.",
     review:
       "Meidän täytyy tarkistaa varaus PostNordilta. Ota yhteyttä Komisioon alla olevalla pakettiviitteellä ennen lähettämistä.",
-    code: "PostNordin lähetyskoodisi",
+    packageTitle: "Paketti {reference}",
+    sharedCode:
+      "Pakkaa kaikki {count} tuotetta yhteen ulkopakkaukseen. Jokaisen tuotteen kohdalla näkyy sama QR-koodi, joka koskee vain tätä pakettia.",
+    packTogether:
+      "Pakkaa valitut tuotteet samaan ulkopakkaukseen. Saat yhden yhteisen lähetyskoodin.",
+    bookTogether: "Hae koodi yhdelle paketille",
+    code: "Tämän paketin lähetyskoodi",
     instructions:
       "Vie suljettu paketti PostNordin palvelupisteeseen ja näytä koodi. Palvelupiste tulostaa osoitekortin. Säilytä lähetyskuitti.",
     tracking: "Seuraa pakettia",
@@ -228,7 +258,13 @@ const copy: Record<Locale, Copy> = {
       "Die Buchung muss geprüft werden. Aktualisiere für das Ergebnis. Buche nicht selbst einen weiteren Versand.",
     review:
       "Wir müssen die Buchung bei PostNord prüfen. Kontaktiere Komisio vor dem Versand mit der folgenden Paketreferenz.",
-    code: "Dein PostNord-Versandcode",
+    packageTitle: "Paket {reference}",
+    sharedCode:
+      "Verpacke alle {count} Artikel in einem gemeinsamen Außenpaket. Bei jedem Artikel erscheint derselbe QR-Code, der nur für dieses Paket gilt.",
+    packTogether:
+      "Verpacke die ausgewählten Artikel gemeinsam in einem Außenpaket. Du erhältst einen gemeinsamen Versandcode.",
+    bookTogether: "Code für ein Paket abrufen",
+    code: "Versandcode für dieses Paket",
     instructions:
       "Bringe das verschlossene Paket zu einer PostNord-Annahmestelle und zeige den Code. Dort wird das Versandetikett gedruckt. Bewahre den Einlieferungsbeleg auf.",
     tracking: "Paket verfolgen",
@@ -267,7 +303,13 @@ const copy: Record<Locale, Copy> = {
       "La reserva debe comprobarse. Actualiza para obtener el resultado. No reserves otro envío por tu cuenta.",
     review:
       "Debemos comprobar la reserva con PostNord. Contacta con Komisio con la referencia siguiente antes de enviar.",
-    code: "Tu código de envío de PostNord",
+    packageTitle: "Paquete {reference}",
+    sharedCode:
+      "Coloca los {count} artículos en un único paquete exterior. Cada artículo muestra el mismo código QR, válido solo para este paquete.",
+    packTogether:
+      "Coloca los artículos seleccionados juntos en un único paquete exterior. Recibirás un solo código de envío.",
+    bookTogether: "Obtener código para un paquete",
+    code: "Código de envío de este paquete",
     instructions:
       "Lleva el paquete cerrado a un punto de PostNord y muestra el código. Allí imprimirán la etiqueta. Guarda el resguardo de entrega.",
     tracking: "Seguir paquete",
@@ -307,7 +349,13 @@ const copy: Record<Locale, Copy> = {
       "La prenotazione va verificata. Aggiorna per vedere il risultato. Non prenotare un’altra spedizione autonomamente.",
     review:
       "Dobbiamo verificare la prenotazione con PostNord. Contatta Komisio con il riferimento seguente prima di spedire.",
-    code: "Il tuo codice di spedizione PostNord",
+    packageTitle: "Pacco {reference}",
+    sharedCode:
+      "Metti tutti i {count} articoli in un unico imballaggio esterno. Ogni articolo mostra lo stesso codice QR, valido solo per questo pacco.",
+    packTogether:
+      "Imballa insieme gli articoli selezionati in un unico pacco. Riceverai un solo codice di spedizione.",
+    bookTogether: "Ottieni il codice per un pacco",
+    code: "Codice di spedizione del pacco",
     instructions:
       "Porta il pacco chiuso a un punto PostNord e mostra il codice. Stamperanno l’etichetta. Conserva la ricevuta di consegna.",
     tracking: "Traccia il pacco",
