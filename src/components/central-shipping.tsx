@@ -15,7 +15,7 @@ import {
 import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { shippingAddressCopy } from "@/lib/shipping-address-copy";
 import { CentralShippingAddress } from "./central-shipping-address";
-import { Button, Card, Loading, Message, uiStyles } from "./ui";
+import { Button, Card, Choice, Loading, Message, uiStyles } from "./ui";
 import { ExternalPageButton } from "./external-page-button";
 
 export function CentralShipping({
@@ -63,6 +63,18 @@ export function CentralShipping({
     writer.getState,
   );
   const [invalid, setInvalid] = useState(false);
+  const [selection, setSelection] = useState<{ offer: string; ids: string[] }>({
+    offer,
+    ids: [],
+  });
+  const additional = selection.offer === offer ? selection.ids : [];
+  const eligible = state.data?.eligibleItems ?? [];
+  const selected = [
+    offer,
+    ...additional.filter(
+      (id) => id !== offer && eligible.some((i) => i.offerId === id),
+    ),
+  ];
   useFocusEffect(
     useCallback(() => {
       void read.refresh();
@@ -88,6 +100,7 @@ export function CentralShipping({
           action: "book",
           requestId: randomUUID(),
           offerId: offer,
+          ...(state.data?.bundlingAvailable ? { offerIds: selected } : {}),
           address,
         },
         offer,
@@ -112,6 +125,18 @@ export function CentralShipping({
   if (parcel)
     return (
       <Card>
+        {parcel.items.length ? (
+          <>
+            <Text style={uiStyles.label}>
+              {t.contents.replace("{count}", String(parcel.items.length))}
+            </Text>
+            {parcel.items.map((i) => (
+              <Text key={i.offerId} style={uiStyles.body}>
+                {i.description}
+              </Text>
+            ))}
+          </>
+        ) : null}
         {parcel.environment === "sandbox" ? (
           <Message>{t.sandbox}</Message>
         ) : null}
@@ -170,7 +195,11 @@ export function CentralShipping({
       </Card>
     );
   if (itemCount !== 1) return <Message>{t.grouped}</Message>;
-  if (!state.data.available || !state.data.measurementsOptional)
+  if (
+    !state.data.available ||
+    !state.data.measurementsOptional ||
+    (state.data.bundlingAvailable && !eligible.some((i) => i.offerId === offer))
+  )
     return (
       <Card>
         <Message>{t.unavailable}</Message>
@@ -191,6 +220,38 @@ export function CentralShipping({
   return (
     <>
       <Text style={uiStyles.body}>{t.intro}</Text>
+      {state.data.bundlingAvailable && eligible.length > 1 ? (
+        <Card>
+          <Text accessibilityRole="header" style={uiStyles.heading}>
+            {t.selectItems}
+          </Text>
+          <Text style={uiStyles.note}>{t.selectionHint}</Text>
+          {eligible.map((i) => (
+            <Choice
+              key={i.offerId}
+              role="checkbox"
+              listRow
+              label={i.description}
+              selected={selected.includes(i.offerId)}
+              disabled={busy || i.offerId === offer}
+              onPress={() =>
+                setSelection((current) => {
+                  const ids = current.offer === offer ? current.ids : [];
+                  return {
+                    offer,
+                    ids: ids.includes(i.offerId)
+                      ? ids.filter((id) => id !== i.offerId)
+                      : [...ids, i.offerId],
+                  };
+                })
+              }
+            />
+          ))}
+          <Text style={uiStyles.label}>
+            {t.selectedCount.replace("{count}", String(selected.length))}
+          </Text>
+        </Card>
+      ) : null}
       <CentralShippingAddress user={user} disabled={busy}>
         {(address) => (
           <>

@@ -1,5 +1,8 @@
 # Decisions
 
+- 2026-11-13: Ask for native notification permission on first active launch, including guests, superseding seller-only prompting. Persist the choice without registering a token before login. Only the first account may inherit guest consent; denial, manual opt-out and account isolation remain intact.
+- 2026-11-13: Central shipping may select additional accepted, unbooked items for one parcel when advertised by the server. Freeze the selection in the existing command journal; each linked item shows the shared code. Keep legacy pending commands and single-item backend compatibility.
+
 - 2026-11-12: Owner replaces the central welcome page with direct photo capture. Step 2 automatically uploads and analyzes for phone-verified users; reuse the bound journal on return/retry, preserve manual details, and retain explicit verification and manual entry when AI is unavailable.
 
 - 2026-11-12: Keep offer consent compact: open the offer's frozen agreement from a small link in a dismissible native sheet. Reading or closing terms never grants consent; the existing checkbox and version-bound completion command remain required.

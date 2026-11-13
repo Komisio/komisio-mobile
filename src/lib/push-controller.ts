@@ -107,8 +107,10 @@ export function createPushController(deps: PushDependencies) {
       const r = await load(currentUser);
       if (!current()) return;
       if (r.owner !== currentUser) {
+        // Only a never-registered installation may carry its launch consent to
+        // the first login. Switching between accounts never inherits consent.
+        if (r.owner !== "" || r.registered || r.pending) r.desired = false;
         r.owner = currentUser;
-        r.desired = false;
         await save(r);
       }
       let permission = await deps.permission(false);
@@ -281,6 +283,28 @@ export function createPushController(deps: PushDependencies) {
       if (user !== expectedUser) return queue;
       const expected = generation;
       return schedule(() => synchronize("initial", expected));
+    },
+    requestLaunchPermission() {
+      return schedule(async () => {
+        if (deps.platform === "web") return;
+        if (user) return synchronize("initial", generation);
+        try {
+          const r = await load("");
+          // A signed-out installation must retain the previous user's choice.
+          if (r.owner || r.initialPermissionAsked || r.registered || r.pending)
+            return;
+          if ((await deps.permission(false)) !== "undetermined") return;
+          r.initialPermissionAsked = true;
+          await save(r);
+          r.desired = (await deps.permission(true)) === "granted";
+          // This is installation consent only: no token or API request before
+          // login. The serialized context refresh claims it for the first user.
+          await save(r);
+        } catch {
+          // Permission/storage failure must never prevent opening the app.
+          emit({ ...snapshot, busy: false, error: "REQUEST_FAILED" });
+        }
+      });
     },
     enable() {
       const expected = generation;

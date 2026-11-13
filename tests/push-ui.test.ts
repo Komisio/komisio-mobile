@@ -122,6 +122,7 @@ test("initial native permission waits for authenticated seller lookup and ignore
   ]) {
     const effects: (() => void | (() => void))[] = [];
     const requests: string[] = [];
+    const launches: string[] = [];
     let resolveLookup!: (result: unknown) => void;
     const lookup = new Promise((resolve) => {
       resolveLookup = resolve;
@@ -135,7 +136,10 @@ test("initial native permission waits for authenticated seller lookup and ignore
         },
       },
       "react-native": {
-        AppState: { addEventListener: () => ({ remove: () => {} }) },
+        AppState: {
+          currentState: "active",
+          addEventListener: () => ({ remove: () => {} }),
+        },
       },
       "expo-router": { router: { push: () => {} } },
       "@/lib/session": {
@@ -152,6 +156,9 @@ test("initial native permission waits for authenticated seller lookup and ignore
       "@/lib/push-runtime": {
         sellerPush: {
           setContext: async () => {},
+          requestLaunchPermission: async () => {
+            launches.push("launch");
+          },
           refresh: async () => {},
           requestInitialPermission: async (id: string) => {
             requests.push(id);
@@ -170,6 +177,11 @@ test("initial native permission waits for authenticated seller lookup and ignore
     bridge.PushBridge();
     const cleanup = effects.map((run) => run());
     assert.equal(requests.length, 0, scenario);
+    assert.equal(
+      launches.length,
+      ["loading", "mfa"].includes(scenario) ? 0 : 1,
+      scenario,
+    );
     if (scenario === "stale") cleanup.forEach((stop) => stop?.());
     resolveLookup({
       data: scenario === "empty" ? [] : [account],
@@ -246,7 +258,10 @@ test("a tap waits through login/MFA, chooses the verified store and opens once; 
   const bridge = compile("../src/components/push-bridge.tsx", {
     react,
     "react-native": {
-      AppState: { addEventListener: () => ({ remove: () => {} }) },
+      AppState: {
+        currentState: "active",
+        addEventListener: () => ({ remove: () => {} }),
+      },
     },
     "expo-router": { router: { push: (v: unknown) => navigation.push(v) } },
     "@/lib/session": { useSession: () => ({ ...state }) },
@@ -262,6 +277,7 @@ test("a tap waits through login/MFA, chooses the verified store and opens once; 
     "@/lib/push-runtime": {
       sellerPush: {
         setContext: async (u: unknown) => contexts.push(u),
+        requestLaunchPermission: async () => {},
         requestInitialPermission: async (u: string) => initialRequests.push(u),
         refresh: async () => {},
         getSnapshot: () => ({ status: "on" }),

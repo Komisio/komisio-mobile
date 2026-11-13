@@ -51,6 +51,15 @@ export function PushBridge() {
     void sellerPush.setContext(user, locale === "da" ? "dk" : locale);
   }, [user, locale]);
   useEffect(() => {
+    if (
+      state.ready &&
+      !state.authFailed &&
+      !state.mfaRequired &&
+      AppState.currentState === "active"
+    )
+      void sellerPush.requestLaunchPermission();
+  }, [state.ready, state.authFailed, state.mfaRequired, user, resume]);
+  useEffect(() => {
     const stop = observePush(
       (data) => {
         const p = parsePushData(data);

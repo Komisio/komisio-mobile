@@ -2,8 +2,12 @@ import type { Locale } from "./locale";
 
 const sv = {
   title: "Skicka till Komisio",
-  intro:
-    "Packa en vara per paket. Komisio betalar frakten – ditt avtalade belopp påverkas inte.",
+  intro: "Komisio betalar frakten. Ditt avtalade belopp påverkas inte.",
+  selectItems: "Välj varor till paketet",
+  selectionHint:
+    "Den här varan ingår. Lägg till fler godkända varor som du vill skicka samtidigt.",
+  selectedCount: "{count} varor i ett paket",
+  contents: "Paketets innehåll ({count})",
   address: "Din avsändaradress i Sverige",
   street: "Gatuadress",
   postalCode: "Postnummer",
@@ -40,8 +44,12 @@ const copy: Record<Locale, Copy> = {
   sv,
   en: {
     title: "Ship to Komisio",
-    intro:
-      "Pack one item per parcel. Komisio pays for shipping – your agreed amount stays the same.",
+    intro: "Komisio pays for shipping. Your agreed amount stays the same.",
+    selectItems: "Choose items for the parcel",
+    selectionHint:
+      "This item is included. Add other accepted items to send together.",
+    selectedCount: "{count} items in one parcel",
+    contents: "Parcel contents ({count})",
     address: "Your sender address in Sweden",
     street: "Street address",
     postalCode: "Postal code",
@@ -75,8 +83,12 @@ const copy: Record<Locale, Copy> = {
   },
   no: {
     title: "Send til Komisio",
-    intro:
-      "Pakk én vare per pakke. Komisio betaler frakten – det avtalte beløpet ditt endres ikke.",
+    intro: "Komisio betaler frakten. Det avtalte beløpet ditt endres ikke.",
+    selectItems: "Velg varer til pakken",
+    selectionHint:
+      "Denne varen er med. Legg til flere godkjente varer du vil sende sammen.",
+    selectedCount: "{count} varer i én pakke",
+    contents: "Pakkens innhold ({count})",
     address: "Din avsenderadresse i Sverige",
     street: "Gateadresse",
     postalCode: "Postnummer",
@@ -110,8 +122,12 @@ const copy: Record<Locale, Copy> = {
   },
   da: {
     title: "Send til Komisio",
-    intro:
-      "Pak én vare pr. pakke. Komisio betaler fragten – dit aftalte beløb ændres ikke.",
+    intro: "Komisio betaler fragten. Dit aftalte beløb ændres ikke.",
+    selectItems: "Vælg varer til pakken",
+    selectionHint:
+      "Denne vare er med. Tilføj flere godkendte varer, du vil sende sammen.",
+    selectedCount: "{count} varer i én pakke",
+    contents: "Pakkens indhold ({count})",
     address: "Din afsenderadresse i Sverige",
     street: "Adresse",
     postalCode: "Postnummer",
@@ -145,8 +161,12 @@ const copy: Record<Locale, Copy> = {
   },
   fi: {
     title: "Lähetä Komisioon",
-    intro:
-      "Pakkaa yksi tuote pakettia kohden. Komisio maksaa toimituksen – sovittu korvauksesi ei muutu.",
+    intro: "Komisio maksaa toimituksen. Sovittu korvauksesi ei muutu.",
+    selectItems: "Valitse paketin tuotteet",
+    selectionHint:
+      "Tämä tuote on mukana. Lisää muita hyväksyttyjä tuotteita samaan lähetykseen.",
+    selectedCount: "{count} tuotetta yhdessä paketissa",
+    contents: "Paketin sisältö ({count})",
     address: "Lähettäjän osoitteesi Ruotsissa",
     street: "Katuosoite",
     postalCode: "Postinumero",
@@ -180,8 +200,12 @@ const copy: Record<Locale, Copy> = {
   },
   de: {
     title: "An Komisio senden",
-    intro:
-      "Packe einen Artikel pro Paket. Komisio zahlt den Versand – dein vereinbarter Betrag bleibt gleich.",
+    intro: "Komisio zahlt den Versand. Dein vereinbarter Betrag bleibt gleich.",
+    selectItems: "Artikel für das Paket wählen",
+    selectionHint:
+      "Dieser Artikel ist dabei. Füge weitere angenommene Artikel für den gemeinsamen Versand hinzu.",
+    selectedCount: "{count} Artikel in einem Paket",
+    contents: "Paketinhalt ({count})",
     address: "Deine Absenderadresse in Schweden",
     street: "Straße und Hausnummer",
     postalCode: "Postleitzahl",
@@ -215,8 +239,12 @@ const copy: Record<Locale, Copy> = {
   },
   es: {
     title: "Enviar a Komisio",
-    intro:
-      "Empaqueta un artículo por paquete. Komisio paga el envío; tu importe acordado no cambia.",
+    intro: "Komisio paga el envío. Tu importe acordado no cambia.",
+    selectItems: "Elige los artículos del paquete",
+    selectionHint:
+      "Este artículo está incluido. Añade otros artículos aceptados para enviarlos juntos.",
+    selectedCount: "{count} artículos en un paquete",
+    contents: "Contenido del paquete ({count})",
     address: "Tu dirección de remitente en Suecia",
     street: "Dirección",
     postalCode: "Código postal",
@@ -251,8 +279,12 @@ const copy: Record<Locale, Copy> = {
   },
   it: {
     title: "Spedisci a Komisio",
-    intro:
-      "Imballa un articolo per pacco. Komisio paga la spedizione: l’importo concordato non cambia.",
+    intro: "Komisio paga la spedizione. Il tuo importo concordato non cambia.",
+    selectItems: "Scegli gli articoli del pacco",
+    selectionHint:
+      "Questo articolo è incluso. Aggiungi altri articoli accettati da spedire insieme.",
+    selectedCount: "{count} articoli in un pacco",
+    contents: "Contenuto del pacco ({count})",
     address: "Il tuo indirizzo di mittente in Svezia",
     street: "Indirizzo",
     postalCode: "CAP",

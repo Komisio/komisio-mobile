@@ -179,7 +179,7 @@ function fixture(options: { stored?: string; platform?: "ios" | "web" } = {}) {
     },
   };
 }
-test("opening app does not prompt or opt in; explicit consent and disable are confirmed", async () => {
+test("context refresh never invents consent; explicit enable and disable are confirmed", async () => {
   const f = fixture();
   await f.controller.setContext("one", "sv");
   assert.equal(f.writes.length, 0);
@@ -403,4 +403,71 @@ test("mismatched response cannot confirm a device write", () => {
       ),
     /INVALID_REPLY/,
   );
+});
+
+test("first launch asks once before login and transfers consent only to the first account", async () => {
+  const f = fixture();
+  f.permission("undetermined");
+  f.answer("granted");
+  await Promise.all([
+    f.controller.requestLaunchPermission(),
+    f.controller.requestLaunchPermission(),
+  ]);
+  assert.equal(f.prompts.filter(Boolean).length, 1);
+  assert.equal(f.writes.length, 0);
+  assert.equal(f.saved().owner, "");
+  const restarted = fixture({ stored: JSON.stringify(f.saved()) });
+  await restarted.controller.setContext("first", "sv");
+  assert.equal(restarted.controller.getSnapshot().status, "on");
+  assert.equal(restarted.writes[0].user, "first");
+  await restarted.controller.setContext("second", "sv");
+  await restarted.controller.requestLaunchPermission();
+  assert.equal(restarted.state().enabled, false);
+  assert.equal(restarted.prompts.filter(Boolean).length, 0);
+});
+
+test("launch never repeats denial or overrides an existing account's choice", async () => {
+  const f = fixture();
+  f.permission("undetermined");
+  f.answer("denied");
+  await f.controller.requestLaunchPermission();
+  await f.controller.requestLaunchPermission();
+  await f.controller.setContext("first", "sv");
+  await f.controller.requestLaunchPermission();
+  assert.equal(f.prompts.filter(Boolean).length, 1);
+  assert.equal(f.writes.length, 0);
+  await f.controller.setContext(null, "sv");
+  f.permission("undetermined");
+  await f.controller.requestLaunchPermission();
+  assert.equal(f.prompts.filter(Boolean).length, 1);
+  const web = fixture({ platform: "web" });
+  web.permission("undetermined");
+  await web.controller.requestLaunchPermission();
+  assert.equal(web.prompts.length, 0);
+});
+
+test("login during the launch dialog registers only after consent and with the current identity", async () => {
+  const f = fixture();
+  f.permission("undetermined");
+  f.answer("granted");
+  let release!: () => void;
+  let entered!: () => void;
+  const started = new Promise<void>((r) => {
+    entered = r;
+  });
+  const waiting = new Promise<void>((r) => {
+    release = r;
+  });
+  f.onPrompt(async () => {
+    entered();
+    await waiting;
+  });
+  const prompt = f.controller.requestLaunchPermission();
+  await started;
+  const login = f.controller.setContext("first", "sv");
+  assert.equal(f.writes.length, 0);
+  release();
+  await Promise.all([prompt, login]);
+  assert.equal(f.writes.length, 1);
+  assert.equal(f.writes[0].user, "first");
 });

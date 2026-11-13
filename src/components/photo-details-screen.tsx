@@ -189,7 +189,20 @@ export function PhotoDetailsScreen() {
         maxLength={160}
         editable={!busy}
         onChangeText={(value) => change("description", value)}
-        returnKeyType="next"
+        multiline
+        numberOfLines={3}
+        style={[
+          uiStyles.body,
+          {
+            minHeight: 88,
+            borderWidth: 1,
+            borderColor: colors.control,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            padding: 12,
+            textAlignVertical: "top",
+          },
+        ]}
       />
       <Field
         label={t.brand}
@@ -249,6 +262,10 @@ export function PhotoDetailsScreen() {
           onChangeText={(value) => change("desiredSellerAmount", value)}
           inputMode="decimal"
           keyboardType="decimal-pad"
+          returnKeyType="done"
+          inputAccessoryViewButtonLabel={t.keyboardDone}
+          submitBehavior="blurAndSubmit"
+          onSubmitEditing={Keyboard.dismiss}
         />
         <Text style={uiStyles.note}>{t.priceHint}</Text>
       </View>
