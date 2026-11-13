@@ -1,9 +1,12 @@
-import type { ExternalOutboxStorage } from "./external-submission";
+import type {
+  ExternalAttempt,
+  ExternalOutboxStorage,
+} from "./external-submission";
 
-export async function externalOutboxStorage(
+export async function externalOutboxStorage<T = ExternalAttempt>(
   ownerId: string,
   binding: string,
-): Promise<ExternalOutboxStorage> {
+): Promise<ExternalOutboxStorage<T>> {
   if (!/^[a-f0-9-]{36}$/.test(ownerId))
     throw new Error("SUBMISSION_UNAVAILABLE");
   const { Directory, File, Paths } = await import("expo-file-system");

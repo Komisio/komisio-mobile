@@ -1,5 +1,13 @@
 # Decisions
 
+- 2026-11-12: Owner replaces the central welcome page with direct photo capture. Step 2 automatically uploads and analyzes for phone-verified users; reuse the bound journal on return/retry, preserve manual details, and retain explicit verification and manual entry when AI is unavailable.
+
+- 2026-11-12: Keep offer consent compact: open the offer's frozen agreement from a small link in a dismissible native sheet. Reading or closing terms never grants consent; the existing checkbox and version-bound completion command remain required.
+
+- 2026-11-12: Upload central AI photos after phone verification; run analysis only on explicit request after all uploads finish. Keep analysis retries user/project-bound and preserve manual details and compensation wishes. Submission retains its independent image journal and command identity.
+
+- 2026-11-12: Use SDK-compatible expo-camera for consecutive still photos on iOS and Android. Save each shot to the existing private draft before the next capture; retain the eight-photo limit and library picker. Request no microphone access. AI remains a separate explicit action.
+
 - 2026-11-11: Offer store-independent account creation with Apple, Google and email codes; retain password/SMS login and one-time phone verification before submission. Provider linking must retain the authenticated user and MFA; never merge seller records by contact email.
 - 2026-11-11: Add SDK-compatible expo-apple-authentication for native Apple sign-in. Google uses the existing system authentication browser with PKCE on iOS/Android. Keep provider results isolated until identity checks pass; keys and provider secrets remain server-side.
 

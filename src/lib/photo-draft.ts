@@ -187,9 +187,15 @@ export class PhotoDraftRepository {
       return { draft: next, photos };
     });
   }
-  add(inputs: PhotoInput[]) {
+  add(inputs: PhotoInput[], expected?: DraftRevision) {
     return this.run(async () => {
       const current = parsePhotoDraft(await this.storage.read());
+      if (
+        expected &&
+        (current.draftId !== expected.draftId ||
+          current.revision !== expected.revision)
+      )
+        throw new Error("DRAFT_CHANGED");
       if (inputs.length + current.photoIds.length > MAX_DRAFT_PHOTOS)
         throw new Error("PHOTO_LIMIT");
       if (

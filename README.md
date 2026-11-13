@@ -82,10 +82,13 @@ and email remains available. Web is a local test surface, not a deployed OAuth c
 
 ## Photo drafts
 
-Home now provides separate Komisio and store entry points, before and after
-login. The Komisio introduction keeps the bottom navigation; the photo steps
-have a Close action. The bundled `assets/photos/home-dress.png` is the
+Home provides separate Komisio and store entry points, before and after
+login. Komisio opens the first photo step directly; Close returns to Home.
+Legacy `/home/sell` links redirect to that photo step. The bundled `assets/photos/home-dress.png` is the
 owner-selected AI-generated hanger variant, created for Komisio in this task.
+The compact `assets/photos/photo-guide.webp` collage was generated for the
+photo guide. Its information icon opens short photo tips and explains that
+Komisio uses the images for assessment, pricing and handover documentation.
 Phone sellers can enable email/password login on the same verified identity
 under Profile → Sign-in methods → Email login, after confirming ownership of the address.
 
@@ -97,7 +100,9 @@ The screen takes or selects up to eight photos for one item. Every completed
 edit saves a local draft: private app files on iOS/Android and a dedicated
 IndexedDB database on web. Closing and reopening the preview restores it.
 Removing photos or clearing the draft never deletes library originals. Camera
-permission is requested on the Take a photo action; no microphone access is used.
+permission is requested on Start taking photos; no microphone access is used.
+The camera stays open for consecutive photos. After the first photo, the entry
+action becomes Take more photos; the phone library remains available.
 After a successful save, imported files inside the app's own picker cache are
 removed on a best-effort basis. Uncommitted files are left for the OS to reclaim.
 
@@ -108,23 +113,27 @@ offline recovery and existing seller flows on the signed app before public
 release. Android uses the same code and its existing build profile. Web/export
 checks do not establish native-device behavior.
 
-After the photos, choose one receiving store, enter the description, brand,
-condition and optional desired selling price, then review the local draft.
-The dedicated `public_external_app_stores` RPC lists only explicitly opted-in
-stores; ordinary app visibility and seller login remain separate. A platform
-without that RPC shows an unavailable message and retains the draft. No store
-is opted in automatically. Selection is refreshed before saving, and a currency
-change requires confirmation before clearing the optional price.
+After the photos, resolve the platform's central Komisio recipient, enter the
+description, brand, condition and optional desired seller compensation, then
+review the draft. Ordinary store access remains a separate path. The central
+recipient is rechecked before saving; unavailable configuration retains the draft.
+
+Step 2 automatically uploads and analyzes the image set for a phone-verified
+identity. Unverified users can enter details manually or verify their phone
+and return. All uploads must finish before analysis starts. The existing private
+journal reuses the same analysis on return or retry, and suggestions fill empty
+fields without replacing manual entries. Leaving the screen prevents a later
+upload completion from starting analysis while hidden. Errors leave manual
+entry available; retry reconciles the original request.
 
 Version 1 photo manifests remain readable and upgrade on the next edit without
 discarding images. Item details persist alongside the photos; stale editors are
 rejected instead of overwriting newer changes. Leaving an edited form asks
 whether to save. Drafts stay on the current device, including offline.
 
-There is no AI analysis, upload, SMS verification, offer, guarantee or
-seller-balance update in this increment. Those require the platform contracts
-for external applicants. The summary explicitly remains a local draft, with no
-send action until authenticated submission is available.
+Photo analysis creates suggestions only. Sending a request to Komisio still
+requires the separate review and explicit submission action; analysis does not
+accept an offer, create a handover or credit a seller balance.
 
 ## Continuous integration
 

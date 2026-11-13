@@ -1,9 +1,12 @@
-import type { ExternalOutboxStorage } from "./external-submission";
+import type {
+  ExternalAttempt,
+  ExternalOutboxStorage,
+} from "./external-submission";
 
-export async function externalOutboxStorage(
+export async function externalOutboxStorage<T = ExternalAttempt>(
   ownerId: string,
   binding: string,
-): Promise<ExternalOutboxStorage> {
+): Promise<ExternalOutboxStorage<T>> {
   if (typeof indexedDB === "undefined")
     throw new Error("SUBMISSION_UNAVAILABLE");
   const db = await new Promise<IDBDatabase>((resolve, reject) => {
