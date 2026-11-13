@@ -32,9 +32,9 @@ const sv = {
     "Vi behöver kontrollera bokningen hos PostNord. Kontakta Komisio och ange paketreferensen nedan innan du skickar.",
   packageTitle: "Paket {reference}",
   sharedCode:
-    "Alla {count} varor ska ligga i ett gemensamt ytterpaket. Samma QR-kod visas från varje vara och gäller bara detta paket.",
+    "Alla {count} varor ska ligga i ett gemensamt paket. Samma QR-kod visas från varje vara och gäller bara detta paket.",
   packTogether:
-    "Packa de valda varorna tillsammans i ett ytterpaket. Du får en gemensam fraktkod.",
+    "Packa de valda varorna tillsammans i ett paket. Du får en gemensam fraktkod.",
   bookTogether: "Hämta kod för ett paket",
   code: "Fraktkod för paketet",
   instructions:
@@ -80,9 +80,9 @@ const copy: Record<Locale, Copy> = {
       "We need to check the booking with PostNord. Contact Komisio with the parcel reference below before shipping.",
     packageTitle: "Parcel {reference}",
     sharedCode:
-      "Pack all {count} items in one outer parcel. Each item shows the same QR code, which is only for this parcel.",
+      "Pack all {count} items in one parcel. Each item shows the same QR code, which is only for this parcel.",
     packTogether:
-      "Pack the selected items together in one outer parcel. You will receive one shared shipping code.",
+      "Pack the selected items together in one parcel. You will receive one shared shipping code.",
     bookTogether: "Get code for one parcel",
     code: "Shipping code for this parcel",
     instructions:
@@ -125,9 +125,9 @@ const copy: Record<Locale, Copy> = {
       "Vi må kontrollere bestillingen hos PostNord. Kontakt Komisio med pakkereferansen nedenfor før du sender.",
     packageTitle: "Pakke {reference}",
     sharedCode:
-      "Alle {count} varene skal ligge i én felles ytterpakke. Den samme QR-koden vises fra hver vare og gjelder bare denne pakken.",
+      "Alle {count} varene skal ligge i én felles pakke. Den samme QR-koden vises fra hver vare og gjelder bare denne pakken.",
     packTogether:
-      "Pakk de valgte varene sammen i én ytterpakke. Du får én felles fraktkode.",
+      "Pakk de valgte varene sammen i én pakke. Du får én felles fraktkode.",
     bookTogether: "Hent kode for én pakke",
     code: "Fraktkode for pakken",
     instructions:
@@ -170,9 +170,9 @@ const copy: Record<Locale, Copy> = {
       "Vi skal kontrollere bestillingen hos PostNord. Kontakt Komisio med pakkereferencen nedenfor, før du sender.",
     packageTitle: "Pakke {reference}",
     sharedCode:
-      "Alle {count} varer skal ligge i én fælles yderpakke. Samme QR-kode vises fra hver vare og gælder kun denne pakke.",
+      "Alle {count} varer skal ligge i én fælles pakke. Samme QR-kode vises fra hver vare og gælder kun denne pakke.",
     packTogether:
-      "Pak de valgte varer sammen i én yderpakke. Du får én fælles fragtkode.",
+      "Pak de valgte varer sammen i én pakke. Du får én fælles fragtkode.",
     bookTogether: "Hent kode til én pakke",
     code: "Fragtkode til pakken",
     instructions:
@@ -215,9 +215,9 @@ const copy: Record<Locale, Copy> = {
       "Meidän täytyy tarkistaa varaus PostNordilta. Ota yhteyttä Komisioon alla olevalla pakettiviitteellä ennen lähettämistä.",
     packageTitle: "Paketti {reference}",
     sharedCode:
-      "Pakkaa kaikki {count} tuotetta yhteen ulkopakkaukseen. Jokaisen tuotteen kohdalla näkyy sama QR-koodi, joka koskee vain tätä pakettia.",
+      "Pakkaa kaikki {count} tuotetta yhteen pakettiin. Jokaisen tuotteen kohdalla näkyy sama QR-koodi, joka koskee vain tätä pakettia.",
     packTogether:
-      "Pakkaa valitut tuotteet samaan ulkopakkaukseen. Saat yhden yhteisen lähetyskoodin.",
+      "Pakkaa valitut tuotteet samaan pakettiin. Saat yhden yhteisen lähetyskoodin.",
     bookTogether: "Hae koodi yhdelle paketille",
     code: "Tämän paketin lähetyskoodi",
     instructions:
@@ -260,9 +260,9 @@ const copy: Record<Locale, Copy> = {
       "Wir müssen die Buchung bei PostNord prüfen. Kontaktiere Komisio vor dem Versand mit der folgenden Paketreferenz.",
     packageTitle: "Paket {reference}",
     sharedCode:
-      "Verpacke alle {count} Artikel in einem gemeinsamen Außenpaket. Bei jedem Artikel erscheint derselbe QR-Code, der nur für dieses Paket gilt.",
+      "Verpacke alle {count} Artikel in einem gemeinsamen Paket. Bei jedem Artikel erscheint derselbe QR-Code, der nur für dieses Paket gilt.",
     packTogether:
-      "Verpacke die ausgewählten Artikel gemeinsam in einem Außenpaket. Du erhältst einen gemeinsamen Versandcode.",
+      "Verpacke die ausgewählten Artikel gemeinsam in einem Paket. Du erhältst einen gemeinsamen Versandcode.",
     bookTogether: "Code für ein Paket abrufen",
     code: "Versandcode für dieses Paket",
     instructions:
@@ -305,9 +305,9 @@ const copy: Record<Locale, Copy> = {
       "Debemos comprobar la reserva con PostNord. Contacta con Komisio con la referencia siguiente antes de enviar.",
     packageTitle: "Paquete {reference}",
     sharedCode:
-      "Coloca los {count} artículos en un único paquete exterior. Cada artículo muestra el mismo código QR, válido solo para este paquete.",
+      "Coloca los {count} artículos en un único paquete. Cada artículo muestra el mismo código QR, válido solo para este paquete.",
     packTogether:
-      "Coloca los artículos seleccionados juntos en un único paquete exterior. Recibirás un solo código de envío.",
+      "Coloca los artículos seleccionados juntos en un único paquete. Recibirás un solo código de envío.",
     bookTogether: "Obtener código para un paquete",
     code: "Código de envío de este paquete",
     instructions:
@@ -351,7 +351,7 @@ const copy: Record<Locale, Copy> = {
       "Dobbiamo verificare la prenotazione con PostNord. Contatta Komisio con il riferimento seguente prima di spedire.",
     packageTitle: "Pacco {reference}",
     sharedCode:
-      "Metti tutti i {count} articoli in un unico imballaggio esterno. Ogni articolo mostra lo stesso codice QR, valido solo per questo pacco.",
+      "Metti tutti i {count} articoli in un unico pacco. Ogni articolo mostra lo stesso codice QR, valido solo per questo pacco.",
     packTogether:
       "Imballa insieme gli articoli selezionati in un unico pacco. Riceverai un solo codice di spedizione.",
     bookTogether: "Ottieni il codice per un pacco",
