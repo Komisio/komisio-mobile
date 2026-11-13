@@ -17,24 +17,25 @@ export type BookParcel = {
   requestId: string;
   offerId: string;
   address: ShippingAddress;
-  weightG: number;
-  lengthMm: number;
-  widthMm: number;
-  heightMm: number;
+  weightG?: number;
+  lengthMm?: number;
+  widthMm?: number;
+  heightMm?: number;
 };
 export type ShippingState = {
   offerId: string;
   available: boolean;
+  measurementsOptional: boolean;
   parcel: null | {
     id: string;
     reference: string;
     environment: "sandbox" | "production";
     sender: Contact;
     recipient: Contact;
-    weightG: number;
-    lengthMm: number;
-    widthMm: number;
-    heightMm: number;
+    weightG: number | null;
+    lengthMm: number | null;
+    widthMm: number | null;
+    heightMm: number | null;
     status: "pending" | "needs_review" | "booked";
     createdAt: string;
     booking: null | {
@@ -80,8 +81,14 @@ function address(v: unknown, full = false) {
   )
     invalid();
 }
-function measurements(v: Record<string, unknown>) {
+function measurements(v: Record<string, unknown>, nullable = false) {
   const { weightG: w, lengthMm: l, widthMm: b, heightMm: h } = v;
+  if (
+    nullable
+      ? [w, l, b, h].every((x) => x === null)
+      : [w, l, b, h].every((x) => x === undefined)
+  )
+    return;
   if (
     ![w, l, b, h].every(
       (x) => typeof x === "number" && Number.isSafeInteger(x) && x > 0,
@@ -130,6 +137,11 @@ export function parseShippingState(
   const v = object(value);
   if (!isId(offer) || v.offerId !== offer || typeof v.available !== "boolean")
     invalid();
+  if (
+    v.measurementsOptional !== undefined &&
+    typeof v.measurementsOptional !== "boolean"
+  )
+    invalid();
   if (v.parcel !== null) {
     const p = object(v.parcel);
     if (
@@ -144,7 +156,7 @@ export function parseShippingState(
       invalid();
     address(p.sender, true);
     address(p.recipient, true);
-    measurements(p);
+    measurements(p, true);
     if (p.status === "booked") {
       const b = object(p.booking);
       if (
@@ -158,7 +170,10 @@ export function parseShippingState(
         invalid();
     } else if (p.booking !== null) invalid();
   }
-  return v as unknown as ShippingState;
+  return {
+    ...v,
+    measurementsOptional: v.measurementsOptional === true,
+  } as unknown as ShippingState;
 }
 /** A carrier-owned URL, never a URL supplied by an API reply. */
 export function parcelTrackingUrl(

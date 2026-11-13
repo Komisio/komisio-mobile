@@ -4,6 +4,7 @@ const SENSITIVE_PREFIXES = [
   "komisio.pending.bank.v1.",
   "komisio.pending.onboarding.v1.",
   "komisio.pending.shipping.v1.",
+  "komisio.pending.shipping-address.v1.",
 ];
 type BrowserStorage = Pick<
   Storage,

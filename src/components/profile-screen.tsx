@@ -5,7 +5,8 @@ import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { pushCopy } from "@/lib/push-copy";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { hasVerifiedEmail, hasVerifiedPhone } from "@/lib/identity-gates";
+import { CentralShippingAddress } from "./central-shipping-address";
 import { accountAuthCopy } from "@/lib/account-auth-copy";
 import { LoginOptions } from "./login-options";
 import { PrivacyLink } from "./privacy-link";
@@ -78,6 +79,13 @@ export function ProfileScreen() {
             label={pushCopy[locale].title}
             onPress={() => router.push("/notifications")}
           />
+          {hasVerifiedPhone(session.user) ? (
+            <CentralShippingAddress
+              key={session.user.id}
+              user={session.user.id}
+              hideUnavailable
+            />
+          ) : null}
         </>
       )}
       <View style={styles.group}>

@@ -10,10 +10,12 @@ import { readShipping, shippingWriter } from "@/lib/central-shipping-runtime";
 import {
   parseBookParcel,
   parcelTrackingUrl,
-  shippingMeasure,
+  type ShippingAddress,
 } from "@/lib/central-shipping";
 import { centralShippingCopy } from "@/lib/central-shipping-copy";
-import { Button, Card, Field, Loading, Message, uiStyles } from "./ui";
+import { shippingAddressCopy } from "@/lib/shipping-address-copy";
+import { CentralShippingAddress } from "./central-shipping-address";
+import { Button, Card, Loading, Message, uiStyles } from "./ui";
 import { ExternalPageButton } from "./external-page-button";
 
 export function CentralShipping({
@@ -26,7 +28,8 @@ export function CentralShipping({
   itemCount: number;
 }) {
   const { locale, d } = useI18n(),
-    t = centralShippingCopy(locale);
+    t = centralShippingCopy(locale),
+    addressCopy = shippingAddressCopy(locale);
   const { refreshAssurance } = useSession();
   const read = useMemo(
     () =>
@@ -59,13 +62,6 @@ export function CentralShipping({
     writer.getState,
     writer.getState,
   );
-  const [street, setStreet] = useState(""),
-    [postalCode, setPostalCode] = useState(""),
-    [city, setCity] = useState("");
-  const [weight, setWeight] = useState(""),
-    [length, setLength] = useState(""),
-    [width, setWidth] = useState(""),
-    [height, setHeight] = useState("");
   const [invalid, setInvalid] = useState(false);
   useFocusEffect(
     useCallback(() => {
@@ -85,22 +81,14 @@ export function CentralShipping({
     )
       void refreshAssurance();
   }
-  function book() {
+  function book(address: ShippingAddress) {
     try {
       const command = parseBookParcel(
         {
           action: "book",
           requestId: randomUUID(),
           offerId: offer,
-          address: {
-            street: street.trim(),
-            postalCode: postalCode.replace(/\s/g, ""),
-            city: city.trim(),
-          },
-          weightG: shippingMeasure(weight, 3),
-          lengthMm: shippingMeasure(length, 1),
-          widthMm: shippingMeasure(width, 1),
-          heightMm: shippingMeasure(height, 1),
+          address,
         },
         offer,
       );
@@ -182,7 +170,7 @@ export function CentralShipping({
       </Card>
     );
   if (itemCount !== 1) return <Message>{t.grouped}</Message>;
-  if (!state.data.available)
+  if (!state.data.available || !state.data.measurementsOptional)
     return (
       <Card>
         <Message>{t.unavailable}</Message>
@@ -203,95 +191,39 @@ export function CentralShipping({
   return (
     <>
       <Text style={uiStyles.body}>{t.intro}</Text>
-      <Card>
-        <Text accessibilityRole="header" style={uiStyles.heading}>
-          {t.address}
-        </Text>
-        <Field
-          label={t.street}
-          value={street}
-          onChangeText={setStreet}
-          editable={!busy}
-          autoComplete="street-address"
-          maxLength={50}
-        />
-        <Field
-          label={t.postalCode}
-          value={postalCode}
-          onChangeText={setPostalCode}
-          editable={!busy}
-          keyboardType="number-pad"
-          autoComplete="postal-code"
-          maxLength={6}
-        />
-        <Field
-          label={t.city}
-          value={city}
-          onChangeText={setCity}
-          editable={!busy}
-          maxLength={35}
-        />
-      </Card>
-      <Card>
-        <Text accessibilityRole="header" style={uiStyles.heading}>
-          {t.parcel}
-        </Text>
-        <Text style={uiStyles.note}>{t.limits}</Text>
-        <Field
-          label={t.weight}
-          value={weight}
-          onChangeText={setWeight}
-          editable={!busy}
-          keyboardType="decimal-pad"
-          maxLength={8}
-        />
-        <Field
-          label={t.length}
-          value={length}
-          onChangeText={setLength}
-          editable={!busy}
-          keyboardType="decimal-pad"
-          maxLength={6}
-        />
-        <Field
-          label={t.width}
-          value={width}
-          onChangeText={setWidth}
-          editable={!busy}
-          keyboardType="decimal-pad"
-          maxLength={6}
-        />
-        <Field
-          label={t.height}
-          value={height}
-          onChangeText={setHeight}
-          editable={!busy}
-          keyboardType="decimal-pad"
-          maxLength={6}
-        />
-      </Card>
-      {invalid || change.status === "rejected" ? (
-        <Message tone="error">{t.invalid}</Message>
-      ) : null}
-      {change.status === "conflict" ? (
-        <Message>
-          {change.code === "PARCEL_GROUP_UNSUPPORTED"
-            ? t.grouped
-            : change.code === "SHIPPING_CONTACT_UNSUPPORTED"
-              ? t.contactUnsupported
-              : t.error}
-        </Message>
-      ) : null}
-      <Button
-        label={t.book}
-        busy={busy}
-        disabled={
-          !["ready", "success", "conflict", "rejected", "discarded"].includes(
-            change.status,
-          )
-        }
-        onPress={book}
-      />
+      <CentralShippingAddress user={user} disabled={busy}>
+        {(address) => (
+          <>
+            <Text style={uiStyles.note}>{addressCopy.limits}</Text>
+            {invalid || change.status === "rejected" ? (
+              <Message tone="error">{addressCopy.bookingInvalid}</Message>
+            ) : null}
+            {change.status === "conflict" ? (
+              <Message>
+                {change.code === "PARCEL_GROUP_UNSUPPORTED"
+                  ? t.grouped
+                  : change.code === "SHIPPING_CONTACT_UNSUPPORTED"
+                    ? t.contactUnsupported
+                    : t.error}
+              </Message>
+            ) : null}
+            <Button
+              label={t.book}
+              busy={busy}
+              disabled={
+                ![
+                  "ready",
+                  "success",
+                  "conflict",
+                  "rejected",
+                  "discarded",
+                ].includes(change.status)
+              }
+              onPress={() => book(address)}
+            />
+          </>
+        )}
+      </CentralShippingAddress>
     </>
   );
 }
