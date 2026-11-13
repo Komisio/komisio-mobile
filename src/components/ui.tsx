@@ -101,6 +101,7 @@ export function ItemCard({
   onPress,
   compact = false,
   dense = false,
+  tone = "default",
   trailing,
 }: {
   children: ReactNode;
@@ -109,6 +110,7 @@ export function ItemCard({
   onPress: () => void;
   compact?: boolean;
   dense?: boolean;
+  tone?: "default" | "soft";
   trailing?: ReactNode;
 }) {
   const { focused, focusProps } = useControlFocus();
@@ -120,6 +122,7 @@ export function ItemCard({
       {...focusProps}
       style={({ pressed }) => [
         styles.itemCard,
+        tone === "soft" && styles.softItem,
         compact && styles.compactItem,
         dense && styles.denseItem,
         focused && styles.focused,
@@ -527,6 +530,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   itemBody: { flex: 1, minWidth: 0, gap: 4 },
+  softItem: { backgroundColor: colors.softAccent },
   media: { width: 88, borderRadius: 10, overflow: "hidden" },
   compactItem: { padding: 12, gap: 12, minHeight: 76 },
   compactMedia: { width: 72 },
