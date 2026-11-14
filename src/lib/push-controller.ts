@@ -279,6 +279,14 @@ export function createPushController(deps: PushDependencies) {
       const expected = generation;
       return schedule(() => synchronize("refresh", expected));
     },
+    async checkBeforeSubmission(expectedUser: string) {
+      if (user !== expectedUser) return null;
+      const expected = generation;
+      await schedule(() => synchronize("refresh", expected));
+      return user === expectedUser && expected === generation
+        ? snapshot.status
+        : null;
+    },
     requestInitialPermission(expectedUser: string) {
       if (user !== expectedUser) return queue;
       const expected = generation;
@@ -306,7 +314,8 @@ export function createPushController(deps: PushDependencies) {
         }
       });
     },
-    enable() {
+    enable(expectedUser?: string) {
+      if (expectedUser && user !== expectedUser) return queue;
       const expected = generation;
       return schedule(() => synchronize("enable", expected));
     },

@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-14: Before a new central submission, check this account's device notifications and offer explicit activation or submission without them. Returning from phone settings never submits. Retries preserve their command. Name and postal address remain in the later onboarding/shipping flow.
+
 - 2026-11-13: Ask for native notification permission on first active launch, including guests, superseding seller-only prompting. Persist the choice without registering a token before login. Only the first account may inherit guest consent; denial, manual opt-out and account isolation remain intact.
 - 2026-11-13: Central shipping may select additional accepted, unbooked items for one parcel when advertised by the server. Freeze the selection in the existing command journal; each linked item shows the shared code. Keep legacy pending commands and single-item backend compatibility.
 

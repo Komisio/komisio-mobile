@@ -191,6 +191,52 @@ test("context refresh never invents consent; explicit enable and disable are con
   assert.equal(f.state().enabled, false);
   assert.equal(f.controller.getSnapshot().status, "off");
 });
+
+test("submission checks fresh OS permission and account opt-out without requesting permission", async () => {
+  const f = fixture();
+  await f.controller.setContext("one", "sv");
+  assert.equal(await f.controller.checkBeforeSubmission("one"), "off");
+  assert.equal(f.prompts.filter(Boolean).length, 0);
+  await f.controller.enable("one");
+  assert.equal(await f.controller.checkBeforeSubmission("one"), "on");
+  f.permission("denied");
+  assert.equal(await f.controller.checkBeforeSubmission("one"), "denied");
+  assert.equal(f.state().enabled, false);
+  f.permission("granted");
+  await f.controller.disable();
+  assert.equal(await f.controller.checkBeforeSubmission("one"), "off");
+  assert.equal(f.prompts.filter(Boolean).length, 1);
+});
+
+test("submission checks and Settings activation cannot cross account changes", async () => {
+  const f = fixture();
+  await f.controller.setContext("one", "sv");
+  const oldCheck = f.controller.checkBeforeSubmission("one");
+  await f.controller.setContext("two", "sv");
+  assert.equal(await oldCheck, null);
+  assert.equal(await f.controller.checkBeforeSubmission("one"), null);
+  await f.controller.enable("one");
+  assert.equal(f.prompts.filter(Boolean).length, 0);
+  assert.equal(f.writes.length, 0);
+  assert.equal(await f.controller.checkBeforeSubmission("two"), "off");
+});
+
+test("submission check reports an unconfirmed registration rather than claiming notifications work", async () => {
+  const f = fixture();
+  await f.controller.setContext("one", "sv");
+  f.fail(true);
+  await f.controller.enable("one");
+  assert.equal(await f.controller.checkBeforeSubmission("one"), "error");
+  f.fail(false);
+  assert.equal(await f.controller.checkBeforeSubmission("one"), "on");
+  const web = fixture({ platform: "web" });
+  await web.controller.setContext("one", "sv");
+  assert.equal(
+    await web.controller.checkBeforeSubmission("one"),
+    "unavailable",
+  );
+  assert.equal(web.writes.length, 0);
+});
 test("first seller sign-in requests native permission once and preserves manual controls", async () => {
   const f = fixture();
   f.permission("undetermined");
