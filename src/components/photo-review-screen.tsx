@@ -19,6 +19,8 @@ import {
 import { externalSubmission } from "@/lib/external-submission-runtime";
 import type { ExternalAttempt } from "@/lib/external-submission";
 import { hasVerifiedPhone } from "@/lib/identity-gates";
+import { sellerPush } from "@/lib/push-runtime";
+import { SubmissionNotifications } from "./submission-notifications";
 
 export function PhotoReviewScreen() {
   const { locale, d } = useI18n();
@@ -41,6 +43,9 @@ export function PhotoReviewScreen() {
   const [error, setError] = useState("");
   const [recipientChanged, setRecipientChanged] = useState(false);
   const [progress, setProgress] = useState("");
+  const [notificationOwner, setNotificationOwner] = useState<string | null>(
+    null,
+  );
   const locked = useRef(false),
     active = useRef(false),
     currentOwner = useRef(owner);
@@ -54,6 +59,7 @@ export function PhotoReviewScreen() {
       setOutbox(null);
       setOutboxFailed(false);
       setError("");
+      setNotificationOwner(null);
       if (owner)
         void externalSubmission(owner)
           .then((c) => c.load())
@@ -72,7 +78,7 @@ export function PhotoReviewScreen() {
   const attempt = outbox?.owner === owner ? outbox?.attempt : null;
   const pending =
     attempt?.state === "pending" || attempt?.state === "confirmed";
-  async function send(resume = false) {
+  async function send(resume = false, notificationsReviewed = false) {
     if (locked.current) return;
     if (!owner || !hasVerifiedPhone(session?.user)) {
       router.push("/photo-phone");
@@ -90,7 +96,21 @@ export function PhotoReviewScreen() {
     setProgress("");
     const current = () => active.current && currentOwner.current === owner;
     try {
+      if (!resume && !notificationsReviewed) {
+        const status = await sellerPush.checkBeforeSubmission(owner);
+        if (!current()) return;
+        if (status === null) {
+          setError(s.sendError);
+          return;
+        }
+        if (status !== "on" && status !== "unavailable") {
+          setNotificationOwner(owner);
+          return;
+        }
+      }
+      if (!current()) return;
       const controller = await externalSubmission(owner);
+      if (!current()) return;
       if (!resume) await controller.prepare(snapshot!, "SE");
       const result = await controller.resume((done, total) => {
         if (current())
@@ -142,6 +162,19 @@ export function PhotoReviewScreen() {
       }
     }
   }
+  if (owner && notificationOwner === owner)
+    return (
+      <SubmissionNotifications
+        key={owner}
+        user={owner}
+        onCancel={() => setNotificationOwner(null)}
+        onContinue={() => {
+          if (!active.current || currentOwner.current !== owner) return;
+          setNotificationOwner(null);
+          void send(false, true);
+        }}
+      />
+    );
   if (outboxFailed)
     return (
       <Screen topSafeArea={false}>
