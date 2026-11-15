@@ -19,7 +19,7 @@ import {
   colors,
   uiStyles,
 } from "@/components/ui";
-import { ExternalItemPhoto } from "@/components/external-item-photo";
+import { ExternalPhotoGallery } from "@/components/external-photo-gallery";
 import { CentralShipping } from "@/components/central-shipping";
 import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { OfferAgreementLink } from "@/components/offer-agreement-link";
@@ -418,9 +418,10 @@ function Handover({
           key={i.offerId}
           style={{ flexDirection: "row", gap: 12, alignItems: "center" }}
         >
-          <ExternalItemPhoto
+          <ExternalPhotoGallery
             owner={user}
-            photo={i.photoId}
+            photos={[i.photoId]}
+            offerId={i.offerId}
             label={i.description}
           />
           <View style={{ flex: 1 }}>

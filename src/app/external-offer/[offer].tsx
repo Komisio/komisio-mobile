@@ -13,7 +13,7 @@ import {
   colors,
   uiStyles,
 } from "@/components/ui";
-import { ExternalItemPhoto } from "@/components/external-item-photo";
+import { ExternalPhotoGallery } from "@/components/external-photo-gallery";
 import {
   readExternalOfferItem,
   externalOfferWriter,
@@ -177,9 +177,9 @@ function Offer({ user, id }: { user: string; id: string }) {
       {data && o ? (
         <>
           <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
-            <ExternalItemPhoto
+            <ExternalPhotoGallery
               owner={user}
-              photo={data.item.photos[0]}
+              photos={data.item.photos}
               label={data.item.description}
             />
             <View style={{ flex: 1 }}>
@@ -316,7 +316,7 @@ function Offer({ user, id }: { user: string; id: string }) {
               }
             />
           ) : null}
-          {o.canDecline && !pending ? (
+          {o.canDecline && !expired && !pending ? (
             <Button
               label={t.no}
               variant="secondary"

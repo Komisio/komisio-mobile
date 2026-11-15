@@ -124,7 +124,7 @@ test("request pages reject malformed rows, money, statuses and overlong pages", 
     { requests: [null] },
     { requests: [{ ...row, desired_price_ore: 15000 }] },
     { requests: [{ ...row, status: "sold" }] },
-    { activeCount: 11 },
+    { activeCount: 31 },
     { requests: Array(26).fill(row) },
     { requests: [{ ...row, photos: [] }] },
     { requests: [{ ...row, decline_note: "x".repeat(1001) }] },
@@ -137,6 +137,62 @@ test("request pages reject malformed rows, money, statuses and overlong pages", 
         ...patch,
       }),
     );
+});
+
+test("thirty active requests and filtered history retain lifecycle actions", async () => {
+  const f = fixture();
+  const page = {
+    activeCount: 30,
+    activeLimit: 30,
+    historyCount: 4,
+    hasMore: true,
+    requests: [
+      { ...row, lifecycleStatus: "waiting", active: true, canWithdraw: true },
+    ],
+  };
+  f.reply(200, page);
+  assert.deepEqual(await f.api.list(25, "history"), parseExternalPage(page));
+  assert.deepEqual(JSON.parse(String(f.calls[0].init.body)), {
+    action: "list",
+    offset: 25,
+    group: "history",
+    protocol: 2,
+  });
+  assert.throws(() =>
+    parseExternalPage({
+      ...page,
+      requests: [
+        {
+          ...row,
+          lifecycleStatus: "accepted",
+          active: true,
+          canWithdraw: true,
+        },
+      ],
+    }),
+  );
+  assert.throws(() => parseExternalPage({ ...page, activeLimit: 10 }));
+});
+
+test("withdrawal retries use the same receipt and never cross accounts", async () => {
+  const f = fixture();
+  f.reply(503, {});
+  await assert.rejects(f.api.withdraw(id(1)), /SUBMISSION_UNAVAILABLE/);
+  f.reply(200, { id: id(1) });
+  await f.api.withdraw(id(1));
+  assert.equal(f.calls[0].init.body, f.calls[1].init.body);
+  assert.deepEqual(JSON.parse(String(f.calls[0].init.body)), {
+    action: "withdraw",
+    requestId: id(1),
+    operationId: id(1),
+  });
+  f.reply(200, { id: id(2) });
+  await assert.rejects(f.api.withdraw(id(1)), /SUBMISSION_UNAVAILABLE/);
+  f.reply(409, { error: "REQUEST_CHANGED" });
+  await assert.rejects(f.api.withdraw(id(1)), /REQUEST_CHANGED/);
+  f.actor(id(5));
+  await assert.rejects(f.api.withdraw(id(1)), /SESSION_CHANGED/);
+  assert.equal(f.calls.length, 4);
 });
 test("phone-only identities do not gain the existing email seller routes", () => {
   const phone = {

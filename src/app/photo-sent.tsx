@@ -106,7 +106,7 @@ export default function PhotoSent() {
           <PhotoCapacity count={data.count} />
           <Button
             label={t.newItem}
-            disabled={data.count >= 10}
+            disabled={data.count >= 30}
             onPress={() => router.replace("/photo-draft")}
           />
         </>

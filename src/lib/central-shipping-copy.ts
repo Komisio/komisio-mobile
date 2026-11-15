@@ -29,8 +29,7 @@ const sv = {
   pending:
     "Bokningen behöver kontrolleras. Uppdatera för att hämta resultatet. Boka inte en ny frakt på egen hand.",
   review:
-    "Vi behöver kontrollera bokningen hos PostNord. Kontakta Komisio och ange paketreferensen nedan innan du skickar.",
-  packageTitle: "Paket {reference}",
+    "Vi behöver kontrollera bokningen hos PostNord. Kontakta Komisio innan du skickar.",
   sharedCode:
     "Alla {count} varor ska ligga i ett gemensamt paket. Samma QR-kod visas från varje vara och gäller bara detta paket.",
   packTogether:
@@ -77,8 +76,7 @@ const copy: Record<Locale, Copy> = {
     pending:
       "The booking needs checking. Refresh to get the result. Do not book another shipment yourself.",
     review:
-      "We need to check the booking with PostNord. Contact Komisio with the parcel reference below before shipping.",
-    packageTitle: "Parcel {reference}",
+      "We need to check the booking with PostNord. Contact Komisio before shipping.",
     sharedCode:
       "Pack all {count} items in one parcel. Each item shows the same QR code, which is only for this parcel.",
     packTogether:
@@ -122,8 +120,7 @@ const copy: Record<Locale, Copy> = {
     pending:
       "Bestillingen må kontrolleres. Oppdater for å hente resultatet. Ikke bestill en ny frakt selv.",
     review:
-      "Vi må kontrollere bestillingen hos PostNord. Kontakt Komisio med pakkereferansen nedenfor før du sender.",
-    packageTitle: "Pakke {reference}",
+      "Vi må kontrollere bestillingen hos PostNord. Kontakt Komisio før du sender.",
     sharedCode:
       "Alle {count} varene skal ligge i én felles pakke. Den samme QR-koden vises fra hver vare og gjelder bare denne pakken.",
     packTogether:
@@ -167,8 +164,7 @@ const copy: Record<Locale, Copy> = {
     pending:
       "Bestillingen skal kontrolleres. Opdater for at hente resultatet. Bestil ikke selv en ny fragt.",
     review:
-      "Vi skal kontrollere bestillingen hos PostNord. Kontakt Komisio med pakkereferencen nedenfor, før du sender.",
-    packageTitle: "Pakke {reference}",
+      "Vi skal kontrollere bookingen hos PostNord. Kontakt Komisio, før du sender.",
     sharedCode:
       "Alle {count} varer skal ligge i én fælles pakke. Samme QR-kode vises fra hver vare og gælder kun denne pakke.",
     packTogether:
@@ -212,8 +208,7 @@ const copy: Record<Locale, Copy> = {
     pending:
       "Varaus täytyy tarkistaa. Päivitä tuloksen hakemiseksi. Älä varaa itse uutta lähetystä.",
     review:
-      "Meidän täytyy tarkistaa varaus PostNordilta. Ota yhteyttä Komisioon alla olevalla pakettiviitteellä ennen lähettämistä.",
-    packageTitle: "Paketti {reference}",
+      "Meidän on tarkistettava varaus PostNordilta. Ota yhteyttä Komisioon ennen lähettämistä.",
     sharedCode:
       "Pakkaa kaikki {count} tuotetta yhteen pakettiin. Jokaisen tuotteen kohdalla näkyy sama QR-koodi, joka koskee vain tätä pakettia.",
     packTogether:
@@ -257,8 +252,7 @@ const copy: Record<Locale, Copy> = {
     pending:
       "Die Buchung muss geprüft werden. Aktualisiere für das Ergebnis. Buche nicht selbst einen weiteren Versand.",
     review:
-      "Wir müssen die Buchung bei PostNord prüfen. Kontaktiere Komisio vor dem Versand mit der folgenden Paketreferenz.",
-    packageTitle: "Paket {reference}",
+      "Wir müssen die Buchung bei PostNord prüfen. Kontaktiere Komisio vor dem Versand.",
     sharedCode:
       "Verpacke alle {count} Artikel in einem gemeinsamen Paket. Bei jedem Artikel erscheint derselbe QR-Code, der nur für dieses Paket gilt.",
     packTogether:
@@ -302,8 +296,7 @@ const copy: Record<Locale, Copy> = {
     pending:
       "La reserva debe comprobarse. Actualiza para obtener el resultado. No reserves otro envío por tu cuenta.",
     review:
-      "Debemos comprobar la reserva con PostNord. Contacta con Komisio con la referencia siguiente antes de enviar.",
-    packageTitle: "Paquete {reference}",
+      "Debemos comprobar la reserva con PostNord. Contacta con Komisio antes de enviar.",
     sharedCode:
       "Coloca los {count} artículos en un único paquete. Cada artículo muestra el mismo código QR, válido solo para este paquete.",
     packTogether:
@@ -348,8 +341,7 @@ const copy: Record<Locale, Copy> = {
     pending:
       "La prenotazione va verificata. Aggiorna per vedere il risultato. Non prenotare un’altra spedizione autonomamente.",
     review:
-      "Dobbiamo verificare la prenotazione con PostNord. Contatta Komisio con il riferimento seguente prima di spedire.",
-    packageTitle: "Pacco {reference}",
+      "Dobbiamo verificare la prenotazione con PostNord. Contatta Komisio prima di spedire.",
     sharedCode:
       "Metti tutti i {count} articoli in un unico pacco. Ogni articolo mostra lo stesso codice QR, valido solo per questo pacco.",
     packTogether:

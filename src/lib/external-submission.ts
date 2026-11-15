@@ -35,6 +35,23 @@ export type ExternalOutboxStorage<T = ExternalAttempt> = {
   prune(keep: string[]): Promise<void>;
 };
 export type ExternalRequest = {
+  lifecycleStatus?:
+    | "waiting"
+    | "offered"
+    | "accepted"
+    | "open"
+    | "received"
+    | "registered"
+    | "expired"
+    | "rejected"
+    | "declined"
+    | "cancelled"
+    | "withdrawn"
+    | "sold"
+    | "acquired"
+    | "ended";
+  active?: boolean;
+  canWithdraw?: boolean;
   sender_country?: "SE" | null;
   id: string;
   tenant_id: string;
@@ -53,6 +70,8 @@ export type ExternalRequest = {
 };
 export type ExternalRequestPage = {
   activeCount: number;
+  activeLimit?: number;
+  historyCount?: number;
   hasMore: boolean;
   requests: ExternalRequest[];
 };

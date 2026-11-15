@@ -72,7 +72,14 @@ export function createEmailLogin({
     });
     const result = response.status === 204 ? null : await response.json();
     if (!response.ok) {
-      const code = result?.code ?? result?.error_code;
+      // Auth's original response uses a numeric `code` plus `error_code`.
+      // Newer versions put the symbolic error in `code` instead.
+      const code =
+        typeof result?.error_code === "string"
+          ? result.error_code
+          : typeof result?.code === "string"
+            ? result.code
+            : undefined;
       throw new Error(
         [
           "email_exists",

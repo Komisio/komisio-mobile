@@ -2,10 +2,12 @@ import { externalOfferCopy } from "@/lib/external-offer-copy";
 import { externalOfferApi } from "@/lib/external-offer-runtime";
 import type { ExternalOffer } from "@/lib/external-offer";
 import { useCallback, useRef, useState } from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
+import { externalLifecycleCopy } from "@/lib/external-lifecycle-copy";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   Button,
+  Choice,
   Card,
   Loading,
   Message,
@@ -41,8 +43,10 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
     verified = hasVerifiedPhone(session?.user);
   const { snapshot } = useItemDraft();
   const [offset, setOffset] = useState(0);
+  const [group, setGroup] = useState<"active" | "history">("active");
   const [page, setPage] = useState<{
     owner: string;
+    group: "active" | "history";
     data: ExternalRequestPage;
     offers: ExternalOffer[] | null;
   } | null>(null);
@@ -59,20 +63,25 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
     setPending(false);
     if (owner && verified) {
       void Promise.all([
-        externalRequestApi(owner).list(offset),
+        externalRequestApi(owner).list(offset, group),
         externalSubmission(owner).then((c) => c.load()),
       ])
         .then(async ([data, attempt]) => {
           if (request) {
             const selected = await externalRequestApi(owner).lookup(request);
-            if (selected)
+            if (
+              selected &&
+              (group === "active"
+                ? selected.active !== false
+                : selected.active === false)
+            )
               data.requests = [
                 selected,
                 ...data.requests.filter((r) => r.id !== selected.id),
               ].slice(0, 25);
           }
           if (current) {
-            setPage({ owner, data, offers: null });
+            setPage({ owner, group, data, offers: null });
             setPending(
               attempt?.state === "pending" || attempt?.state === "confirmed",
             );
@@ -83,7 +92,7 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
             const offers = await externalOfferApi(owner).list(
               data.requests.map((r) => r.id),
             );
-            if (current) setPage({ owner, data, offers });
+            if (current) setPage({ owner, group, data, offers });
           } catch (e) {
             if (current) {
               setOfferError(true);
@@ -113,7 +122,7 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
     return () => {
       current = false;
     };
-  }, [owner, verified, offset, request, t.loadError, refreshAssurance]);
+  }, [owner, verified, offset, group, request, t.loadError, refreshAssurance]);
   const stop = useRef<(() => void) | null>(null);
   const refresh = useCallback(() => {
     stop.current?.();
@@ -125,7 +134,26 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
       return () => stop.current?.();
     }, [refresh]),
   );
-  const data = page && page.owner === owner ? page.data : null;
+  useFocusEffect(
+    useCallback(() => {
+      if (page?.owner !== owner || page?.group !== group) return;
+      const remaining = page.offers
+        ?.filter((offer) => offer.status === "offered")
+        .map(
+          (offer) => Date.parse(offer.expiresAt) - Date.parse(offer.serverNow),
+        );
+      if (!remaining?.length) return;
+      // Relative to server time so a wrong device clock cannot extend an offer.
+      const timer = setTimeout(
+        refresh,
+        Math.max(0, Math.min(...remaining)) + 1000,
+      );
+      return () => clearTimeout(timer);
+    }, [page, owner, group, refresh]),
+  );
+  const data =
+    page && page.owner === owner && page.group === group ? page.data : null;
+  const lifecycle = externalLifecycleCopy(locale);
   if (!verified)
     return (
       <Screen
@@ -187,12 +215,31 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
           ) : !pending ? (
             <Button
               label={t.newItem}
-              disabled={data.activeCount >= 10}
+              disabled={data.activeCount >= 30}
               onPress={() => router.push("/photo-draft")}
             />
           ) : null}
-          {data.activeCount >= 10 ? <Message>{t.limit}</Message> : null}
-          {!data.requests.length ? <Message>{t.noRequests}</Message> : null}
+          {data.activeCount >= 30 ? <Message>{t.limit}</Message> : null}
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {(["active", "history"] as const).map((tab) => (
+              <Choice
+                key={tab}
+                label={lifecycle[tab]}
+                selected={group === tab}
+                onPress={() => {
+                  setOffset(0);
+                  setGroup(tab);
+                }}
+              />
+            ))}
+          </View>
+          {!data.requests.length ? (
+            <Message>
+              {group === "active"
+                ? lifecycle.emptyActive
+                : lifecycle.emptyHistory}
+            </Message>
+          ) : null}
           {offerError ? (
             <>
               <Message tone="error">
@@ -208,6 +255,7 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
               owner={owner!}
               offer={page?.offers?.find((o) => o.requestId === r.id)}
               offersLoaded={page?.offers !== null}
+              onChanged={refresh}
             />
           ))}
           {data.requests.some((r) => r.status === "declined") ? (

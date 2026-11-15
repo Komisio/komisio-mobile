@@ -18,7 +18,7 @@ const sv = {
   brand: "Märke (valfritt)",
   condition: "Skick",
   notes: "Mer om varan (valfritt)",
-  desiredSellerAmount: "Vad vill du få för varan? (valfritt), {currency}",
+  desiredSellerAmount: "Vad vill du få för varan? (valfritt)",
   priceHint:
     "Butiken bestämmer försäljningspriset och lämnar ett separat erbjudande till dig.",
   reviewTitle: "Ditt utkast",
@@ -74,8 +74,7 @@ const copies: Record<Locale, Copy> = {
     brand: "Brand (optional)",
     condition: "Condition",
     notes: "More about the item (optional)",
-    desiredSellerAmount:
-      "What would you like to receive? (optional), {currency}",
+    desiredSellerAmount: "What would you like to receive? (optional)",
     priceHint:
       "The store sets the selling price and makes a separate offer to you.",
     reviewTitle: "Your draft",
@@ -126,8 +125,7 @@ const copies: Record<Locale, Copy> = {
     brand: "Merke (valgfritt)",
     condition: "Tilstand",
     notes: "Mer om varen (valgfritt)",
-    desiredSellerAmount:
-      "Hva ønsker du å få for varen? (valgfritt), {currency}",
+    desiredSellerAmount: "Hva ønsker du å få for varen? (valgfritt)",
     priceHint: "Butikken bestemmer salgsprisen og gir deg et eget tilbud.",
     reviewTitle: "Utkastet ditt",
     review: "Se over varen",
@@ -178,8 +176,7 @@ const copies: Record<Locale, Copy> = {
     brand: "Mærke (valgfrit)",
     condition: "Stand",
     notes: "Mere om varen (valgfrit)",
-    desiredSellerAmount:
-      "Hvad vil du gerne have for varen? (valgfrit), {currency}",
+    desiredSellerAmount: "Hvad vil du gerne have for varen? (valgfrit)",
     priceHint:
       "Butikken bestemmer salgsprisen og giver dig et særskilt tilbud.",
     reviewTitle: "Dit udkast",
@@ -231,8 +228,7 @@ const copies: Record<Locale, Copy> = {
     brand: "Merkki (valinnainen)",
     condition: "Kunto",
     notes: "Lisätiedot (valinnainen)",
-    desiredSellerAmount:
-      "Mitä haluaisit saada tuotteesta? (valinnainen), {currency}",
+    desiredSellerAmount: "Mitä haluaisit saada tuotteesta? (valinnainen)",
     priceHint:
       "Myymälä päättää myyntihinnan ja tekee sinulle erillisen tarjouksen.",
     reviewTitle: "Luonnoksesi",
@@ -284,8 +280,7 @@ const copies: Record<Locale, Copy> = {
     brand: "Marke (optional)",
     condition: "Zustand",
     notes: "Weitere Angaben (optional)",
-    desiredSellerAmount:
-      "Was möchtest du für den Artikel erhalten? (optional), {currency}",
+    desiredSellerAmount: "Was möchtest du für den Artikel erhalten? (optional)",
     priceHint:
       "Das Geschäft legt den Verkaufspreis fest und macht dir ein separates Angebot.",
     reviewTitle: "Dein Entwurf",
@@ -337,7 +332,7 @@ const copies: Record<Locale, Copy> = {
     brand: "Marca (opcional)",
     condition: "Estado",
     notes: "Más información (opcional)",
-    desiredSellerAmount: "¿Cuánto te gustaría recibir? (opcional), {currency}",
+    desiredSellerAmount: "¿Cuánto te gustaría recibir? (opcional)",
     priceHint:
       "La tienda fija el precio de venta y te hace una oferta por separado.",
     reviewTitle: "Tu borrador",
@@ -389,7 +384,7 @@ const copies: Record<Locale, Copy> = {
     brand: "Marca (facoltativa)",
     condition: "Condizioni",
     notes: "Altre informazioni (facoltative)",
-    desiredSellerAmount: "Quanto vorresti ricevere? (facoltativo), {currency}",
+    desiredSellerAmount: "Quanto vorresti ricevere? (facoltativo)",
     priceHint:
       "Il negozio stabilisce il prezzo di vendita e ti fa un'offerta separata.",
     reviewTitle: "La tua bozza",

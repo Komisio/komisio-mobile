@@ -78,13 +78,13 @@ export function PhotoCapacity({ count }: { count: number }) {
       >
         <Text style={uiStyles.label}>{label}</Text>
         <Text style={uiStyles.note}>
-          {t.remaining.replace("{count}", String(Math.max(0, 10 - count)))}
+          {t.remaining.replace("{count}", String(Math.max(0, 30 - count)))}
         </Text>
       </View>
       <View
         accessibilityRole="progressbar"
         accessibilityLabel={label}
-        accessibilityValue={{ min: 0, max: 10, now: count }}
+        accessibilityValue={{ min: 0, max: 30, now: count }}
         style={{
           height: 6,
           borderRadius: 3,
@@ -95,7 +95,7 @@ export function PhotoCapacity({ count }: { count: number }) {
         <View
           style={{
             height: 6,
-            width: `${Math.min(100, count * 10)}%`,
+            width: `${Math.min(100, (count / 30) * 100)}%`,
             backgroundColor: colors.brand,
           }}
         />
