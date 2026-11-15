@@ -34,11 +34,11 @@ const sv = {
   noRequests: "Du har inte skickat några förfrågningar ännu.",
   newItem: "Fota en vara",
   continueDraft: "Fortsätt med utkastet",
-  activeCount: "{count} av 10 aktiva varor",
+  activeCount: "{count} av 30 aktiva varor",
   waiting: "Väntar på butik",
   declined: "Nekad",
   limit:
-    "Du har redan 10 aktiva varor. En ny plats blir ledig när en vara är avslutad.",
+    "Du har redan 30 aktiva varor. En ny plats blir ledig när en vara är avslutad.",
   unavailable:
     "Butiken tar inte emot nya förfrågningar just nu. Välj en annan butik.",
   changed:
@@ -88,11 +88,11 @@ const en: Copy = {
   noRequests: "You have not sent any requests yet.",
   newItem: "Photograph an item",
   continueDraft: "Continue your draft",
-  activeCount: "{count} of 10 active items",
+  activeCount: "{count} of 30 active items",
   waiting: "Waiting for store",
   declined: "Declined",
   limit:
-    "You already have 10 active items. A place becomes available when an item is finished.",
+    "You already have 30 active items. A place becomes available when an item is finished.",
   unavailable:
     "The store is not accepting new requests right now. Choose another store.",
   changed:
@@ -139,11 +139,11 @@ const no: Copy = {
   noRequests: "Du har ikke sendt noen forespørsler ennå.",
   newItem: "Fotografer en vare",
   continueDraft: "Fortsett med utkastet",
-  activeCount: "{count} av 10 aktive varer",
+  activeCount: "{count} av 30 aktive varer",
   waiting: "Venter på butikk",
   declined: "Avslått",
   limit:
-    "Du har allerede 10 aktive varer. En plass blir ledig når en vare er avsluttet.",
+    "Du har allerede 30 aktive varer. En plass blir ledig når en vare er avsluttet.",
   unavailable:
     "Butikken tar ikke imot nye forespørsler akkurat nå. Velg en annen butikk.",
   changed:
@@ -191,11 +191,11 @@ const da: Copy = {
   noRequests: "Du har ikke sendt nogen forespørgsler endnu.",
   newItem: "Fotografér en vare",
   continueDraft: "Fortsæt med udkastet",
-  activeCount: "{count} af 10 aktive varer",
+  activeCount: "{count} af 30 aktive varer",
   waiting: "Venter på butik",
   declined: "Afvist",
   limit:
-    "Du har allerede 10 aktive varer. En plads bliver ledig, når en vare er afsluttet.",
+    "Du har allerede 30 aktive varer. En plads bliver ledig, når en vare er afsluttet.",
   unavailable:
     "Butikken modtager ikke nye forespørgsler lige nu. Vælg en anden butik.",
   changed:
@@ -242,11 +242,11 @@ const fi: Copy = {
   noRequests: "Et ole vielä lähettänyt ehdotuksia.",
   newItem: "Kuvaa tuote",
   continueDraft: "Jatka luonnosta",
-  activeCount: "{count}/10 aktiivista tuotetta",
+  activeCount: "{count}/30 aktiivista tuotetta",
   waiting: "Odottaa liikettä",
   declined: "Hylätty",
   limit:
-    "Sinulla on jo 10 aktiivista tuotetta. Paikka vapautuu, kun tuote on käsitelty loppuun.",
+    "Sinulla on jo 30 aktiivista tuotetta. Paikka vapautuu, kun tuote on käsitelty loppuun.",
   unavailable:
     "Liike ei ota vastaan uusia ehdotuksia juuri nyt. Valitse toinen liike.",
   changed:
@@ -296,11 +296,11 @@ const de: Copy = {
   noRequests: "Du hast noch keine Anfragen gesendet.",
   newItem: "Artikel fotografieren",
   continueDraft: "Entwurf fortsetzen",
-  activeCount: "{count} von 10 aktiven Artikeln",
+  activeCount: "{count} von 30 aktiven Artikeln",
   waiting: "Wartet auf Geschäft",
   declined: "Abgelehnt",
   limit:
-    "Du hast bereits 10 aktive Artikel. Ein Platz wird frei, wenn ein Artikel abgeschlossen ist.",
+    "Du hast bereits 30 aktive Artikel. Ein Platz wird frei, wenn ein Artikel abgeschlossen ist.",
   unavailable:
     "Das Geschäft nimmt gerade keine neuen Anfragen an. Wähle ein anderes Geschäft.",
   changed:
@@ -350,11 +350,11 @@ const es: Copy = {
   noRequests: "Aún no has enviado solicitudes.",
   newItem: "Fotografiar un artículo",
   continueDraft: "Continuar el borrador",
-  activeCount: "{count} de 10 artículos activos",
+  activeCount: "{count} de 30 artículos activos",
   waiting: "Esperando a la tienda",
   declined: "Rechazado",
   limit:
-    "Ya tienes 10 artículos activos. Habrá una plaza cuando se complete un artículo.",
+    "Ya tienes 30 artículos activos. Habrá una plaza cuando se complete un artículo.",
   unavailable:
     "La tienda no acepta nuevas solicitudes ahora. Elige otra tienda.",
   changed:
@@ -403,11 +403,11 @@ const it: Copy = {
   noRequests: "Non hai ancora inviato richieste.",
   newItem: "Fotografa un articolo",
   continueDraft: "Continua la bozza",
-  activeCount: "{count} di 10 articoli attivi",
+  activeCount: "{count} di 30 articoli attivi",
   waiting: "In attesa del negozio",
   declined: "Rifiutato",
   limit:
-    "Hai già 10 articoli attivi. Si libererà un posto quando un articolo sarà concluso.",
+    "Hai già 30 articoli attivi. Si libererà un posto quando un articolo sarà concluso.",
   unavailable:
     "Il negozio non accetta nuove richieste al momento. Scegli un altro negozio.",
   changed:

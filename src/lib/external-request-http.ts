@@ -25,6 +25,8 @@ const safeErrors = new Set([
   "PHOTO_IN_USE",
   "PLAN_READ_ONLY",
   "REQUEST_CONFLICT",
+  "REQUEST_CHANGED",
+  "REQUEST_NOT_FOUND",
   "INVALID_INPUT",
   "INVALID_IMAGE",
   "PHOTO_TOO_LARGE",
@@ -37,7 +39,10 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
     !page ||
     !Number.isInteger(page.activeCount) ||
     page.activeCount < 0 ||
-    page.activeCount > 10 ||
+    page.activeCount > 30 ||
+    (page.activeLimit !== undefined && page.activeLimit !== 30) ||
+    (page.historyCount !== undefined &&
+      (!Number.isSafeInteger(page.historyCount) || page.historyCount < 0)) ||
     typeof page.hasMore !== "boolean" ||
     !Array.isArray(page.requests) ||
     page.requests.length > 25
@@ -60,6 +65,28 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       photos: row.photos,
     });
     if (
+      (row.lifecycleStatus !== undefined &&
+        ![
+          "waiting",
+          "offered",
+          "accepted",
+          "open",
+          "received",
+          "registered",
+          "expired",
+          "rejected",
+          "declined",
+          "cancelled",
+          "withdrawn",
+          "sold",
+          "acquired",
+          "ended",
+        ].includes(row.lifecycleStatus)) ||
+      (row.active !== undefined && typeof row.active !== "boolean") ||
+      (row.canWithdraw !== undefined &&
+        (typeof row.canWithdraw !== "boolean" ||
+          (row.canWithdraw &&
+            (row.lifecycleStatus !== "waiting" || row.active !== true)))) ||
       typeof row.store_name !== "string" ||
       (row.price_basis !== undefined &&
         !["resale", "seller_amount"].includes(row.price_basis)) ||
@@ -88,9 +115,24 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       created_at: row.created_at,
       status: row.status,
       decline_note: row.decline_note,
+      ...(row.lifecycleStatus ? { lifecycleStatus: row.lifecycleStatus } : {}),
+      ...(row.active !== undefined ? { active: row.active } : {}),
+      ...(row.canWithdraw !== undefined
+        ? { canWithdraw: row.canWithdraw }
+        : {}),
     };
   });
-  return { activeCount: page.activeCount, hasMore: page.hasMore, requests };
+  return {
+    activeCount: page.activeCount,
+    hasMore: page.hasMore,
+    requests,
+    ...(page.activeLimit !== undefined
+      ? { activeLimit: page.activeLimit }
+      : {}),
+    ...(page.historyCount !== undefined
+      ? { historyCount: page.historyCount }
+      : {}),
+  };
 }
 export function createExternalRequestApi(deps: {
   endpoint: string | null;
@@ -101,7 +143,11 @@ export function createExternalRequestApi(deps: {
     init: RequestInit,
   ): Promise<Pick<Response, "status" | "text">>;
 }): ExternalRequestApi & {
-  list(offset?: number): Promise<ExternalRequestPage>;
+  list(
+    offset?: number,
+    group?: "all" | "active" | "history",
+  ): Promise<ExternalRequestPage>;
+  withdraw(id: string): Promise<void>;
 } {
   async function call(
     body: unknown,
@@ -163,7 +209,7 @@ export function createExternalRequestApi(deps: {
   return {
     async lookup(id) {
       const page = parseExternalPage(
-        await call({ action: "list", requestId: id }),
+        await call({ action: "list", requestId: id, protocol: 2 }),
       );
       if (
         page.hasMore ||
@@ -173,8 +219,18 @@ export function createExternalRequestApi(deps: {
         throw new Error("SUBMISSION_UNAVAILABLE");
       return page.requests[0] ?? null;
     },
-    async list(offset = 0) {
-      return parseExternalPage(await call({ action: "list", offset }));
+    async list(offset = 0, group = "all") {
+      return parseExternalPage(
+        await call({ action: "list", offset, group, protocol: 2 }),
+      );
+    },
+    async withdraw(id) {
+      // One irreversible withdrawal per immutable request; retries, including
+      // after a restart, reuse its identifier instead of creating a new intent.
+      await confirmed(
+        { action: "withdraw", requestId: id, operationId: id },
+        id,
+      );
     },
     async upload(id, bytes) {
       if (!bytes.length || bytes.length > 3 * 1024 * 1024)

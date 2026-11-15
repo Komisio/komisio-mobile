@@ -16,6 +16,7 @@ import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
 import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { useI18n } from "@/lib/i18n";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
+import { externalLifecycleCopy } from "@/lib/external-lifecycle-copy";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import {
   emptyItemDetails,
@@ -254,20 +255,31 @@ export function PhotoDetailsScreen() {
         ]}
       />
       <View style={{ gap: 6 }}>
-        <Field
-          label={t.desiredSellerAmount.replace("{currency}", currency)}
-          value={values.desiredSellerAmount}
-          maxLength={32}
-          editable={!busy}
-          onChangeText={(value) => change("desiredSellerAmount", value)}
-          inputMode="decimal"
-          keyboardType="decimal-pad"
-          returnKeyType="done"
-          inputAccessoryViewButtonLabel={t.keyboardDone}
-          submitBehavior="blurAndSubmit"
-          onSubmitEditing={Keyboard.dismiss}
-        />
+        <Text style={uiStyles.label}>{t.desiredSellerAmount}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ width: 160, maxWidth: "70%" }}>
+            <Field
+              label={`${t.desiredSellerAmount}, ${currency}`}
+              labelHidden
+              value={values.desiredSellerAmount}
+              maxLength={32}
+              editable={!busy}
+              onChangeText={(value) => change("desiredSellerAmount", value)}
+              inputMode="decimal"
+              keyboardType="decimal-pad"
+              returnKeyType="done"
+              inputAccessoryViewButtonLabel={t.keyboardDone}
+              submitBehavior="blurAndSubmit"
+              onSubmitEditing={Keyboard.dismiss}
+              placeholder=""
+            />
+          </View>
+          <Text style={uiStyles.body}>{currency}</Text>
+        </View>
         <Text style={uiStyles.note}>{t.priceHint}</Text>
+        <Text style={uiStyles.note}>
+          {externalLifecycleCopy(locale).minimumGuidance}
+        </Text>
       </View>
       {issues.length ? (
         <Message tone="error">

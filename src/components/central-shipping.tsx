@@ -136,17 +136,14 @@ export function CentralShipping({
       <>
         {parcel.items.length === 0 ? itemPreview : null}
         <Card>
-          <Text accessibilityRole="header" style={uiStyles.heading}>
-            {t.packageTitle.replace("{reference}", parcel.reference)}
-          </Text>
           {parcel.items.length ? (
             <>
               <Text style={uiStyles.label}>
                 {t.contents.replace("{count}", String(parcel.items.length))}
               </Text>
-              {parcel.items.map((i) => (
+              {parcel.items.map((i, index) => (
                 <Text key={i.offerId} style={uiStyles.body}>
-                  {i.description}
+                  {index + 1}. {i.description}
                 </Text>
               ))}
             </>
