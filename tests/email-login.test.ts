@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createEmailLogin } from "../src/lib/email-login.ts";
+import {
+  emailLoginCopy,
+  emailLoginError,
+} from "../src/lib/email-login-copy.ts";
 
 function fixture() {
   let owner = "phone-owner";
@@ -137,10 +141,45 @@ test("a late account change cannot redirect a credential write to the next user"
 });
 
 test("address conflicts remain explicit and never trigger signup or linking", async () => {
+  for (const body of [
+    { code: "email_exists" },
+    { code: 422, error_code: "email_exists", msg: "Already registered" },
+  ]) {
+    const f = fixture();
+    f.respond(Response.json(body, { status: 422 }));
+    await assert.rejects(f.api.begin("used@example.test"), (error: Error) => {
+      assert.equal(
+        emailLoginError("sv", error.message),
+        emailLoginCopy("sv").conflict,
+      );
+      return true;
+    });
+    assert.equal(f.requests.length, 1);
+  }
+});
+
+test("legacy rate limits are explained while unknown server details stay private", async () => {
   const f = fixture();
-  f.respond(Response.json({ code: "email_exists" }, { status: 422 }));
-  await assert.rejects(f.api.begin("used@example.test"), /email_exists/);
-  assert.equal(f.requests.length, 1);
+  f.respond(
+    Response.json(
+      { code: 429, error_code: "over_email_send_rate_limit" },
+      { status: 429 },
+    ),
+  );
+  await assert.rejects(f.api.begin("seller@example.test"), (error: Error) => {
+    assert.equal(
+      emailLoginError("sv", error.message),
+      emailLoginCopy("sv").wait,
+    );
+    return true;
+  });
+  f.respond(
+    Response.json({ code: 500, msg: "Private diagnostic" }, { status: 500 }),
+  );
+  await assert.rejects(
+    f.api.begin("seller@example.test"),
+    /^Error: EMAIL_UNAVAILABLE$/,
+  );
 });
 
 test("secure password change supports an email reauthentication code and empty success response", async () => {
