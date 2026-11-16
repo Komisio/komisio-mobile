@@ -291,7 +291,6 @@ export function CentralShipping({
             {!selectionFits ? (
               <Message tone="error">{t.selectionTooLarge}</Message>
             ) : null}
-            <Text style={uiStyles.note}>{addressCopy.limits}</Text>
             {invalid || change.status === "rejected" ? (
               <Message tone="error">{addressCopy.bookingInvalid}</Message>
             ) : null}
