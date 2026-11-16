@@ -6,6 +6,7 @@ import {
   parcelTrackingUrl,
   shippingOutcome,
   shippingMeasure,
+  parcelSelectionFits,
 } from "../src/lib/central-shipping.ts";
 
 const id = "f7800000-0000-4000-8000-000000000601",
@@ -42,6 +43,57 @@ const state = {
     createdAt: "2026-11-12T10:00:00Z",
   },
 };
+
+test("five 400 g items fit; remaining items make a separate package", () => {
+  const items = Array.from({ length: 10 }, (_, n) => ({
+    offerId: `f7800000-0000-4000-8000-${String(401 + n).padStart(12, "0")}`,
+    handoverId: id,
+    description: "Dress",
+    reference: `H-${n + 1}`,
+    status: "open" as const,
+    selectionWeightG: 400,
+  }));
+  const ids = items.map((i) => i.offerId);
+  assert.equal(parcelSelectionFits(items, ids.slice(0, 5), 2000), true);
+  assert.equal(parcelSelectionFits(items, ids.slice(0, 6), 2000), false);
+  assert.equal(parcelSelectionFits(items, ids.slice(5), 2000), true);
+  assert.equal(parcelSelectionFits(items, ids, null), true);
+  const unknown = [{ ...items[0], selectionWeightG: undefined }, items[1]];
+  assert.equal(parcelSelectionFits(unknown, [ids[0]], 2000), true);
+  assert.equal(parcelSelectionFits(unknown, ids.slice(0, 2), 2000), false);
+  assert.equal(parcelSelectionFits(items, [id], 2000), false);
+  assert.equal(
+    parcelSelectionFits(
+      [{ ...items[0], selectionWeightG: 2100 }],
+      [ids[0]],
+      2000,
+    ),
+    false,
+  );
+  const read = {
+    offerId: offer,
+    available: true,
+    parcel: null,
+    eligibleItems: items,
+    selectionWeightLimitG: 2000,
+  };
+  assert.equal(parseShippingState(read, offer).selectionWeightLimitG, 2000);
+  assert.throws(() =>
+    parseShippingState({ ...read, selectionWeightLimitG: 3000 }, offer),
+  );
+  for (const selectionWeightG of [0, -1, 1.5, 100001, "400", null]) {
+    assert.throws(() =>
+      parseShippingState(
+        { ...read, eligibleItems: [{ ...items[0], selectionWeightG }] },
+        offer,
+      ),
+    );
+  }
+  assert.deepEqual(shippingOutcome(409, { error: "PARCEL_WEIGHT_LIMIT" }, id), {
+    kind: "conflict",
+    code: "PARCEL_WEIGHT_LIMIT",
+  });
+});
 test("postal input rejects injected destinations and invalid measurements", () => {
   assert.deepEqual(parseBookParcel(command, offer), command);
   for (const extra of [
