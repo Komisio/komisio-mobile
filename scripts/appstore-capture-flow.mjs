@@ -146,7 +146,8 @@ const tapId = (id) => ({ tapOn: { id } });
 export function captureFlow(locale) {
   if (!locales.includes(locale)) throw new Error("Unsupported locale");
   const sv = locale === "sv-SE";
-  const store = sv ? "Andra varvet — Demo" : "Second Story — Demo";
+  // Reuse the current App Review seller and its approved synthetic store.
+  const store = "Second Story — Demo";
   const storeChoice = sv ? "Sälj via en butik" : "Sell through a store";
   const homeTitle = sv
     ? "Låt dina fina saker leva vidare"

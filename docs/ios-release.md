@@ -148,7 +148,7 @@ native app and required iPad resolution; it is not a marketing screenshot.
 For the seven views in both languages, create project variables
 `MAESTRO_SCREENSHOT_EMAIL` and `MAESTRO_SCREENSHOT_PASSWORD` with **secret**
 visibility in the EAS **preview** environment. Use only an owner-approved
-synthetic seller account that can access the two configured demo stores. Never
+synthetic seller account that can access Second Story — Demo. Never
 use an owner/admin login. Do not put passwords in commands, workflow inputs,
 source files or `EXPO_PUBLIC_*` variables. The production build environment does
 not need these credentials. A seller with TOTP requires a separate workflow;
