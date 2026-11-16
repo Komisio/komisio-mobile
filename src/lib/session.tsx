@@ -13,6 +13,7 @@ import { createAuthBootstrap } from "./auth-bootstrap";
 import { setCommandUser } from "./command-storage";
 import { sellerPush } from "./push-runtime";
 import { hasVerifiedEmail } from "./identity-gates";
+import { watchAppleRevocation } from "./apple-credential";
 
 export type AppStore = { id: string; name: string; slug: string };
 export type SellerAccount = {
@@ -67,6 +68,34 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     account: SellerAccount | null | "failed";
   } | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const appleSubject = session?.user.identities?.find(
+    (i) => i.provider === "apple",
+  )?.identity_data?.sub;
+  const userId = session?.user.id;
+  useEffect(() => {
+    if (!userId || typeof appleSubject !== "string") return;
+    let active = true;
+    const stop = watchAppleRevocation(appleSubject, () => {
+      void (async () => {
+        const current = await supabase.auth.getSession();
+        if (
+          !active ||
+          current.error ||
+          current.data.session?.user.id !== userId
+        )
+          return;
+        try {
+          setCommandUser(null);
+        } catch {}
+        // Use Supabase's local logout, not Apple's interactive signOutAsync.
+        await supabase.auth.signOut({ scope: "local" });
+      })().catch(() => {});
+    });
+    return () => {
+      active = false;
+      stop();
+    };
+  }, [userId, appleSubject]);
 
   useEffect(() => {
     secureStorage

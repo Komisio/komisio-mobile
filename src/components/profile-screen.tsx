@@ -8,6 +8,7 @@ import { pushCopy } from "@/lib/push-copy";
 import { hasVerifiedEmail, hasVerifiedPhone } from "@/lib/identity-gates";
 import { CentralShippingAddress } from "./central-shipping-address";
 import { accountAuthCopy } from "@/lib/account-auth-copy";
+import { accountDeletionCopy } from "@/lib/account-deletion-copy";
 import { LoginOptions } from "./login-options";
 import { PrivacyLink } from "./privacy-link";
 import {
@@ -117,6 +118,12 @@ export function ProfileScreen() {
         </View>
       ) : null}
       <PrivacyLink />
+      {session ? (
+        <NavigationRow
+          label={accountDeletionCopy(locale).title}
+          onPress={() => router.push("/account-deletion")}
+        />
+      ) : null}
     </Screen>
   );
 }

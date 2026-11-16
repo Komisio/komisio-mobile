@@ -6,6 +6,7 @@ import { runInNewContext } from "node:vm";
 import { dictionaries } from "../src/lib/dictionaries.ts";
 import { locales } from "../src/lib/locale.ts";
 import { pushCopy } from "../src/lib/push-copy.ts";
+import { accountDeletionCopy } from "../src/lib/account-deletion-copy.ts";
 
 const require = createRequire(import.meta.url);
 function compile(file: string, modules: Record<string, unknown>) {
@@ -62,6 +63,7 @@ test("profile exposes one store action, language detail, financial links and log
       CentralShippingAddress: "CentralShippingAddress",
     },
     "@/lib/push-copy": { pushCopy },
+    "@/lib/account-deletion-copy": { accountDeletionCopy },
     react: { useState: (value: unknown) => [value, () => {}] },
     "react-native": {
       Text: "Text",
@@ -129,6 +131,7 @@ test("profile exposes one store action, language detail, financial links and log
     "/notifications",
     "/bank-account",
     "/agreement",
+    "/account-deletion",
     "logout",
   ]);
   assert.ok(
