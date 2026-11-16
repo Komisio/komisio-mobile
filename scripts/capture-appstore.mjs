@@ -27,8 +27,8 @@ const mode = process.env.CAPTURE_MODE;
 const target = process.env.CAPTURE_DEVICE ?? "ipad";
 const buildId = process.env.CAPTURE_BUILD_ID;
 function preflight() {
-  if (!["ipad", "iphone"].includes(target))
-    throw new Error("Choose ipad or iphone capture device.");
+  if (!["ipad", "iphone", "iphone-large"].includes(target))
+    throw new Error("Choose ipad, iphone or iphone-large capture device.");
   if (!["probe", "capture"].includes(mode))
     throw new Error("Choose probe or capture mode.");
   if (
@@ -108,8 +108,8 @@ try {
     throw new Error("The archive must be the Komisio iOS simulator app.");
   }
   const appVersion = plist("CFBundleShortVersionString");
-  if (appVersion !== "2.0.0")
-    throw new Error("This capture is scoped to Komisio 2.0.0.");
+  if (appVersion !== "2.0.2")
+    throw new Error("This capture is scoped to Komisio 2.0.2.");
   const listing = JSON.parse(sim(["list", "--json"], "List simulator devices"));
   // Installed device types alone do not establish runtime compatibility.
   console.log(
@@ -198,7 +198,7 @@ try {
   mkdirSync(output, { recursive: true });
   const expected =
     mode === "probe"
-      ? ["probe-store-picker.png"]
+      ? ["probe-home.png"]
       : locales.flatMap((locale) =>
           screens.map((_, index) => `${screenshotName(locale, index)}.png`),
         );
@@ -212,7 +212,7 @@ try {
       ? [
           [
             "probe",
-            `appId: ${appId}\n---\n- launchApp:\n    clearState: true\n    clearKeychain: true\n- extendedWaitUntil:\n    visible: "(Choose store|Välj butik)"\n    timeout: 60000\n- takeScreenshot: probe-store-picker\n`,
+            `appId: ${appId}\n---\n- launchApp:\n    clearState: true\n    clearKeychain: true\n- extendedWaitUntil:\n    visible: "(Sell through a store|Sälj via en butik)"\n    timeout: 60000\n- takeScreenshot: probe-home\n`,
           ],
         ]
       : locales.map((locale) => [locale, captureFlow(locale)]);
@@ -253,19 +253,27 @@ try {
       );
       if (hierarchy.status === 0) {
         const text = hierarchy.stdout ?? "";
-        console.log(`Current login errors: ${JSON.stringify(safeLoginFindings(text))}`);
-        console.log(`Current UI markers: ${JSON.stringify({
-          emailField: text.includes("login-email"),
-          passwordField: text.includes("login-password"),
-          overviewId: text.includes("tab-overview"),
-          profileId: text.includes("tab-profile"),
-          overviewLabel: text.includes("Översikt") || text.includes("Overview"),
-          profileLabel: text.includes("Profil") || text.includes("Profile"),
-          expectedEmailPresent: text.includes(process.env.MAESTRO_SCREENSHOT_EMAIL),
-          storePicker: text.includes("Choose store") || text.includes("Välj butik"),
-          springboard: /SpringBoard|Springboard/.test(text),
-          passwordPrompt: /Save Password|Passwords|Spara lösenord/.test(text),
-        })}`);
+        console.log(
+          `Current login errors: ${JSON.stringify(safeLoginFindings(text))}`,
+        );
+        console.log(
+          `Current UI markers: ${JSON.stringify({
+            emailField: text.includes("login-email"),
+            passwordField: text.includes("login-password"),
+            overviewId: text.includes("tab-overview"),
+            profileId: text.includes("tab-profile"),
+            overviewLabel:
+              text.includes("Översikt") || text.includes("Overview"),
+            profileLabel: text.includes("Profil") || text.includes("Profile"),
+            expectedEmailPresent: text.includes(
+              process.env.MAESTRO_SCREENSHOT_EMAIL,
+            ),
+            storePicker:
+              text.includes("Choose store") || text.includes("Välj butik"),
+            springboard: /SpringBoard|Springboard/.test(text),
+            passwordPrompt: /Save Password|Passwords|Spara lösenord/.test(text),
+          })}`,
+        );
         // A disposable simulator contains only the authorized synthetic demo.
         // Retain a diagnostic image only after credential fields have gone and
         // the hierarchy contains no literal password. Never export raw reports.
@@ -277,11 +285,29 @@ try {
         ) {
           const diagnosticOutput = resolve("artifacts/capture-diagnostic");
           mkdirSync(diagnosticOutput, { recursive: true });
-          sim(["io", device, "screenshot", join(diagnosticOutput, "failed-screen.png")], "Capture diagnostic screen");
-          writeFileSync(join(diagnosticOutput, "manifest.json"), JSON.stringify({ buildId, target, status: "failed", marketingReady: false }));
+          sim(
+            [
+              "io",
+              device,
+              "screenshot",
+              join(diagnosticOutput, "failed-screen.png"),
+            ],
+            "Capture diagnostic screen",
+          );
+          writeFileSync(
+            join(diagnosticOutput, "manifest.json"),
+            JSON.stringify({
+              buildId,
+              target,
+              status: "failed",
+              marketingReady: false,
+            }),
+          );
         }
       } else {
-        console.log("Post-failure UI inspection unavailable; raw output withheld.");
+        console.log(
+          "Post-failure UI inspection unavailable; raw output withheld.",
+        );
       }
       const diagnostics = temporary;
       if (existsSync(diagnostics)) {

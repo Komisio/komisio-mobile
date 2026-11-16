@@ -142,13 +142,13 @@ npx eas-cli@latest workflow:run .eas/workflows/capture-appstore.yml \
   -F build_id=<simulator-build-id> -F mode=probe
 ```
 
-`probe` captures only the store picker, without login. It checks the worker,
+`probe` captures only Home, without login. It checks the worker,
 native app and required iPad resolution; it is not a marketing screenshot.
 
-For the five seller views in both languages, create project variables
+For the seven views in both languages, create project variables
 `MAESTRO_SCREENSHOT_EMAIL` and `MAESTRO_SCREENSHOT_PASSWORD` with **secret**
 visibility in the EAS **preview** environment. Use only an owner-approved
-synthetic seller account that can access the two configured demo stores. Never
+synthetic seller account that can access Second Story — Demo. Never
 use an owner/admin login. Do not put passwords in commands, workflow inputs,
 source files or `EXPO_PUBLIC_*` variables. The production build environment does
 not need these credentials. A seller with TOTP requires a separate workflow;
@@ -161,11 +161,11 @@ npx eas-cli@latest workflow:run .eas/workflows/capture-appstore.yml \
 
 The capture runs the ordinary app in a disposable 13-inch iPad Pro simulator
 on an EAS macOS worker. It selects the language/store through the UI, signs in,
-and visits Overview, My Items, Money, Store and Profile. It performs no financial
+and visits Home, the empty photo step, Overview, My Items, Money, Store and Profile. It performs no financial
 writes. Maestro runs locally on that worker; no Maestro Cloud subscription or
 Expo Simulators partner access is needed. Its diagnostic reports and command
 output can contain expanded credentials, so they are never uploaded or printed.
-The marketing artifact contains only the ten explicitly named PNGs and a
+The marketing artifact contains only the fourteen explicitly named PNGs and a
 build/device/dimensions manifest, after every flow succeeds. A fresh output
 directory is required. A failed run may publish a separate `capture-diagnostic`
 image only after the credential fields have gone and no literal password is
@@ -174,7 +174,8 @@ never upload that image to App Store Connect. Raw reports remain on the worker.
 
 To replace an iPhone capture from the same app build, add `-F device=iphone`
 to the capture command. This selects an iPhone 16 Pro and checks medium
-Dynamic Island screenshot dimensions. The default `device=ipad` uses a
+Dynamic Island screenshot dimensions. Use `-F device=iphone-large` for an
+iPhone 16 Pro Max with native 1320×2868 captures. The default `device=ipad` uses a
 13-inch iPad Pro. The runner matches the device to a compatible installed
 runtime instead of assuming the newest runtime supports every device.
 
@@ -182,7 +183,7 @@ Download the `native-appstore-screenshots` artifact and visually inspect every
 image: correct language, store/currency, loaded images and amounts, no errors,
 truncation or title/price overlap. The dimension check accepts only native
 portrait 2064×2752 or 2048×2732 iPad captures, or 1206×2622 / 1179×2556
-iPhone captures when explicitly selected. It does not prove the visual content is
+iPhone captures, or 1320×2868 for `iphone-large`, when explicitly selected. It does not prove the visual content is
 correct. Upload reviewed captures to their matching App Store locales manually;
 this workflow never submits or releases the app. Remove the capture credentials
 from EAS when no longer needed through the account's normal secret management.

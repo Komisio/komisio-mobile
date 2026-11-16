@@ -1,6 +1,14 @@
 // JSON command arrays are valid YAML. Values are data, never shell fragments.
 export const appId = "com.inority.komisio";
-export const screens = ["overview", "my-items", "money", "store", "profile"];
+export const screens = [
+  "home",
+  "photos",
+  "overview",
+  "my-items",
+  "money",
+  "store",
+  "profile",
+];
 export const locales = ["sv-SE", "en-GB"];
 
 export function safeLoginFindings(text) {
@@ -86,12 +94,13 @@ export function selectCaptureSimulator(
   minimumVersion,
   target = "ipad",
 ) {
-  if (!["ipad", "iphone"].includes(target))
+  if (!["ipad", "iphone", "iphone-large"].includes(target))
     throw new Error("Unsupported capture device");
   const types = listing.devicetypes.filter((d) =>
     target === "ipad"
       ? /^iPad Pro 13-inch/.test(d.name)
-      : d.name === "iPhone 16 Pro",
+      : d.name ===
+        (target === "iphone-large" ? "iPhone 16 Pro Max" : "iPhone 16 Pro"),
   );
   const runtimes = listing.runtimes
     .filter(
@@ -137,20 +146,37 @@ const tapId = (id) => ({ tapOn: { id } });
 export function captureFlow(locale) {
   if (!locales.includes(locale)) throw new Error("Unsupported locale");
   const sv = locale === "sv-SE";
-  const store = sv ? "Andra varvet — Demo" : "Second Story — Demo";
+  // Reuse the current App Review seller and its approved synthetic store.
+  const store = "Second Story — Demo";
+  const storeChoice = sv ? "Sälj via en butik" : "Sell through a store";
+  const homeTitle = sv
+    ? "Låt dina fina saker leva vidare"
+    : "Give your favourite things a new life";
   const ready = [
     sv ? "Senaste försäljningarna" : "Recent sales",
     sv ? "[1-9][0-9]* varor" : "[1-9][0-9]* items",
     sv ? "Tillgängligt saldo" : "Available balance",
-    sv ? "[1-9][0-9]* varor" : "[1-9][0-9]* items",
     sv ? "Inloggad som" : "Signed in as",
   ];
   const commands = [
     { launchApp: { clearState: true, clearKeychain: true } },
+    wait({ id: "tab-home" }),
+    { tapOn: "(Sell through a store|Sälj via en butik)" },
     wait("(Choose store|Välj butik)"),
     { tapOn: "(Language: English|Språk: Svenska)" },
     { tapOn: sv ? "Svenska" : "English" },
     { tapOn: sv ? "Stäng" : "Close" },
+    tapId("tab-home"),
+    wait(homeTitle),
+    { waitForAnimationToEnd: { timeout: 10000 } },
+    { takeScreenshot: { path: screenshotName(locale, 0) } },
+    { tapOn: sv ? "Sälj via Komisio" : "Sell through Komisio" },
+    wait(sv ? "Börja fota" : "Start taking photos"),
+    { waitForAnimationToEnd: { timeout: 10000 } },
+    { takeScreenshot: { path: screenshotName(locale, 1) } },
+    { tapOn: sv ? "Stäng" : "Close" },
+    wait(homeTitle),
+    { tapOn: storeChoice },
     {
       scrollUntilVisible: {
         element: { text: literal(store) },
@@ -184,22 +210,43 @@ export function captureFlow(locale) {
     // iPad's password-saving modal is inaccessible to Maestro (#3277).
     // Relaunch after the login form disappears, preserving the session.
     // This dismisses transient OS UI without saving credentials or changing auth.
-    { extendedWaitUntil: { notVisible: { id: "login-email" }, timeout: 60000 } },
+    {
+      extendedWaitUntil: { notVisible: { id: "login-email" }, timeout: 60000 },
+    },
     { launchApp: { clearState: false, clearKeychain: false, stopApp: true } },
     wait({ id: "tab-overview" }),
   ];
-  const tabs = ["overview", "items", "money", "store", "profile"];
+  // The store catalogue now lives under Home, rather than in its own tab.
+  commands.push(tapId("tab-home"), wait(homeTitle), { tapOn: storeChoice });
+  commands.push({
+    scrollUntilVisible: {
+      element: { text: literal(store) },
+      direction: "DOWN",
+      timeout: 60000,
+    },
+  });
+  commands.push(
+    { tapOn: literal(store) },
+    wait(sv ? "[1-9][0-9]* varor" : "[1-9][0-9]* items"),
+  );
+  commands.push({ waitForAnimationToEnd: { timeout: 10000 } });
+  commands.push({ takeScreenshot: { path: screenshotName(locale, 5) } });
+  const tabs = ["overview", "items", "money", "profile"];
   for (const [index, tab] of tabs.entries()) {
     commands.push(tapId(`tab-${tab}`), wait(ready[index]));
     // Wait for native transitions to settle; no financial controls are tapped.
     commands.push({ waitForAnimationToEnd: { timeout: 10000 } });
-    commands.push({ takeScreenshot: { path: screenshotName(locale, index) } });
+    commands.push({
+      takeScreenshot: {
+        path: screenshotName(locale, index === 3 ? 6 : index + 2),
+      },
+    });
   }
   return `appId: ${appId}\n---\n${JSON.stringify(commands, null, 2)}\n`;
 }
 
 export function screenshotSize(bytes, target = "ipad") {
-  if (!["ipad", "iphone"].includes(target))
+  if (!["ipad", "iphone", "iphone-large"].includes(target))
     throw new Error("Unsupported capture device");
   if (
     bytes.length < 24 ||
@@ -218,10 +265,12 @@ export function screenshotSize(bytes, target = "ipad") {
           [2064, 2752],
           [2048, 2732],
         ]
-      : [
-          [1206, 2622],
-          [1179, 2556],
-        ];
+      : target === "iphone-large"
+        ? [[1320, 2868]]
+        : [
+            [1206, 2622],
+            [1179, 2556],
+          ];
   if (!allowed.some(([w, h]) => width === w && height === h)) {
     throw new Error(
       `Unexpected ${target} screenshot dimensions: ${width}x${height}`,
