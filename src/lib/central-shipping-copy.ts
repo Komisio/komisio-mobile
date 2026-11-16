@@ -21,8 +21,6 @@ const sv = {
   length: "Längsta sidan (cm)",
   width: "Mellersta sidan (cm)",
   height: "Kortaste sidan (cm)",
-  limits:
-    "Väg och mät paketet. Max 20 kg och 150 cm på längsta sidan. Längd + omkrets får vara högst 300 cm.",
   book: "Hämta fraktkod",
   invalid: "Kontrollera adressen och paketets vikt och mått.",
   contactUnsupported:
@@ -72,8 +70,6 @@ const copy: Record<Locale, Copy> = {
     length: "Longest side (cm)",
     width: "Middle side (cm)",
     height: "Shortest side (cm)",
-    limits:
-      "Weigh and measure the parcel. Max 20 kg and 150 cm on the longest side. Length + circumference must not exceed 300 cm.",
     book: "Get shipping code",
     invalid: "Check the address, parcel weight and dimensions.",
     contactUnsupported:
@@ -120,8 +116,6 @@ const copy: Record<Locale, Copy> = {
     length: "Lengste side (cm)",
     width: "Mellomste side (cm)",
     height: "Korteste side (cm)",
-    limits:
-      "Vei og mål pakken. Maks 20 kg og 150 cm på lengste side. Lengde + omkrets kan være høyst 300 cm.",
     book: "Hent fraktkode",
     invalid: "Kontroller adressen, pakkens vekt og mål.",
     contactUnsupported:
@@ -168,8 +162,6 @@ const copy: Record<Locale, Copy> = {
     length: "Længste side (cm)",
     width: "Mellemste side (cm)",
     height: "Korteste side (cm)",
-    limits:
-      "Vej og mål pakken. Maks. 20 kg og 150 cm på længste side. Længde + omkreds må højst være 300 cm.",
     book: "Hent fragtkode",
     invalid: "Kontrollér adressen og pakkens vægt og mål.",
     contactUnsupported:
@@ -216,8 +208,6 @@ const copy: Record<Locale, Copy> = {
     length: "Pisin sivu (cm)",
     width: "Keskipitkä sivu (cm)",
     height: "Lyhin sivu (cm)",
-    limits:
-      "Punnitse ja mittaa paketti. Enintään 20 kg ja pisin sivu 150 cm. Pituus + ympärysmitta enintään 300 cm.",
     book: "Hae lähetyskoodi",
     invalid: "Tarkista osoite sekä paketin paino ja mitat.",
     contactUnsupported:
@@ -264,8 +254,6 @@ const copy: Record<Locale, Copy> = {
     length: "Längste Seite (cm)",
     width: "Mittlere Seite (cm)",
     height: "Kürzeste Seite (cm)",
-    limits:
-      "Wiege und miss das Paket. Max. 20 kg und 150 cm an der längsten Seite. Länge + Umfang höchstens 300 cm.",
     book: "Versandcode abrufen",
     invalid: "Prüfe Adresse, Gewicht und Paketmaße.",
     contactUnsupported:
@@ -312,8 +300,6 @@ const copy: Record<Locale, Copy> = {
     length: "Lado más largo (cm)",
     width: "Lado intermedio (cm)",
     height: "Lado más corto (cm)",
-    limits:
-      "Pesa y mide el paquete. Máximo 20 kg y 150 cm en el lado más largo. Longitud + perímetro: máximo 300 cm.",
     book: "Obtener código de envío",
     invalid: "Comprueba la dirección, el peso y las medidas.",
     contactUnsupported:
@@ -361,8 +347,6 @@ const copy: Record<Locale, Copy> = {
     length: "Lato più lungo (cm)",
     width: "Lato intermedio (cm)",
     height: "Lato più corto (cm)",
-    limits:
-      "Pesa e misura il pacco. Massimo 20 kg e 150 cm sul lato più lungo. Lunghezza + circonferenza: massimo 300 cm.",
     book: "Ottieni codice di spedizione",
     invalid: "Controlla indirizzo, peso e dimensioni del pacco.",
     contactUnsupported:

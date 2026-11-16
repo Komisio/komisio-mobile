@@ -9,7 +9,6 @@ type Copy = {
   pending: string;
   required: string;
   cancel: string;
-  limits: string;
   bookingInvalid: string;
 };
 const copy: Record<Locale, Copy> = {
@@ -25,8 +24,6 @@ const copy: Record<Locale, Copy> = {
     required:
       "Du kan spara din adress när du har tackat ja till ditt första erbjudande från Komisio.",
     cancel: "Avbryt",
-    limits:
-      "Packa stadigt. Max 20 kg och 150 cm på längsta sidan. Längd + omkrets: högst 300 cm.",
     bookingInvalid: "Kontrollera avsändaradressen och försök igen.",
   },
   en: {
@@ -40,8 +37,6 @@ const copy: Record<Locale, Copy> = {
     required:
       "You can save your address after accepting your first Komisio offer.",
     cancel: "Cancel",
-    limits:
-      "Pack securely. Max 20 kg and 150 cm on the longest side. Length + girth: max 300 cm.",
     bookingInvalid: "Check the sender address and try again.",
   },
   no: {
@@ -56,8 +51,6 @@ const copy: Record<Locale, Copy> = {
     required:
       "Du kan lagre adressen etter at du har godtatt ditt første tilbud fra Komisio.",
     cancel: "Avbryt",
-    limits:
-      "Pakk godt. Maks 20 kg og 150 cm på lengste side. Lengde + omkrets: maks 300 cm.",
     bookingInvalid: "Kontroller avsenderadressen og prøv igjen.",
   },
   da: {
@@ -72,8 +65,6 @@ const copy: Record<Locale, Copy> = {
     required:
       "Du kan gemme adressen, når du har accepteret dit første tilbud fra Komisio.",
     cancel: "Annuller",
-    limits:
-      "Pak forsvarligt. Maks. 20 kg og 150 cm på længste side. Længde + omkreds: maks. 300 cm.",
     bookingInvalid: "Kontrollér afsenderadressen og prøv igen.",
   },
   fi: {
@@ -89,8 +80,6 @@ const copy: Record<Locale, Copy> = {
     required:
       "Voit tallentaa osoitteen hyväksyttyäsi ensimmäisen Komisio-tarjouksesi.",
     cancel: "Peruuta",
-    limits:
-      "Pakkaa huolellisesti. Enintään 20 kg ja pisin sivu 150 cm. Pituus + ympärysmitta: enintään 300 cm.",
     bookingInvalid: "Tarkista lähettäjän osoite ja yritä uudelleen.",
   },
   de: {
@@ -105,8 +94,6 @@ const copy: Record<Locale, Copy> = {
     required:
       "Nach Annahme deines ersten Komisio-Angebots kannst du die Adresse speichern.",
     cancel: "Abbrechen",
-    limits:
-      "Sicher verpacken. Max. 20 kg und 150 cm längste Seite. Länge + Umfang: max. 300 cm.",
     bookingInvalid: "Absenderadresse prüfen und erneut versuchen.",
   },
   es: {
@@ -121,8 +108,6 @@ const copy: Record<Locale, Copy> = {
     required:
       "Puedes guardar tu dirección tras aceptar tu primera oferta de Komisio.",
     cancel: "Cancelar",
-    limits:
-      "Embala bien. Máx. 20 kg y 150 cm en el lado más largo. Longitud + perímetro: máx. 300 cm.",
     bookingInvalid:
       "Comprueba la dirección del remitente e inténtalo de nuevo.",
   },
@@ -138,8 +123,6 @@ const copy: Record<Locale, Copy> = {
     required:
       "Puoi salvare l’indirizzo dopo aver accettato la prima offerta di Komisio.",
     cancel: "Annulla",
-    limits:
-      "Imballa bene. Max 20 kg e 150 cm sul lato più lungo. Lunghezza + circonferenza: max 300 cm.",
     bookingInvalid: "Controlla l’indirizzo del mittente e riprova.",
   },
 };
