@@ -434,7 +434,8 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 23);
+  assert.equal(routes().length, 24);
+  assert.ok(routes().includes("account-deletion"));
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
   state = { ...state, store: null };
@@ -454,6 +455,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "account-auth",
     "login",
     "language",
+    "account-deletion",
     "account-methods",
     "email-login",
     "notifications",

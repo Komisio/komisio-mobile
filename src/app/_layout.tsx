@@ -120,6 +120,16 @@ function Routes() {
 
       <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
         <Stack.Screen
+          name="account-deletion"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/profile",
+              d.close,
+              navigation.canGoBack(),
+            )
+          }
+        />
+        <Stack.Screen
           name="account-methods"
           options={({ navigation }) =>
             detailHeaderOptions(
