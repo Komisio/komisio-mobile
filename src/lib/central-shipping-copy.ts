@@ -4,6 +4,10 @@ const sv = {
   title: "Skicka till Komisio",
   intro: "Komisio betalar frakten. Ditt avtalade belopp påverkas inte.",
   selectItems: "Välj varor till paketet",
+  packageLimit:
+    "Paketet har plats för de valda varorna. Boka frakten och välj sedan resterande varor till ett nytt paket.",
+  selectionTooLarge:
+    "Välj färre varor till paketet. Om varan inte kan bokas ensam, kontakta Komisio.",
   selectionHint:
     "Den här varan ingår. Lägg till fler godkända varor som du vill skicka samtidigt.",
   selectedCount: "{count} varor i ett paket",
@@ -51,6 +55,10 @@ const copy: Record<Locale, Copy> = {
     title: "Ship to Komisio",
     intro: "Komisio pays for shipping. Your agreed amount stays the same.",
     selectItems: "Choose items for the parcel",
+    packageLimit:
+      "This parcel has room for the selected items. Book it, then choose the remaining items for a new parcel.",
+    selectionTooLarge:
+      "Select fewer items for this parcel. If an item cannot be booked alone, contact Komisio.",
     selectionHint:
       "This item is included. Add other accepted items to send together.",
     selectedCount: "{count} items in one parcel",
@@ -95,6 +103,10 @@ const copy: Record<Locale, Copy> = {
     title: "Send til Komisio",
     intro: "Komisio betaler frakten. Det avtalte beløpet ditt endres ikke.",
     selectItems: "Velg varer til pakken",
+    packageLimit:
+      "Pakken har plass til de valgte varene. Bestill frakten og velg deretter resten til en ny pakke.",
+    selectionTooLarge:
+      "Velg færre varer til pakken. Kontakt Komisio hvis en vare ikke kan bestilles alene.",
     selectionHint:
       "Denne varen er med. Legg til flere godkjente varer du vil sende sammen.",
     selectedCount: "{count} varer i én pakke",
@@ -139,6 +151,10 @@ const copy: Record<Locale, Copy> = {
     title: "Send til Komisio",
     intro: "Komisio betaler fragten. Dit aftalte beløb ændres ikke.",
     selectItems: "Vælg varer til pakken",
+    packageLimit:
+      "Pakken har plads til de valgte varer. Bestil fragten, og vælg derefter resten til en ny pakke.",
+    selectionTooLarge:
+      "Vælg færre varer til pakken. Kontakt Komisio, hvis en vare ikke kan bestilles alene.",
     selectionHint:
       "Denne vare er med. Tilføj flere godkendte varer, du vil sende sammen.",
     selectedCount: "{count} varer i én pakke",
@@ -183,6 +199,10 @@ const copy: Record<Locale, Copy> = {
     title: "Lähetä Komisioon",
     intro: "Komisio maksaa toimituksen. Sovittu korvauksesi ei muutu.",
     selectItems: "Valitse paketin tuotteet",
+    packageLimit:
+      "Valitut tuotteet mahtuvat tähän pakettiin. Varaa lähetys ja valitse sitten loput uuteen pakettiin.",
+    selectionTooLarge:
+      "Valitse pakettiin vähemmän tuotteita. Jos tuotetta ei voi lähettää yksin, ota yhteyttä Komisioon.",
     selectionHint:
       "Tämä tuote on mukana. Lisää muita hyväksyttyjä tuotteita samaan lähetykseen.",
     selectedCount: "{count} tuotetta yhdessä paketissa",
@@ -227,6 +247,10 @@ const copy: Record<Locale, Copy> = {
     title: "An Komisio senden",
     intro: "Komisio zahlt den Versand. Dein vereinbarter Betrag bleibt gleich.",
     selectItems: "Artikel für das Paket wählen",
+    packageLimit:
+      "Die ausgewählten Artikel passen in dieses Paket. Buche den Versand und wähle danach die übrigen Artikel für ein neues Paket.",
+    selectionTooLarge:
+      "Wähle weniger Artikel für dieses Paket. Falls ein Artikel nicht einzeln gebucht werden kann, kontaktiere Komisio.",
     selectionHint:
       "Dieser Artikel ist dabei. Füge weitere angenommene Artikel für den gemeinsamen Versand hinzu.",
     selectedCount: "{count} Artikel in einem Paket",
@@ -271,6 +295,10 @@ const copy: Record<Locale, Copy> = {
     title: "Enviar a Komisio",
     intro: "Komisio paga el envío. Tu importe acordado no cambia.",
     selectItems: "Elige los artículos del paquete",
+    packageLimit:
+      "Los artículos seleccionados caben en este paquete. Reserva el envío y elige después los restantes para otro paquete.",
+    selectionTooLarge:
+      "Selecciona menos artículos para este paquete. Si no puedes reservar un artículo solo, contacta con Komisio.",
     selectionHint:
       "Este artículo está incluido. Añade otros artículos aceptados para enviarlos juntos.",
     selectedCount: "{count} artículos en un paquete",
@@ -316,6 +344,10 @@ const copy: Record<Locale, Copy> = {
     title: "Spedisci a Komisio",
     intro: "Komisio paga la spedizione. Il tuo importo concordato non cambia.",
     selectItems: "Scegli gli articoli del pacco",
+    packageLimit:
+      "Gli articoli selezionati entrano in questo pacco. Prenota la spedizione, poi scegli gli altri per un nuovo pacco.",
+    selectionTooLarge:
+      "Seleziona meno articoli per questo pacco. Se non puoi prenotare un articolo da solo, contatta Komisio.",
     selectionHint:
       "Questo articolo è incluso. Aggiungi altri articoli accettati da spedire insieme.",
     selectedCount: "{count} articoli in un pacco",

@@ -29,6 +29,7 @@ export type ParcelItem = {
   handoverId: string;
   reference: string;
   status: "open" | "received" | "cancelled";
+  selectionWeightG?: number;
 };
 export type ShippingState = {
   offerId: string;
@@ -36,6 +37,7 @@ export type ShippingState = {
   measurementsOptional: boolean;
   bundlingAvailable: boolean;
   eligibleItems: ParcelItem[];
+  selectionWeightLimitG?: number | null;
   parcel: null | {
     id: string;
     reference: string;
@@ -167,6 +169,14 @@ function parcelItems(value: unknown): ParcelItem[] {
       !["open", "received", "cancelled"].includes(String(i.status))
     )
       invalid();
+    if (
+      i.selectionWeightG !== undefined &&
+      (typeof i.selectionWeightG !== "number" ||
+        !Number.isSafeInteger(i.selectionWeightG) ||
+        i.selectionWeightG < 1 ||
+        i.selectionWeightG > 100000)
+    )
+      invalid();
   }
   if (new Set(value.map((i) => i.offerId)).size !== value.length) invalid();
   return value as ParcelItem[];
@@ -189,6 +199,8 @@ export function parseShippingState(
   )
     invalid();
   const eligibleItems = parcelItems(v.eligibleItems);
+  if (v.selectionWeightLimitG != null && v.selectionWeightLimitG !== 2000)
+    invalid();
   if (eligibleItems.some((i) => i.status !== "open")) invalid();
   if (v.parcel !== null) {
     const p = object(v.parcel);
@@ -259,11 +271,36 @@ export function shippingOutcome(
       "HANDOVER_CLOSED",
       "REQUEST_CONFLICT",
       "PARCEL_GROUP_UNSUPPORTED",
+      "PARCEL_WEIGHT_LIMIT",
       "SHIPPING_CONTACT_UNSUPPORTED",
     ].includes(String(v?.error))
   )
     return { kind: "conflict", code: String(v?.error) };
   return { kind: "unknown", code: String(v?.error ?? "UNKNOWN") };
+}
+
+/** Server repeats the cap atomically. Missing estimates occupy the whole package. */
+export function parcelSelectionFits(
+  items: ParcelItem[],
+  selected: string[],
+  limit?: number | null,
+): boolean {
+  if (limit == null) return true;
+  if (
+    limit !== 2000 ||
+    selected.length === 0 ||
+    selected.length > 10 ||
+    new Set(selected).size !== selected.length ||
+    selected.some((id) => !items.some((i) => i.offerId === id))
+  )
+    return false;
+  return (
+    selected.reduce(
+      (sum, id) =>
+        sum + (items.find((i) => i.offerId === id)?.selectionWeightG ?? limit),
+      0,
+    ) <= limit
+  );
 }
 /** Convert typed kg/cm exactly to grams/mm; no guessed parcel defaults. */
 export function shippingMeasure(value: string, decimals: 1 | 3): number {

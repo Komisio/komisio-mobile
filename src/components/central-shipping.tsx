@@ -10,6 +10,7 @@ import { createScopedRead } from "@/lib/scoped-read";
 import { readShipping, shippingWriter } from "@/lib/central-shipping-runtime";
 import {
   parseBookParcel,
+  parcelSelectionFits,
   parcelTrackingUrl,
   type ShippingAddress,
 } from "@/lib/central-shipping";
@@ -78,6 +79,10 @@ export function CentralShipping({
       (id) => id !== offer && eligible.some((i) => i.offerId === id),
     ),
   ];
+  const weightLimit = state.data?.selectionWeightLimitG;
+  const selectionFits = parcelSelectionFits(eligible, selected, weightLimit);
+  const cannotAdd = (id: string) =>
+    !parcelSelectionFits(eligible, [...selected, id], weightLimit);
   useFocusEffect(
     useCallback(() => {
       void read.refresh();
@@ -97,6 +102,7 @@ export function CentralShipping({
       void refreshAssurance();
   }
   function book(address: ShippingAddress) {
+    if (!selectionFits) return;
     try {
       const command = parseBookParcel(
         {
@@ -243,6 +249,12 @@ export function CentralShipping({
             {t.selectItems}
           </Text>
           <Text style={uiStyles.note}>{t.selectionHint}</Text>
+          {weightLimit != null &&
+          eligible.some(
+            (i) => !selected.includes(i.offerId) && cannotAdd(i.offerId),
+          ) ? (
+            <Message>{t.packageLimit}</Message>
+          ) : null}
           {eligible.map((i) => (
             <Choice
               key={i.offerId}
@@ -250,7 +262,11 @@ export function CentralShipping({
               listRow
               label={i.description}
               selected={selected.includes(i.offerId)}
-              disabled={busy || i.offerId === offer}
+              disabled={
+                busy ||
+                i.offerId === offer ||
+                (!selected.includes(i.offerId) && cannotAdd(i.offerId))
+              }
               onPress={() =>
                 setSelection((current) => {
                   const ids = current.offer === offer ? current.ids : [];
@@ -272,6 +288,9 @@ export function CentralShipping({
       <CentralShippingAddress user={user} disabled={busy}>
         {(address) => (
           <>
+            {!selectionFits ? (
+              <Message tone="error">{t.selectionTooLarge}</Message>
+            ) : null}
             <Text style={uiStyles.note}>{addressCopy.limits}</Text>
             {invalid || change.status === "rejected" ? (
               <Message tone="error">{addressCopy.bookingInvalid}</Message>
@@ -282,7 +301,9 @@ export function CentralShipping({
                   ? t.grouped
                   : change.code === "SHIPPING_CONTACT_UNSUPPORTED"
                     ? t.contactUnsupported
-                    : t.error}
+                    : change.code === "PARCEL_WEIGHT_LIMIT"
+                      ? t.selectionTooLarge
+                      : t.error}
               </Message>
             ) : null}
             {selected.length > 1 ? <Message>{t.packTogether}</Message> : null}
@@ -290,6 +311,7 @@ export function CentralShipping({
               label={selected.length > 1 ? t.bookTogether : t.book}
               busy={busy}
               disabled={
+                !selectionFits ||
                 ![
                   "ready",
                   "success",
