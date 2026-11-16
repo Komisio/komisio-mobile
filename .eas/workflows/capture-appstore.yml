@@ -13,9 +13,9 @@ on:
         description: Probe verifies the simulator without login; capture requires demo credentials
       device:
         type: choice
-        options: [ipad, iphone]
+        options: [ipad, iphone, iphone-large]
         default: ipad
-        description: Native 13-inch iPad or medium Dynamic Island iPhone screenshots
+        description: Native 13-inch iPad or medium/large Dynamic Island iPhone screenshots
 jobs:
   screenshots:
     name: Native App Store captures

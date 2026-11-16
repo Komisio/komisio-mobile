@@ -56,12 +56,13 @@ test("simulator selection uses runtime compatibility, not advertised device name
   const m5 = { name: "iPad Pro 13-inch (M5)", identifier: "ipad-m5" };
   const m4 = { name: "iPad Pro 13-inch (M4)", identifier: "ipad-m4" };
   const phone = { name: "iPhone 16 Pro", identifier: "iphone" };
+  const largePhone = { name: "iPhone 16 Pro Max", identifier: "iphone-large" };
   const phoneRuntime = {
     name: "iOS 27.1",
     version: "27.1",
     identifier: "phone-os",
     isAvailable: true,
-    supportedDeviceTypes: [phone],
+    supportedDeviceTypes: [phone, largePhone],
   };
   const tabletRuntime = {
     name: "iPadOS 27.0",
@@ -71,7 +72,7 @@ test("simulator selection uses runtime compatibility, not advertised device name
     supportedDeviceTypes: [m4],
   };
   const listing = {
-    devicetypes: [m5, m4, phone],
+    devicetypes: [m5, m4, phone, largePhone],
     runtimes: [phoneRuntime, tabletRuntime],
   };
   assert.equal(
@@ -79,6 +80,10 @@ test("simulator selection uses runtime compatibility, not advertised device name
     phone.identifier,
   );
   assert.throws(() => selectCaptureSimulator(listing, "16.0", "unknown"));
+  assert.equal(
+    selectCaptureSimulator(listing, "16.0", "iphone-large").type.identifier,
+    largePhone.identifier,
+  );
   assert.equal(
     selectCaptureSimulator(listing, "16.0").type.identifier,
     m4.identifier,
@@ -106,21 +111,29 @@ test("capture flows only log in and navigate; passwords stay as runtime referenc
     const screenshots = commands.filter(
       (cmd: Record<string, unknown>) => "takeScreenshot" in cmd,
     );
-    assert.equal(screenshots.length, 5);
+    assert.equal(screenshots.length, 7);
     assert.deepEqual(
       screenshots.map(
         (cmd: { takeScreenshot: { path: string } }) => cmd.takeScreenshot.path,
       ),
-      [0, 1, 2, 3, 4].map((i) => screenshotName(locale, i)),
+      [0, 1, 5, 2, 3, 4, 6].map((i) => screenshotName(locale, i)),
     );
     assert.match(flow, /\$\{MAESTRO_SCREENSHOT_PASSWORD\}/);
     const taps = commands.filter(
       (cmd: Record<string, unknown>) => "tapOn" in cmd,
     );
-    assert.equal(taps.length, 12);
-    assert.deepEqual(commands.filter((cmd: Record<string, unknown>) => "launchApp" in cmd)[1], {
-      launchApp: { clearState: false, clearKeychain: false, stopApp: true },
-    });
+    assert.ok(
+      taps.some((cmd: { tapOn?: unknown }) =>
+        JSON.stringify(cmd.tapOn).includes("Komisio"),
+      ),
+    );
+    assert.ok(!flow.includes("tab-store"));
+    assert.deepEqual(
+      commands.filter((cmd: Record<string, unknown>) => "launchApp" in cmd)[1],
+      {
+        launchApp: { clearState: false, clearKeychain: false, stopApp: true },
+      },
+    );
     assert.ok(
       !/payout|utbetalning|accept|godkänn|save|spara/i.test(
         JSON.stringify(taps),
@@ -147,6 +160,11 @@ test("capture dimensions reject the smaller iPad and phone formats", () => {
     height: 2622,
   });
   assert.throws(() => screenshotSize(png(2064, 2752), "iphone"));
+  assert.deepEqual(screenshotSize(png(1320, 2868), "iphone-large"), {
+    width: 1320,
+    height: 2868,
+  });
+  assert.throws(() => screenshotSize(png(1206, 2622), "iphone-large"));
   assert.throws(() => screenshotSize(png(2064, 2752), "unknown"));
   assert.deepEqual(screenshotSize(png(2064, 2752)), {
     width: 2064,
