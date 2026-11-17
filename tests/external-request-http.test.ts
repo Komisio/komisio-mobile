@@ -5,10 +5,7 @@ import {
   externalItemsEndpoint,
   parseExternalPage,
 } from "../src/lib/external-request-http.ts";
-import {
-  hasVerifiedEmail,
-  hasVerifiedPhone,
-} from "../src/lib/identity-gates.ts";
+import { hasVerifiedEmail } from "../src/lib/identity-gates.ts";
 import { externalSubmissionCopy } from "../src/lib/external-submission-copy.ts";
 import { locales } from "../src/lib/locale.ts";
 const id = (n: number) =>
@@ -194,15 +191,13 @@ test("withdrawal retries use the same receipt and never cross accounts", async (
   await assert.rejects(f.api.withdraw(id(1)), /SESSION_CHANGED/);
   assert.equal(f.calls.length, 4);
 });
-test("phone-only identities do not gain the existing email seller routes", () => {
+test("phone-only identities and unverified emails cannot enter central or store flows", () => {
   const phone = {
     phone: "46700000001",
     phone_confirmed_at: "2026-11-10",
     user_metadata: { email_confirmed_at: "fake" },
   };
   assert.equal(hasVerifiedEmail(phone as never), false);
-  assert.equal(hasVerifiedPhone(phone as never), true);
-  assert.equal(hasVerifiedPhone({ phone: phone.phone } as never), false);
   assert.equal(
     hasVerifiedEmail({
       email: "test@example.invalid",

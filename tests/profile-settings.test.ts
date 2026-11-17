@@ -53,7 +53,6 @@ test("profile exposes one store action, language detail, financial links and log
   const screen = compile("../src/components/profile-screen.tsx", {
     "@/lib/identity-gates": {
       hasVerifiedEmail: () => true,
-      hasVerifiedPhone: () => false,
     },
     "@/lib/account-auth-copy": {
       accountAuthCopy: () => ({ methods: "Sign-in methods" }),

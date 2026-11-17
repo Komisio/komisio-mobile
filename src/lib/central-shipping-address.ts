@@ -1,5 +1,9 @@
 import { isId } from "./catalogue.ts";
-import type { ShippingAddress } from "./central-shipping.ts";
+import {
+  parseShippingContact,
+  type ShippingContact,
+  type ShippingAddress,
+} from "./central-shipping.ts";
 import type { CommandOutcome } from "./pending-command.ts";
 
 export type ShippingAccount = {
@@ -7,6 +11,7 @@ export type ShippingAccount = {
   sellerId: string;
   revision: number;
   address: ShippingAddress | null;
+  contact: ShippingContact | null;
 };
 export type SaveShippingAddress = {
   action: "save";
@@ -15,6 +20,7 @@ export type SaveShippingAddress = {
   sellerId: string;
   expectedRevision: number;
   address: ShippingAddress;
+  contact: ShippingContact;
 };
 function invalid(): never {
   throw new Error("INVALID_SHIPPING_ADDRESS");
@@ -54,6 +60,7 @@ export function parseShippingAccount(value: unknown): {
   )
     invalid();
   if (a.address !== null) parseShippingAddress(a.address);
+  if (a.contact !== null) parseShippingContact(a.contact);
   return { account: a as ShippingAccount };
 }
 export function parseSaveShippingAddress(
@@ -81,11 +88,13 @@ export function parseSaveShippingAddress(
           "sellerId",
           "expectedRevision",
           "address",
+          "contact",
         ].includes(k),
     )
   )
     invalid();
   parseShippingAddress(v.address);
+  parseShippingContact(v.contact);
   return v as SaveShippingAddress;
 }
 export function shippingAddressOutcome(

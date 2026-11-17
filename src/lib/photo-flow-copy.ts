@@ -5,7 +5,7 @@ const sv = {
   welcomeIntro: "Fota din vara och skicka till Komisio för bedömning.",
   hero: "Kläder, skor, inredning och prylar. Börja med en bild.",
   start: "Sälj något",
-  accountHint: "Du börjar utan lösenord. Mobilnumret verifieras före inskick.",
+  accountHint: "Logga in med Apple, Google eller e-post före inskick.",
   storeLogin: "Jag är säljare i en butik – logga in",
   myItems: "Mina varor hos Komisio",
   steps: ["Fota varan", "Berätta om varan", "Skicka till Komisio"],
@@ -15,10 +15,6 @@ const sv = {
   review: "Redo att skicka?",
   reviewHint:
     "Komisio bedömer dina bilder. Inlämning och ersättning avtalas senare.",
-  phoneHeading: "Verifiera dig",
-  phoneHint: "Vi skickar en kod via sms. Inget lösenord behövs.",
-  whyPhone:
-    "Numret skyddar mot spam och låter dig komma tillbaka till dina varor.",
   sent: "Komisio tittar på din vara",
   sentHint: "Din förfrågan är skickad. Du kan följa den under Mina varor.",
   toItems: "Till mina varor",
@@ -40,7 +36,7 @@ const copies: Record<Locale, Copy> = {
     welcomeIntro: "Photograph your item and send it to Komisio for assessment.",
     hero: "Clothes, shoes, homeware and more. Start with a photo.",
     start: "Sell something",
-    accountHint: "Start without a password. Verify your phone before sending.",
+    accountHint: "Sign in with Apple, Google or email before submitting.",
     storeLogin: "I sell through a store – sign in",
     myItems: "My items with Komisio",
     steps: ["Photograph your item", "Describe your item", "Send to Komisio"],
@@ -50,9 +46,6 @@ const copies: Record<Locale, Copy> = {
     review: "Ready to send?",
     reviewHint:
       "Komisio assesses your photos. Handover and payment terms are agreed later.",
-    phoneHeading: "Verify your phone",
-    phoneHint: "We send a code by text. No password needed.",
-    whyPhone: "Your number prevents spam and lets you return to your items.",
     sent: "Komisio is reviewing your item",
     sentHint: "Your request has been sent. Follow it in My items.",
     toItems: "Go to my items",
@@ -69,7 +62,7 @@ const copies: Record<Locale, Copy> = {
     welcomeIntro: "Ta bilder av varen og send til Komisio for vurdering.",
     hero: "Klær, sko, interiør og ting. Begynn med et bilde.",
     start: "Selg noe",
-    accountHint: "Start uten passord. Bekreft mobilnummeret før innsending.",
+    accountHint: "Logg inn med Apple, Google eller e-post før innsending.",
     storeLogin: "Jeg selger i en butikk – logg inn",
     myItems: "Mine varer hos Komisio",
     steps: ["Ta bilder", "Beskriv varen", "Send til Komisio"],
@@ -79,10 +72,6 @@ const copies: Record<Locale, Copy> = {
     review: "Klar til å sende?",
     reviewHint:
       "Komisio vurderer bildene. Innlevering og betaling avtales senere.",
-    phoneHeading: "Bekreft mobilnummeret",
-    phoneHint: "Vi sender en kode på SMS. Du trenger ikke passord.",
-    whyPhone:
-      "Nummeret beskytter mot spam og lar deg komme tilbake til varene dine.",
     sent: "Komisio ser på varen din",
     sentHint: "Forespørselen er sendt. Følg den under Mine varer.",
     toItems: "Til mine varer",
@@ -99,8 +88,7 @@ const copies: Record<Locale, Copy> = {
     welcomeIntro: "Tag billeder af varen og send til Komisio til vurdering.",
     hero: "Tøj, sko, boligtilbehør og ting. Begynd med et billede.",
     start: "Sælg noget",
-    accountHint:
-      "Start uden adgangskode. Bekræft mobilnummeret inden indsendelse.",
+    accountHint: "Log ind med Apple, Google eller e-mail inden indsendelse.",
     storeLogin: "Jeg sælger i en butik – log ind",
     myItems: "Mine varer hos Komisio",
     steps: ["Tag billeder", "Beskriv varen", "Send til Komisio"],
@@ -110,10 +98,6 @@ const copies: Record<Locale, Copy> = {
     review: "Klar til at sende?",
     reviewHint:
       "Komisio vurderer billederne. Indlevering og betaling aftales senere.",
-    phoneHeading: "Bekræft mobilnummeret",
-    phoneHint: "Vi sender en kode via sms. Ingen adgangskode nødvendig.",
-    whyPhone:
-      "Nummeret beskytter mod spam og giver adgang til dine varer igen.",
     sent: "Komisio ser på din vare",
     sentHint: "Din forespørgsel er sendt. Følg den under Mine varer.",
     toItems: "Til mine varer",
@@ -131,7 +115,7 @@ const copies: Record<Locale, Copy> = {
     hero: "Vaatteita, kenkiä, sisustusta ja tavaroita. Aloita kuvasta.",
     start: "Myy tavara",
     accountHint:
-      "Aloita ilman salasanaa. Vahvista puhelinnumero ennen lähettämistä.",
+      "Kirjaudu Applella, Googlella tai sähköpostilla ennen lähettämistä.",
     storeLogin: "Myyn myymälässä – kirjaudu sisään",
     myItems: "Tavarani Komisiossa",
     steps: ["Kuvaa tavara", "Kerro tavarasta", "Lähetä Komisioon"],
@@ -141,10 +125,6 @@ const copies: Record<Locale, Copy> = {
     review: "Valmis lähettämään?",
     reviewHint:
       "Komisio arvioi kuvasi. Luovutuksesta ja korvauksesta sovitaan myöhemmin.",
-    phoneHeading: "Vahvista puhelinnumerosi",
-    phoneHint: "Lähetämme koodin tekstiviestillä. Et tarvitse salasanaa.",
-    whyPhone:
-      "Numero ehkäisee roskapostia ja antaa pääsyn tavaroihisi myöhemmin.",
     sent: "Komisio arvioi tavaraasi",
     sentHint: "Pyyntösi on lähetetty. Seuraa sitä omissa tavaroissasi.",
     toItems: "Omiin tavaroihin",
@@ -163,7 +143,7 @@ const copies: Record<Locale, Copy> = {
     hero: "Kleidung, Schuhe, Einrichtung und mehr. Beginne mit einem Foto.",
     start: "Etwas verkaufen",
     accountHint:
-      "Starte ohne Passwort. Bestätige deine Handynummer vor dem Senden.",
+      "Melde dich vor dem Einsenden mit Apple, Google oder E-Mail an.",
     storeLogin: "Ich verkaufe über ein Geschäft – anmelden",
     myItems: "Meine Artikel bei Komisio",
     steps: [
@@ -177,10 +157,6 @@ const copies: Record<Locale, Copy> = {
     review: "Bereit zum Senden?",
     reviewHint:
       "Komisio beurteilt deine Fotos. Übergabe und Vergütung werden später vereinbart.",
-    phoneHeading: "Mobilnummer bestätigen",
-    phoneHint: "Wir senden einen Code per SMS. Kein Passwort nötig.",
-    whyPhone:
-      "Die Nummer schützt vor Spam und ermöglicht dir den erneuten Zugriff auf deine Artikel.",
     sent: "Komisio prüft deinen Artikel",
     sentHint: "Deine Anfrage wurde gesendet. Verfolge sie unter Meine Artikel.",
     toItems: "Zu meinen Artikeln",
@@ -198,7 +174,8 @@ const copies: Record<Locale, Copy> = {
       "Fotografía tu artículo y envíalo a Komisio para su valoración.",
     hero: "Ropa, calzado, decoración y más. Empieza con una foto.",
     start: "Vender algo",
-    accountHint: "Empieza sin contraseña. Verifica tu móvil antes de enviar.",
+    accountHint:
+      "Inicia sesión con Apple, Google o correo electrónico antes de enviar.",
     storeLogin: "Vendo a través de una tienda – entrar",
     myItems: "Mis artículos en Komisio",
     steps: [
@@ -212,9 +189,6 @@ const copies: Record<Locale, Copy> = {
     review: "¿Listo para enviar?",
     reviewHint:
       "Komisio valora tus fotos. La entrega y la compensación se acuerdan después.",
-    phoneHeading: "Verifica tu móvil",
-    phoneHint: "Te enviamos un código por SMS. No necesitas contraseña.",
-    whyPhone: "El número evita el spam y te permite volver a tus artículos.",
     sent: "Komisio está revisando tu artículo",
     sentHint: "Tu solicitud se ha enviado. Síguela en Mis artículos.",
     toItems: "Ir a mis artículos",
@@ -232,8 +206,7 @@ const copies: Record<Locale, Copy> = {
       "Fotografa il tuo articolo e invialo a Komisio per una valutazione.",
     hero: "Vestiti, scarpe, arredamento e altro. Inizia con una foto.",
     start: "Vendi qualcosa",
-    accountHint:
-      "Inizia senza password. Verifica il cellulare prima dell'invio.",
+    accountHint: "Accedi con Apple, Google o e-mail prima di inviare.",
     storeLogin: "Vendo tramite un negozio – accedi",
     myItems: "I miei articoli su Komisio",
     steps: ["Fotografa l'articolo", "Descrivi l'articolo", "Invia a Komisio"],
@@ -243,10 +216,6 @@ const copies: Record<Locale, Copy> = {
     review: "Pronto per l'invio?",
     reviewHint:
       "Komisio valuta le tue foto. Consegna e compenso si concordano in seguito.",
-    phoneHeading: "Verifica il cellulare",
-    phoneHint: "Ti inviamo un codice via SMS. Nessuna password necessaria.",
-    whyPhone:
-      "Il numero protegge dallo spam e ti permette di ritrovare i tuoi articoli.",
     sent: "Komisio sta valutando il tuo articolo",
     sentHint: "La richiesta è stata inviata. Seguila in I miei articoli.",
     toItems: "Vai ai miei articoli",

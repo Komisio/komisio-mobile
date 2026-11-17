@@ -4,7 +4,6 @@ import {
   parsePhoneNumberFromString,
   type CountryCode,
 } from "libphonenumber-js/min";
-import { normalizedPhone } from "./phone-verification.ts";
 
 export type PhoneEntry = { callingCode: string; number: string };
 
@@ -39,7 +38,7 @@ export function changePhoneNumber(
   return { ...entry, number: value };
 }
 
-/** Only format the address; SMS verification still establishes ownership. */
+/** Format a shipping contact number; it is not an authentication factor. */
 export function phoneEntryValue(entry: PhoneEntry): string {
   const number = entry.number.trim().replace(/^00/, "+");
   const callingCode = entry.callingCode.trim().replace(/^\+?/, "+");
@@ -50,8 +49,9 @@ export function phoneEntryValue(entry: PhoneEntry): string {
       defaultCallingCode: callingCode.slice(1),
       extract: false,
     });
-    if (!parsed || parsed.ext) throw new Error("PHONE_INVALID");
-    return normalizedPhone(parsed.number);
+    if (!parsed || parsed.ext || !parsed.isPossible())
+      throw new Error("PHONE_INVALID");
+    return parsed.number;
   } catch {
     throw new Error("PHONE_INVALID");
   }

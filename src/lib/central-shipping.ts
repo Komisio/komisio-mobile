@@ -12,12 +12,18 @@ type Contact = ShippingAddress & {
   email: string;
   country: "SE";
 };
+export type ShippingContact = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+};
+export type SenderAddress = ShippingAddress & ShippingContact;
 export type BookParcel = {
   action: "book";
   requestId: string;
   offerId: string;
   offerIds?: string[];
-  address: ShippingAddress;
+  address: SenderAddress;
   weightG?: number;
   lengthMm?: number;
   widthMm?: number;
@@ -90,9 +96,36 @@ function address(v: unknown, full = false) {
     invalid();
   if (
     !full &&
-    Object.keys(a).some((k) => !["street", "postalCode", "city"].includes(k))
+    Object.keys(a).some(
+      (k) =>
+        ![
+          "street",
+          "postalCode",
+          "city",
+          "firstName",
+          "lastName",
+          "phone",
+        ].includes(k),
+    )
   )
     invalid();
+}
+export function parseShippingContact(value: unknown): ShippingContact {
+  const v = object(value);
+  if (
+    Object.keys(v).some(
+      (k) => !["firstName", "lastName", "phone"].includes(k),
+    ) ||
+    !text(v.firstName, 58) ||
+    v.firstName !== v.firstName.trim() ||
+    !text(v.lastName, 58) ||
+    v.lastName !== v.lastName.trim() ||
+    `${v.firstName} ${v.lastName}`.length > 60 ||
+    typeof v.phone !== "string" ||
+    !/^\+[1-9][0-9]{7,14}$/.test(v.phone)
+  )
+    invalid();
+  return v as ShippingContact;
 }
 function measurements(v: Record<string, unknown>, nullable = false) {
   const { weightG: w, lengthMm: l, widthMm: b, heightMm: h } = v;
@@ -141,6 +174,11 @@ export function parseBookParcel(value: unknown, offer: string): BookParcel {
   )
     invalid();
   address(v.address);
+  parseShippingContact({
+    firstName: object(v.address).firstName,
+    lastName: object(v.address).lastName,
+    phone: object(v.address).phone,
+  });
   measurements(v);
   if (
     v.offerIds !== undefined &&

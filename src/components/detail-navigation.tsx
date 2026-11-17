@@ -45,7 +45,7 @@ export function detailHeaderOptions(
   };
 }
 
-/** Always visible, including a photo flow opened as the root after SMS login. */
+/** Always visible, including a photo flow opened as the root after sign-in. */
 export function photoCloseOptions(
   home: Href,
   label: string,

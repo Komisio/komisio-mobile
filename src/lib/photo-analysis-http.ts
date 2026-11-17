@@ -3,7 +3,6 @@ import {
   type PhotoAnalysisCommand,
 } from "./photo-analysis.ts";
 const errors = new Set([
-  "PHONE_VERIFICATION_REQUIRED",
   "AUTH_REQUIRED",
   "MFA_REQUIRED",
   "PASSWORD_UPDATE_REQUIRED",

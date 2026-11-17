@@ -80,6 +80,9 @@ test("package selection disables a sixth item and submits only the five selected
     "./central-shipping-address": {
       CentralShippingAddress: ({ children }: any) =>
         children({
+          firstName: "Alex",
+          lastName: "Example",
+          phone: "+46701234567",
           street: "Testgatan 1",
           postalCode: "12345",
           city: "Teststad",

@@ -15,7 +15,6 @@ import {
   Loading,
   Message,
   Screen,
-  StatusBadge,
   colors,
   uiStyles,
 } from "@/components/ui";
@@ -25,7 +24,7 @@ import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { OfferAgreementLink } from "@/components/offer-agreement-link";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
-import { hasVerifiedPhone } from "@/lib/identity-gates";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { isId } from "@/lib/catalogue";
 import { createScopedRead } from "@/lib/scoped-read";
 import {
@@ -48,7 +47,7 @@ export default function ExternalOnboardingScreen() {
   const { offer } = useLocalSearchParams<{ offer: string }>();
   const { session } = useSession();
   const { locale } = useI18n();
-  if (!session || !hasVerifiedPhone(session.user) || !isId(offer))
+  if (!session || !hasVerifiedEmail(session.user) || !isId(offer))
     return (
       <Screen topSafeArea={false}>
         <Message>{externalOfferCopy(locale).loadError}</Message>
@@ -286,13 +285,6 @@ function AccountForm({
       ) : null}
       {step === 0 ? (
         <>
-          <Card>
-            <Text style={uiStyles.label}>{t.phone}</Text>
-            <Text selectable style={uiStyles.body}>
-              +{data.phone.replace(/^\+/, "")}
-            </Text>
-            <StatusBadge>{t.verified}</StatusBadge>
-          </Card>
           <Field
             label={t.name}
             value={name}

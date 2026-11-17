@@ -57,10 +57,11 @@ This configuration alone does not make the app release-ready.
 Home and Profile open the same store-independent sign-in/registration screen.
 Apple uses native Sign in with Apple on iOS; Google uses the OS authentication
 browser with S256 PKCE on iOS/Android. Email codes create or reopen an account.
-Password and SMS login remain available. Verify the phone once before the first
-central item submission. Signing up creates no store membership or seller record.
+Existing email/password login remains available. Verified email, including Apple
+and Google identities, authorizes central intake without SMS. Signing up creates
+no store membership or seller record.
 
-Existing phone users connect another method under Profile → Sign-in methods;
+Users connect another method under Profile → Sign-in methods;
 linking retains their Auth UID, items and MFA. Contact email is not an account
 merge key. An identity already owned by another account is not moved.
 
@@ -89,8 +90,9 @@ owner-selected AI-generated hanger variant, created for Komisio in this task.
 The compact `assets/photos/photo-guide.webp` collage was generated for the
 photo guide. Its information icon opens short photo tips and explains that
 Komisio uses the images for assessment, pricing and handover documentation.
-Phone sellers can enable email/password login on the same verified identity
-under Profile → Sign-in methods → Email login, after confirming ownership of the address.
+Shipping collects first name, last name, contact phone and Swedish postal address.
+These sender details are saved in Profile and shown before booking. Each booked
+parcel displays its frozen sender; later profile edits do not rewrite a booking.
 
 The same native iOS/Android app offers **Photograph an item** on the store picker
 and in **My items**. `/photo-draft` works in signed builds, including TestFlight,
@@ -118,9 +120,9 @@ description, brand, condition and optional desired seller compensation, then
 review the draft. Ordinary store access remains a separate path. The central
 recipient is rechecked before saving; unavailable configuration retains the draft.
 
-Step 2 automatically uploads and analyzes the image set for a phone-verified
-identity. Unverified users can enter details manually or verify their phone
-and return. All uploads must finish before analysis starts. The existing private
+Step 2 automatically uploads and analyzes the image set for an email-verified
+identity. Guests can enter details manually or sign in with Apple, Google or
+email and return to the same step. All uploads must finish before analysis starts. The existing private
 journal reuses the same analysis on return or retry, and suggestions fill empty
 fields without replacing manual entries. Leaving the screen prevents a later
 upload completion from starting analysis while hidden. Errors leave manual

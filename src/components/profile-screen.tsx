@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { pushCopy } from "@/lib/push-copy";
-import { hasVerifiedEmail, hasVerifiedPhone } from "@/lib/identity-gates";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { CentralShippingAddress } from "./central-shipping-address";
 import { accountAuthCopy } from "@/lib/account-auth-copy";
 import { accountDeletionCopy } from "@/lib/account-deletion-copy";
@@ -55,7 +55,7 @@ export function ProfileScreen() {
                 <View style={styles.identityText}>
                   <Text style={styles.caption}>{d.profile.signedInAs}</Text>
                   <Text selectable style={styles.email}>
-                    {session.user.email || session.user.phone}
+                    {session.user.email}
                   </Text>
                 </View>
               </View>
@@ -80,7 +80,7 @@ export function ProfileScreen() {
             label={pushCopy[locale].title}
             onPress={() => router.push("/notifications")}
           />
-          {hasVerifiedPhone(session.user) ? (
+          {hasVerifiedEmail(session.user) ? (
             <CentralShippingAddress
               key={session.user.id}
               user={session.user.id}

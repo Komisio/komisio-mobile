@@ -17,8 +17,8 @@ function compile(file: string, modules: Record<string, unknown>) {
       externalOfferApi: () => ({ read: async () => null }),
     },
     "@/lib/identity-gates": {
-      hasVerifiedPhone: (user: any) =>
-        Boolean(user?.phone_confirmed_at && user?.phone),
+      hasVerifiedEmail: (user: any) =>
+        Boolean(user?.email_confirmed_at && user?.email),
     },
     ...modules,
   };

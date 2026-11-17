@@ -1,5 +1,5 @@
 import { shippingTransport } from "./central-shipping-runtime";
-import { createExternalPhoneRead } from "./external-offer-http";
+import { createExternalIdentityRead } from "./external-offer-http";
 import { createPendingCommand } from "./pending-command";
 import { commandStorage } from "./command-storage";
 import { commandLock } from "./command-lock";
@@ -11,7 +11,7 @@ import {
 } from "./central-shipping-address";
 export async function readShippingAccount(user: string) {
   return parseShippingAccount(
-    await createExternalPhoneRead(shippingTransport(user, "/address"))({
+    await createExternalIdentityRead(shippingTransport(user, "/address"))({
       action: "read",
     }),
   );

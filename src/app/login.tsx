@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Redirect, router } from "expo-router";
+import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { ExternalPageButton } from "@/components/external-page-button";
 import { supabase } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
@@ -8,7 +8,7 @@ import { Button, Card, Field, Message, Screen } from "@/components/ui";
 import { PrivacyLink } from "@/components/privacy-link";
 import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { homeCopy } from "@/lib/home-copy";
-import { emailLoginCopy } from "@/lib/email-login-copy";
+import { accountReturnPath } from "@/lib/account-return-path";
 
 const web = process.env.EXPO_PUBLIC_KOMISIO_WEB_URL;
 
@@ -16,6 +16,7 @@ const web = process.env.EXPO_PUBLIC_KOMISIO_WEB_URL;
 export default function Login() {
   const { d, locale } = useI18n();
   const t = homeCopy(locale);
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const { store, session, signOut, refreshAssurance } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,15 +56,21 @@ export default function Login() {
   };
 
   if (session && hasVerifiedEmail(session.user))
-    return <Redirect href={store ? "/home/shop" : "/(tabs)/items"} />;
+    return (
+      <Redirect
+        href={
+          accountReturnPath(returnTo) !== "/home"
+            ? accountReturnPath(returnTo)
+            : store
+              ? "/home/shop"
+              : "/(tabs)/items"
+        }
+      />
+    );
   if (session)
     return (
       <Screen title={t.login} topSafeArea={false}>
         <Message>{t.storeAccount}</Message>
-        <Button
-          label={emailLoginCopy(locale).title}
-          onPress={() => router.push("/email-login")}
-        />
         <Button
           label={t.switchAccount}
           variant="secondary"
@@ -128,16 +135,6 @@ export default function Login() {
           url={new URL("/reset-password", web).href}
         />
       ) : null}
-      <Button
-        label={t.smsLogin}
-        variant="secondary"
-        onPress={() =>
-          router.push({
-            pathname: "/photo-phone",
-            params: { destination: "requests" },
-          })
-        }
-      />
       {store ? (
         <Button
           label={d.login.changeStore}

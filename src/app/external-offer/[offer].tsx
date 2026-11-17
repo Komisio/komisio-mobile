@@ -25,14 +25,14 @@ import { externalHandoverCopy } from "@/lib/external-handover-copy";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { formattingLocale } from "@/lib/locale";
-import { hasVerifiedPhone } from "@/lib/identity-gates";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { isId } from "@/lib/catalogue";
 
 export default function ExternalOfferScreen() {
   const { offer } = useLocalSearchParams<{ offer: string }>();
   const { session } = useSession(),
     { locale } = useI18n();
-  if (!session || !hasVerifiedPhone(session.user) || !isId(offer))
+  if (!session || !hasVerifiedEmail(session.user) || !isId(offer))
     return (
       <Screen topSafeArea={false}>
         <Message>{externalOfferCopy(locale).loadError}</Message>

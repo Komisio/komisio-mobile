@@ -1,6 +1,6 @@
 # Screen list for version 1
 
-Owner update, 2026-11-11: Home is shared by guests, phone sellers and existing
+Owner update, 2026-11-17: Home is shared by guests, central sellers and existing
 store sellers. It uses the approved green-dress-on-hanger photo and offers
 "Sell through Komisio" and "Sell through a store". The Komisio introduction
 and ordinary store picker/catalogue are nested under Home, with the bottom
@@ -9,13 +9,16 @@ their explicit Close action. My items and Profile are available to guests
 with sign-in actions. Existing verified store accounts retain Overview,
 Money, catalogue, bank details and agreements behind the existing gates.
 
-Phone sellers can add and verify an email address and choose a password from
-Profile, or after completing handover onboarding. The existing SMS Auth user
-owns both credentials; contact email never links or merges accounts. Email
-confirmation finishes in the browser, followed by password setup in the app.
-Subsequent email/password login does not send an SMS. Conflicting addresses,
-pending MFA and changed sessions fail closed. SMS remains a login alternative.
-The backend first-email mail-hook fix in Komisio/komisio#822 is required.
+Apple, Google and verified email authorize central intake without phone
+verification. SMS sign-in and the former phone-to-email upgrade are removed by
+owner decision (Komisio/komisio#843); there are no active phone-only users to
+migrate. Existing email/password and MFA remain. Contact details never link or
+merge accounts. Sign-in from a photo step returns to that step.
+
+Shipping collects separate first name, last name, contact phone and postal
+address. Profile and booking use the same saved sender card. The shipping page
+shows the exact frozen sender for each booked parcel. The phone is a shipping
+contact, not an authentication factor.
 
 The earlier version-1 review below remains the reference for ordinary store
 features; the later central photo-submission and Home decisions extend it.

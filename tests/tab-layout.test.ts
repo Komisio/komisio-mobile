@@ -317,7 +317,6 @@ test("all detail routes configure back navigation with their own fallback", () =
     "my-items/[tenant]/[item]": "/(tabs)/items",
     language: "/(tabs)/profile",
     notifications: "/(tabs)/profile",
-    "email-login": "/(tabs)/profile",
     "account-methods": "/(tabs)/profile",
     "account-auth": "/home",
     agreement: "/(tabs)/profile",
@@ -420,7 +419,6 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "photo-store",
     "photo-details",
     "photo-review",
-    "photo-phone",
   ];
   assert.deepEqual(routes(), publicRoutes);
   state = { ...state, store: {} };
@@ -434,7 +432,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 24);
+  assert.equal(routes().length, 22);
   assert.ok(routes().includes("account-deletion"));
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
@@ -457,7 +455,6 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "language",
     "account-deletion",
     "account-methods",
-    "email-login",
     "notifications",
     "external-onboarding/[offer]",
     "external-offer/[offer]",
@@ -467,7 +464,6 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "photo-store",
     "photo-details",
     "photo-review",
-    "photo-phone",
   ]);
   state = { ...state, mfaRequired: true };
   assert.deepEqual(routes(), ["mfa"]);
