@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
+import { accountReturnPath } from "../src/lib/account-return-path.ts";
 
 const require = createRequire(import.meta.url);
 const { transformSync } = require("@babel/core");
@@ -25,9 +26,10 @@ function screen(name: "login" | "mfa") {
     "expo-router": {
       router: { replace() {}, push() {} },
       Redirect: "Redirect",
+      useLocalSearchParams: () => ({}),
     },
     "@/lib/home-copy": { homeCopy: () => ({}) },
-    "@/lib/email-login-copy": { emailLoginCopy: () => ({}) },
+    "@/lib/account-return-path": { accountReturnPath },
     "@/lib/identity-gates": { hasVerifiedEmail: () => false },
     react: {
       useState(initial: unknown) {

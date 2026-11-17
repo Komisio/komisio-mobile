@@ -14,7 +14,7 @@ test("device region suggests an editable calling code, with a Sweden fallback", 
   assert.equal(initialPhoneEntry(null).callingCode, "+46");
   assert.equal(initialPhoneEntry("not-a-region").callingCode, "+46");
 });
-test("an existing identity's number takes precedence over the device region", () => {
+test("an existing sender's number takes precedence over the device region", () => {
   assert.deepEqual(initialPhoneEntry("US", "46701234567"), {
     callingCode: "+46",
     number: "701234567",
@@ -60,7 +60,7 @@ test("country-specific national prefixes are handled without dropping significan
     "+46701234567",
   );
 });
-test("invalid input and extensions are not silently converted to another SMS address", () => {
+test("invalid input and extensions are not silently converted to another contact number", () => {
   for (const number of [
     "",
     "+",

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useSession } from "@/lib/session";
-import { hasVerifiedPhone } from "@/lib/identity-gates";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { useI18n } from "@/lib/i18n";
 import { photoAnalysisCopy } from "@/lib/photo-analysis-copy";
 import { photoAnalysis } from "@/lib/photo-analysis-runtime";
@@ -28,7 +28,7 @@ export function PhotoAnalysisPanel({
   const { locale } = useI18n(),
     t = photoAnalysisCopy(locale);
   const user =
-    hasVerifiedPhone(session?.user) && !mfaRequired ? session!.user.id : null;
+    hasVerifiedEmail(session?.user) && !mfaRequired ? session!.user.id : null;
   const language = locale === "da" ? "dk" : locale;
   // Remount the worker on image, recipient, language or identity changes.
   return (

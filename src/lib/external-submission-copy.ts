@@ -1,28 +1,13 @@
 import { centralIntakeCopy } from "./central-intake-copy.ts";
 import type { Locale } from "./locale";
 const sv = {
-  phoneTitle: "Verifiera mobilnumret",
-  phoneIntro: "Bekräfta numret med en kod via sms. Inget lösenord behövs.",
-  phone: "Mobilnummer",
-  callingCode: "Landskod",
-  sendCode: "Skicka kod",
-  code: "Kod från sms",
-  verify: "Verifiera",
-  resend: "Skicka ny kod",
-  resendWait: "Ny kod om {seconds} s",
-  existingAccount: "Numret kopplas till kontot du redan är inloggad på.",
-  phoneInvalid: "Kontrollera landskoden och mobilnumret.",
-  phoneUnavailable:
-    "Det går inte att skicka eller verifiera koden just nu. Försök igen senare. Utkastet finns kvar.",
-  codeInvalid: "Koden är fel eller har gått ut. Begär en ny kod.",
-  phoneUsed:
-    "Numret hör till ett annat konto. Logga in på det kontot eller använd ett annat nummer.",
-  rateLimit: "Vänta en stund innan du begär en ny kod.",
+  loginIntro:
+    "Logga in med Apple, Google eller e-post för att följa dina varor.",
   sessionChanged: "Kontot har ändrats. Öppna sidan igen innan du fortsätter.",
   reviewIntro:
     "Kontrollera varan och skicka en förfrågan till den valda butiken.",
   send: "Skicka till butiken",
-  verifyPhone: "Verifiera mobilnumret",
+  login: "Logga in",
   pending: "Ett inskick behöver bekräftas",
   resume: "Kontrollera och försök igen",
   sendError:
@@ -53,30 +38,12 @@ const sv = {
 };
 type Copy = { [K in keyof typeof sv]: string };
 const en: Copy = {
-  phoneTitle: "Verify your mobile number",
-  phoneIntro:
-    "Confirm your number with a code by text message. No password needed.",
-  phone: "Mobile number",
-  callingCode: "Country code",
-  sendCode: "Send code",
-  code: "Code from text message",
-  verify: "Verify",
-  resend: "Send a new code",
-  resendWait: "New code in {seconds} s",
-  existingAccount:
-    "The number will be linked to the account you are already signed in to.",
-  phoneInvalid: "Check the country code and mobile number.",
-  phoneUnavailable:
-    "The code cannot be sent or verified right now. Try again later. Your draft is saved.",
-  codeInvalid: "The code is incorrect or has expired. Request a new code.",
-  phoneUsed:
-    "This number belongs to another account. Sign in to that account or use another number.",
-  rateLimit: "Wait a moment before requesting another code.",
+  loginIntro: "Sign in with Apple, Google or email to follow your items.",
   sessionChanged:
     "The account has changed. Reopen this page before continuing.",
   reviewIntro: "Check the item and send a request to the selected store.",
   send: "Send to the store",
-  verifyPhone: "Verify mobile number",
+  login: "Sign in",
   pending: "A submission needs confirmation",
   resume: "Check and retry",
   sendError:
@@ -106,28 +73,13 @@ const en: Copy = {
   editAfterRefusal: "Edit the details and try again.",
 };
 const no: Copy = {
-  phoneTitle: "Bekreft mobilnummeret",
-  phoneIntro: "Bekreft nummeret med en kode på SMS. Du trenger ikke passord.",
-  phone: "Mobilnummer",
-  callingCode: "Landskode",
-  sendCode: "Send kode",
-  code: "Kode fra SMS",
-  verify: "Bekreft",
-  resend: "Send ny kode",
-  resendWait: "Ny kode om {seconds} s",
-  existingAccount: "Nummeret knyttes til kontoen du allerede er logget inn på.",
-  phoneInvalid: "Kontroller landskoden og mobilnummeret.",
-  phoneUnavailable:
-    "Koden kan ikke sendes eller bekreftes akkurat nå. Prøv igjen senere. Utkastet er lagret.",
-  codeInvalid: "Koden er feil eller har utløpt. Be om en ny kode.",
-  phoneUsed:
-    "Nummeret tilhører en annen konto. Logg inn på den kontoen eller bruk et annet nummer.",
-  rateLimit: "Vent litt før du ber om en ny kode.",
+  loginIntro:
+    "Logg inn med Apple, Google eller e-post for å følge varene dine.",
   sessionChanged: "Kontoen er endret. Åpne siden på nytt før du fortsetter.",
   reviewIntro:
     "Kontroller varen og send en forespørsel til den valgte butikken.",
   send: "Send til butikken",
-  verifyPhone: "Bekreft mobilnummer",
+  login: "Logg inn",
   pending: "En innsending må bekreftes",
   resume: "Kontroller og prøv igjen",
   sendError:
@@ -157,29 +109,11 @@ const no: Copy = {
   editAfterRefusal: "Endre opplysningene og prøv igjen.",
 };
 const da: Copy = {
-  phoneTitle: "Bekræft mobilnummeret",
-  phoneIntro:
-    "Bekræft nummeret med en kode via sms. Ingen adgangskode er nødvendig.",
-  phone: "Mobilnummer",
-  callingCode: "Landekode",
-  sendCode: "Send kode",
-  code: "Kode fra sms",
-  verify: "Bekræft",
-  resend: "Send ny kode",
-  resendWait: "Ny kode om {seconds} s",
-  existingAccount:
-    "Nummeret knyttes til den konto, du allerede er logget ind på.",
-  phoneInvalid: "Kontrollér landekoden og mobilnummeret.",
-  phoneUnavailable:
-    "Koden kan ikke sendes eller bekræftes lige nu. Prøv igen senere. Dit udkast er gemt.",
-  codeInvalid: "Koden er forkert eller udløbet. Bed om en ny kode.",
-  phoneUsed:
-    "Nummeret tilhører en anden konto. Log ind på den konto eller brug et andet nummer.",
-  rateLimit: "Vent lidt, før du beder om en ny kode.",
+  loginIntro: "Log ind med Apple, Google eller e-mail for at følge dine varer.",
   sessionChanged: "Kontoen er ændret. Åbn siden igen, før du fortsætter.",
   reviewIntro: "Kontrollér varen og send en forespørgsel til den valgte butik.",
   send: "Send til butikken",
-  verifyPhone: "Bekræft mobilnummer",
+  login: "Log ind",
   pending: "En indsendelse skal bekræftes",
   resume: "Kontrollér og prøv igen",
   sendError:
@@ -209,28 +143,12 @@ const da: Copy = {
   editAfterRefusal: "Ret oplysningerne, og prøv igen.",
 };
 const fi: Copy = {
-  phoneTitle: "Vahvista puhelinnumero",
-  phoneIntro:
-    "Vahvista numerosi tekstiviestillä saapuvalla koodilla. Et tarvitse salasanaa.",
-  phone: "Puhelinnumero",
-  callingCode: "Maakoodi",
-  sendCode: "Lähetä koodi",
-  code: "Tekstiviestin koodi",
-  verify: "Vahvista",
-  resend: "Lähetä uusi koodi",
-  resendWait: "Uusi koodi {seconds} s kuluttua",
-  existingAccount: "Numero liitetään tiliin, jolle olet jo kirjautunut.",
-  phoneInvalid: "Tarkista maakoodi ja puhelinnumero.",
-  phoneUnavailable:
-    "Koodia ei voi lähettää tai vahvistaa juuri nyt. Yritä myöhemmin uudelleen. Luonnoksesi on tallessa.",
-  codeInvalid: "Koodi on väärä tai vanhentunut. Pyydä uusi koodi.",
-  phoneUsed:
-    "Numero kuuluu toiselle tilille. Kirjaudu sille tilille tai käytä toista numeroa.",
-  rateLimit: "Odota hetki ennen uuden koodin pyytämistä.",
+  loginIntro:
+    "Kirjaudu Applella, Googlella tai sähköpostilla seurataksesi tuotteitasi.",
   sessionChanged: "Tili on vaihtunut. Avaa sivu uudelleen ennen jatkamista.",
   reviewIntro: "Tarkista tuote ja lähetä ehdotus valitulle liikkeelle.",
   send: "Lähetä liikkeelle",
-  verifyPhone: "Vahvista puhelinnumero",
+  login: "Kirjaudu sisään",
   pending: "Lähetys odottaa vahvistusta",
   resume: "Tarkista ja yritä uudelleen",
   sendError:
@@ -260,31 +178,14 @@ const fi: Copy = {
   editAfterRefusal: "Muokkaa tietoja ja yritä uudelleen.",
 };
 const de: Copy = {
-  phoneTitle: "Mobilnummer bestätigen",
-  phoneIntro: "Bestätige deine Nummer mit einem SMS-Code. Kein Passwort nötig.",
-  phone: "Mobilnummer",
-  callingCode: "Ländervorwahl",
-  sendCode: "Code senden",
-  code: "Code aus der SMS",
-  verify: "Bestätigen",
-  resend: "Neuen Code senden",
-  resendWait: "Neuer Code in {seconds} s",
-  existingAccount:
-    "Die Nummer wird mit deinem bereits angemeldeten Konto verknüpft.",
-  phoneInvalid: "Prüfe die Ländervorwahl und die Mobilnummer.",
-  phoneUnavailable:
-    "Der Code kann gerade nicht gesendet oder bestätigt werden. Versuche es später erneut. Dein Entwurf bleibt gespeichert.",
-  codeInvalid:
-    "Der Code ist falsch oder abgelaufen. Fordere einen neuen Code an.",
-  phoneUsed:
-    "Die Nummer gehört zu einem anderen Konto. Melde dich dort an oder verwende eine andere Nummer.",
-  rateLimit: "Warte kurz, bevor du einen neuen Code anforderst.",
+  loginIntro:
+    "Melde dich mit Apple, Google oder E-Mail an, um deine Artikel zu verfolgen.",
   sessionChanged:
     "Das Konto wurde gewechselt. Öffne die Seite erneut, bevor du fortfährst.",
   reviewIntro:
     "Prüfe den Artikel und sende eine Anfrage an das ausgewählte Geschäft.",
   send: "An das Geschäft senden",
-  verifyPhone: "Mobilnummer bestätigen",
+  login: "Anmelden",
   pending: "Eine Einsendung benötigt Bestätigung",
   resume: "Prüfen und erneut versuchen",
   sendError:
@@ -314,31 +215,14 @@ const de: Copy = {
   editAfterRefusal: "Bearbeite die Angaben und versuche es erneut.",
 };
 const es: Copy = {
-  phoneTitle: "Verifica tu móvil",
-  phoneIntro:
-    "Confirma tu número con un código por SMS. No necesitas contraseña.",
-  phone: "Número de móvil",
-  callingCode: "Prefijo",
-  sendCode: "Enviar código",
-  code: "Código del SMS",
-  verify: "Verificar",
-  resend: "Enviar otro código",
-  resendWait: "Nuevo código en {seconds} s",
-  existingAccount:
-    "El número se vinculará a la cuenta en la que ya has iniciado sesión.",
-  phoneInvalid: "Comprueba el prefijo y el número de móvil.",
-  phoneUnavailable:
-    "Ahora no se puede enviar o verificar el código. Inténtalo más tarde. Tu borrador está guardado.",
-  codeInvalid: "El código es incorrecto o ha caducado. Solicita otro código.",
-  phoneUsed:
-    "Este número pertenece a otra cuenta. Inicia sesión en ella o usa otro número.",
-  rateLimit: "Espera un momento antes de solicitar otro código.",
+  loginIntro:
+    "Inicia sesión con Apple, Google o correo electrónico para seguir tus artículos.",
   sessionChanged:
     "La cuenta ha cambiado. Vuelve a abrir la página antes de continuar.",
   reviewIntro:
     "Revisa el artículo y envía una solicitud a la tienda seleccionada.",
   send: "Enviar a la tienda",
-  verifyPhone: "Verificar móvil",
+  login: "Iniciar sesión",
   pending: "Un envío necesita confirmación",
   resume: "Comprobar y reintentar",
   sendError:
@@ -368,30 +252,12 @@ const es: Copy = {
   editAfterRefusal: "Edita los datos e inténtalo de nuevo.",
 };
 const it: Copy = {
-  phoneTitle: "Verifica il numero di cellulare",
-  phoneIntro:
-    "Conferma il numero con un codice via SMS. Non serve una password.",
-  phone: "Cellulare",
-  callingCode: "Prefisso",
-  sendCode: "Invia codice",
-  code: "Codice dell’SMS",
-  verify: "Verifica",
-  resend: "Invia un nuovo codice",
-  resendWait: "Nuovo codice tra {seconds} s",
-  existingAccount:
-    "Il numero verrà collegato all’account con cui hai già effettuato l’accesso.",
-  phoneInvalid: "Controlla il prefisso e il numero di cellulare.",
-  phoneUnavailable:
-    "Al momento non è possibile inviare o verificare il codice. Riprova più tardi. La bozza è salvata.",
-  codeInvalid: "Il codice è errato o scaduto. Richiedine uno nuovo.",
-  phoneUsed:
-    "Questo numero appartiene a un altro account. Accedi a quell’account o usa un altro numero.",
-  rateLimit: "Attendi un momento prima di richiedere un altro codice.",
+  loginIntro: "Accedi con Apple, Google o e-mail per seguire i tuoi articoli.",
   sessionChanged: "L’account è cambiato. Riapri la pagina prima di continuare.",
   reviewIntro:
     "Controlla l’articolo e invia una richiesta al negozio selezionato.",
   send: "Invia al negozio",
-  verifyPhone: "Verifica cellulare",
+  login: "Accedi",
   pending: "Un invio richiede conferma",
   resume: "Controlla e riprova",
   sendError:
@@ -437,10 +303,6 @@ export function externalSubmissionError(locale: Locale, code: string) {
   const t = externalSubmissionCopy(locale);
   if (code === "SWEDEN_REQUIRED")
     return centralIntakeCopy(locale).countryRequired;
-  if (code === "PHONE_INVALID") return t.phoneInvalid;
-  if (code === "PHONE_CODE_INVALID") return t.codeInvalid;
-  if (code === "PHONE_ALREADY_USED") return t.phoneUsed;
-  if (code === "PHONE_RATE_LIMIT") return t.rateLimit;
   if (code === "SESSION_CHANGED") return t.sessionChanged;
   if (code === "ACTIVE_REQUEST_LIMIT") return t.limit;
   if (code === "STORE_UNAVAILABLE") return t.unavailable;

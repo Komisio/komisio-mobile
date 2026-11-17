@@ -4,7 +4,6 @@ import type { CommandOutcome } from "./pending-command.ts";
 export type ExternalOnboarding = {
   offerId: string;
   tenantId: string;
-  phone: string;
   account: { id: string; name: string; email: string; hasBank: boolean } | null;
   store: {
     address: {
@@ -60,13 +59,7 @@ export function parseExternalOnboarding(
 ): ExternalOnboarding {
   const v = object(value),
     s = object(v.store);
-  if (
-    v.offerId !== offer ||
-    !isId(offer) ||
-    !isId(v.tenantId) ||
-    !string(v.phone, 40, true)
-  )
-    invalid();
+  if (v.offerId !== offer || !isId(offer) || !isId(v.tenantId)) invalid();
   if (v.account !== null) {
     const a = object(v.account);
     if (

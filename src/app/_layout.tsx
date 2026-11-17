@@ -140,16 +140,6 @@ function Routes() {
           }
         />
         <Stack.Screen
-          name="email-login"
-          options={({ navigation }) =>
-            detailHeaderOptions(
-              "/(tabs)/profile",
-              d.close,
-              navigation.canGoBack(),
-            )
-          }
-        />
-        <Stack.Screen
           name="notifications"
           options={({ navigation }) =>
             detailHeaderOptions(
@@ -246,18 +236,6 @@ function Routes() {
               navigation.canGoBack(),
             ),
             title: externalSubmissionCopy(locale).send,
-            ...photoCloseOptions(photoHome, d.close),
-          })}
-        />
-        <Stack.Screen
-          name="photo-phone"
-          options={({ navigation }) => ({
-            ...detailHeaderOptions(
-              "/photo-review",
-              d.close,
-              navigation.canGoBack(),
-            ),
-            title: externalSubmissionCopy(locale).phoneTitle,
             ...photoCloseOptions(photoHome, d.close),
           })}
         />

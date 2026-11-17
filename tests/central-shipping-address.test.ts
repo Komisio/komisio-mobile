@@ -15,6 +15,7 @@ const command = {
   tenantId: tenant,
   sellerId: seller,
   expectedRevision: 0,
+  contact: { firstName: "Alex", lastName: "Example", phone: "+46701234567" },
   address: { street: "Testgatan 1", postalCode: "12345", city: "Teststad" },
 };
 test("address commands bind identity and revision and cannot write other profile fields", () => {
@@ -39,6 +40,7 @@ test("address commands bind identity and revision and cannot write other profile
         sellerId: seller,
         revision: 0,
         address: null,
+        contact: null,
       },
     }).account?.address,
     null,

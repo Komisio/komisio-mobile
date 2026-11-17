@@ -15,7 +15,6 @@ const sv = {
   wait: "Ny kod om {seconds} s",
   other: "Andra sätt att logga in",
   password: "Logga in med lösenord",
-  sms: "Logga in med SMS-kod",
   link: "Logga in / skapa konto",
   methods: "Inloggningssätt",
   methodsIntro:
@@ -35,7 +34,6 @@ const sv = {
     "Det inloggningssättet är redan kopplat till ett konto. Logga in på det befintliga kontot.",
   unavailable:
     "Det här inloggningssättet är inte tillgängligt just nu. Du kan använda e-post.",
-  phoneLater: "Mobilnumret verifierar du när du skickar in din första vara.",
 };
 type Copy = { [K in keyof typeof sv]: string };
 const copies: Record<Locale, Copy> = {
@@ -56,7 +54,6 @@ const copies: Record<Locale, Copy> = {
     wait: "New code in {seconds}s",
     other: "Other ways to sign in",
     password: "Sign in with a password",
-    sms: "Sign in with an SMS code",
     link: "Sign in / create account",
     methods: "Sign-in methods",
     methodsIntro:
@@ -76,7 +73,6 @@ const copies: Record<Locale, Copy> = {
       "This sign-in method is already connected to an account. Sign in to that existing account.",
     unavailable:
       "This sign-in method is unavailable right now. You can use email.",
-    phoneLater: "Verify your phone number when you submit your first item.",
   },
   no: {
     title: "Logg inn eller opprett konto",
@@ -94,7 +90,6 @@ const copies: Record<Locale, Copy> = {
     wait: "Ny kode om {seconds} s",
     other: "Andre måter å logge inn på",
     password: "Logg inn med passord",
-    sms: "Logg inn med SMS-kode",
     link: "Logg inn / opprett konto",
     methods: "Innloggingsmåter",
     methodsIntro:
@@ -114,8 +109,6 @@ const copies: Record<Locale, Copy> = {
       "Denne innloggingsmåten er allerede koblet til en konto. Logg inn på den eksisterende kontoen.",
     unavailable:
       "Denne innloggingsmåten er ikke tilgjengelig nå. Du kan bruke e-post.",
-    phoneLater:
-      "Du bekrefter mobilnummeret når du sender inn den første varen.",
   },
   da: {
     title: "Log ind eller opret konto",
@@ -133,7 +126,6 @@ const copies: Record<Locale, Copy> = {
     wait: "Ny kode om {seconds} s",
     other: "Andre måder at logge ind på",
     password: "Log ind med adgangskode",
-    sms: "Log ind med SMS-kode",
     link: "Log ind / opret konto",
     methods: "Loginmetoder",
     methodsIntro:
@@ -152,8 +144,6 @@ const copies: Record<Locale, Copy> = {
       "Denne loginmetode er allerede knyttet til en konto. Log ind på den eksisterende konto.",
     unavailable:
       "Denne loginmetode er ikke tilgængelig nu. Du kan bruge e-mail.",
-    phoneLater:
-      "Du bekræfter mobilnummeret, når du sender din første vare ind.",
   },
   fi: {
     title: "Kirjaudu tai luo tili",
@@ -171,7 +161,6 @@ const copies: Record<Locale, Copy> = {
     wait: "Uusi koodi {seconds} s kuluttua",
     other: "Muut kirjautumistavat",
     password: "Kirjaudu salasanalla",
-    sms: "Kirjaudu tekstiviestikoodilla",
     link: "Kirjaudu / luo tili",
     methods: "Kirjautumistavat",
     methodsIntro:
@@ -190,8 +179,6 @@ const copies: Record<Locale, Copy> = {
       "Tämä kirjautumistapa on jo liitetty tiliin. Kirjaudu olemassa olevalle tilille.",
     unavailable:
       "Tämä kirjautumistapa ei ole nyt käytettävissä. Voit käyttää sähköpostia.",
-    phoneLater:
-      "Vahvistat puhelinnumerosi ensimmäisen tuotteen lähettämisen yhteydessä.",
   },
   de: {
     title: "Anmelden oder Konto erstellen",
@@ -210,7 +197,6 @@ const copies: Record<Locale, Copy> = {
     wait: "Neuer Code in {seconds} s",
     other: "Andere Anmeldemöglichkeiten",
     password: "Mit Passwort anmelden",
-    sms: "Mit SMS-Code anmelden",
     link: "Anmelden / Konto erstellen",
     methods: "Anmeldemethoden",
     methodsIntro:
@@ -230,8 +216,6 @@ const copies: Record<Locale, Copy> = {
       "Diese Anmeldemethode ist bereits mit einem Konto verbunden. Melde dich bei diesem Konto an.",
     unavailable:
       "Diese Anmeldemethode ist derzeit nicht verfügbar. Du kannst E-Mail verwenden.",
-    phoneLater:
-      "Deine Handynummer bestätigst du beim Einsenden des ersten Artikels.",
   },
   es: {
     title: "Entra o crea una cuenta",
@@ -250,7 +234,6 @@ const copies: Record<Locale, Copy> = {
     wait: "Nuevo código en {seconds} s",
     other: "Otras formas de entrar",
     password: "Entrar con contraseña",
-    sms: "Entrar con código SMS",
     link: "Entrar / crear cuenta",
     methods: "Métodos de acceso",
     methodsIntro:
@@ -268,7 +251,6 @@ const copies: Record<Locale, Copy> = {
     identityUsed:
       "Este método ya está conectado a una cuenta. Entra en esa cuenta existente.",
     unavailable: "Este método no está disponible ahora. Puedes usar el correo.",
-    phoneLater: "Verificarás tu móvil cuando envíes tu primer artículo.",
   },
   it: {
     title: "Accedi o crea un account",
@@ -287,7 +269,6 @@ const copies: Record<Locale, Copy> = {
     wait: "Nuovo codice tra {seconds} s",
     other: "Altri modi per accedere",
     password: "Accedi con password",
-    sms: "Accedi con codice SMS",
     link: "Accedi / crea account",
     methods: "Metodi di accesso",
     methodsIntro:
@@ -306,7 +287,6 @@ const copies: Record<Locale, Copy> = {
     identityUsed:
       "Questo metodo è già collegato a un account. Accedi a quell’account esistente.",
     unavailable: "Questo metodo non è disponibile adesso. Puoi usare l’email.",
-    phoneLater: "Verificherai il cellulare quando invii il primo articolo.",
   },
 };
 export const accountAuthCopy = (locale: Locale) => copies[locale];

@@ -238,7 +238,6 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
         usePreventRemove: () => () => {},
       },
       "./ui": { ...ui, uiStyles: {} },
-      "./photo-phone-screen": { PhotoPhoneScreen: "Phone" },
       "./photo-flow-ui": { PhotoStep: "Step", PhotoStrip: "Photos" },
       "./submission-notifications": { SubmissionNotifications: "Reminder" },
       "@/lib/i18n": {
@@ -250,7 +249,7 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
           refreshAssurance: async () => {},
         }),
       },
-      "@/lib/identity-gates": { hasVerifiedPhone: () => true },
+      "@/lib/identity-gates": { hasVerifiedEmail: () => true },
       "@/lib/use-item-draft": {
         useItemDraft: () => ({
           snapshot: {

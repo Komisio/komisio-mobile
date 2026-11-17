@@ -19,7 +19,8 @@ import {
   parseSaveShippingAddress,
   type ShippingAccount,
 } from "@/lib/central-shipping-address";
-import type { ShippingAddress } from "@/lib/central-shipping";
+import type { SenderAddress } from "@/lib/central-shipping";
+import { phoneEntryValue } from "@/lib/phone-entry";
 import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { shippingAddressCopy } from "@/lib/shipping-address-copy";
 import { Button, Card, Field, Loading, Message, uiStyles } from "./ui";
@@ -28,7 +29,7 @@ type Props = {
   user: string;
   disabled?: boolean;
   hideUnavailable?: boolean;
-  children?: (address: ShippingAddress) => ReactNode;
+  children?: (address: SenderAddress) => ReactNode;
 };
 export function CentralShippingAddress({
   user,
@@ -104,10 +105,13 @@ function AddressEditor({
     t = shippingAddressCopy(locale),
     shipping = centralShippingCopy(locale);
   const { refreshAssurance } = useSession();
-  const [editing, setEditing] = useState(!account.address);
+  const [editing, setEditing] = useState(!account.address || !account.contact);
   const [street, setStreet] = useState(account.address?.street ?? ""),
     [postalCode, setPostalCode] = useState(account.address?.postalCode ?? ""),
     [city, setCity] = useState(account.address?.city ?? "");
+  const [firstName, setFirstName] = useState(account.contact?.firstName ?? "");
+  const [lastName, setLastName] = useState(account.contact?.lastName ?? "");
+  const [phone, setPhone] = useState(account.contact?.phone ?? "");
   const [invalid, setInvalid] = useState(false);
   const writer = useMemo(
     () => shippingAddressWriter(user, account.tenantId, account.sellerId),
@@ -145,6 +149,11 @@ function AddressEditor({
           tenantId: account.tenantId,
           sellerId: account.sellerId,
           expectedRevision: account.revision,
+          contact: {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            phone: phoneEntryValue({ callingCode: "+46", number: phone }),
+          },
           address: {
             street: street.trim(),
             postalCode: postalCode.replace(/\s/g, ""),
@@ -185,6 +194,37 @@ function AddressEditor({
           <>
             <Text style={uiStyles.note}>{t.hint}</Text>
             <Field
+              label={t.firstName}
+              value={firstName}
+              onChangeText={setFirstName}
+              editable={!busy && !disabled}
+              autoComplete="given-name"
+              textContentType="givenName"
+              autoCapitalize="words"
+              maxLength={58}
+            />
+            <Field
+              label={t.lastName}
+              value={lastName}
+              onChangeText={setLastName}
+              editable={!busy && !disabled}
+              autoComplete="family-name"
+              textContentType="familyName"
+              autoCapitalize="words"
+              maxLength={58}
+            />
+            <Field
+              label={t.phone}
+              value={phone}
+              onChangeText={setPhone}
+              editable={!busy && !disabled}
+              autoComplete="tel"
+              textContentType="telephoneNumber"
+              keyboardType="phone-pad"
+              placeholder="070 123 45 67"
+              maxLength={30}
+            />
+            <Field
               label={shipping.street}
               value={street}
               onChangeText={setStreet}
@@ -217,12 +257,15 @@ function AddressEditor({
               disabled={disabled}
               onPress={save}
             />
-            {account.address ? (
+            {account.address && account.contact ? (
               <Button
                 label={t.cancel}
                 variant="text"
                 disabled={busy || disabled}
                 onPress={() => {
+                  setFirstName(account.contact!.firstName);
+                  setLastName(account.contact!.lastName);
+                  setPhone(account.contact!.phone);
                   setStreet(account.address!.street);
                   setPostalCode(account.address!.postalCode);
                   setCity(account.address!.city);
@@ -235,6 +278,10 @@ function AddressEditor({
         ) : (
           <>
             <Text selectable style={uiStyles.body}>
+              {account.contact!.firstName} {account.contact!.lastName}
+              {"\n"}
+              {account.contact!.phone}
+              {"\n"}
               {account.address!.street}
               {"\n"}
               {account.address!.postalCode} {account.address!.city}
@@ -248,7 +295,9 @@ function AddressEditor({
           </>
         )}
       </Card>
-      {!editing && account.address ? children?.(account.address) : null}
+      {!editing && account.address && account.contact
+        ? children?.({ ...account.address, ...account.contact })
+        : null}
     </>
   );
 }

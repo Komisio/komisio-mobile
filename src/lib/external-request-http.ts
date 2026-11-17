@@ -11,7 +11,6 @@ export function externalItemsEndpoint(value: string | undefined) {
 }
 const safeErrors = new Set([
   "AUTH_REQUIRED",
-  "PHONE_VERIFICATION_REQUIRED",
   "MFA_REQUIRED",
   "PASSWORD_UPDATE_REQUIRED",
   "FORBIDDEN",

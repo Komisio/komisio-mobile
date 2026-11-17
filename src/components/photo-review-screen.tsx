@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import { Text } from "react-native";
 import { router, useFocusEffect, usePreventRemove } from "expo-router";
 import { Button, Card, Choice, Loading, Message, Screen, uiStyles } from "./ui";
-import { PhotoPhoneScreen } from "./photo-phone-screen";
+
 import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
 import { photoFlowCopy } from "@/lib/photo-flow-copy";
 import { useItemDraft } from "@/lib/use-item-draft";
@@ -18,7 +18,7 @@ import {
 } from "@/lib/external-submission-copy";
 import { externalSubmission } from "@/lib/external-submission-runtime";
 import type { ExternalAttempt } from "@/lib/external-submission";
-import { hasVerifiedPhone } from "@/lib/identity-gates";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { sellerPush } from "@/lib/push-runtime";
 import { SubmissionNotifications } from "./submission-notifications";
 
@@ -80,8 +80,8 @@ export function PhotoReviewScreen() {
     attempt?.state === "pending" || attempt?.state === "confirmed";
   async function send(resume = false, notificationsReviewed = false) {
     if (locked.current) return;
-    if (!owner || !hasVerifiedPhone(session?.user)) {
-      router.push("/photo-phone");
+    if (!owner || !hasVerifiedEmail(session?.user)) {
+      router.push("/account-auth?returnTo=photo-review");
       return;
     }
     if (!resume && !snapshot) return;
@@ -235,8 +235,11 @@ export function PhotoReviewScreen() {
   return (
     <Screen topSafeArea={false} keyboardInsets>
       <PhotoStep step={3} />
-      {!hasVerifiedPhone(session?.user) ? (
-        <PhotoPhoneScreen embedded />
+      {!hasVerifiedEmail(session?.user) ? (
+        <Button
+          label={s.login}
+          onPress={() => router.push("/account-auth?returnTo=photo-review")}
+        />
       ) : (
         <>
           <Text accessibilityRole="header" style={uiStyles.title}>
@@ -311,7 +314,7 @@ export function PhotoReviewScreen() {
       <Button
         label={s.send}
         busy={busy}
-        disabled={!countryConfirmed || !hasVerifiedPhone(session?.user)}
+        disabled={!countryConfirmed || !hasVerifiedEmail(session?.user)}
         onPress={() => void send()}
       />
     </Screen>

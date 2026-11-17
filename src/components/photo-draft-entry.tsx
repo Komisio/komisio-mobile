@@ -23,8 +23,8 @@ export function PhotoDraftEntry() {
             session
               ? "/external-items"
               : {
-                  pathname: "/photo-phone",
-                  params: { destination: "requests" },
+                  pathname: "/account-auth",
+                  params: { returnTo: "external-items" },
                 },
           )
         }

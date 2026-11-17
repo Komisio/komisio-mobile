@@ -1,7 +1,7 @@
 import { fetch } from "expo/fetch";
 import { supabase } from "./supabase";
 import { externalItemsEndpoint } from "./external-request-http";
-import { createExternalPhoneRead } from "./external-offer-http";
+import { createExternalIdentityRead } from "./external-offer-http";
 import { externalOfferApi } from "./external-offer-runtime";
 import {
   parseExternalOnboarding,
@@ -29,7 +29,10 @@ function transport(user: string) {
 }
 export async function readExternalOnboarding(user: string, id: string) {
   const [data, offer] = await Promise.all([
-    createExternalPhoneRead(transport(user))({ action: "read", offerId: id }),
+    createExternalIdentityRead(transport(user))({
+      action: "read",
+      offerId: id,
+    }),
     externalOfferApi(user).read(id),
   ]);
   const account = parseExternalOnboarding(data, id);

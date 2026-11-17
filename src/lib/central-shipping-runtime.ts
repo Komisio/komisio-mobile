@@ -1,7 +1,7 @@
 import { fetch } from "expo/fetch";
 import { supabase } from "./supabase";
 import { externalItemsEndpoint } from "./external-request-http";
-import { createExternalPhoneRead } from "./external-offer-http";
+import { createExternalIdentityRead } from "./external-offer-http";
 import { createPendingCommand } from "./pending-command";
 import { commandStorage } from "./command-storage";
 import { commandLock } from "./command-lock";
@@ -28,7 +28,7 @@ export function shippingTransport(user: string, suffix = "") {
 }
 export async function readShipping(user: string, offer: string) {
   return parseShippingState(
-    await createExternalPhoneRead(shippingTransport(user))({
+    await createExternalIdentityRead(shippingTransport(user))({
       action: "read",
       offerId: offer,
     }),

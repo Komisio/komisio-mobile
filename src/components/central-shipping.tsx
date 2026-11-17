@@ -12,7 +12,7 @@ import {
   parseBookParcel,
   parcelSelectionFits,
   parcelTrackingUrl,
-  type ShippingAddress,
+  type SenderAddress,
 } from "@/lib/central-shipping";
 import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { shippingAddressCopy } from "@/lib/shipping-address-copy";
@@ -101,7 +101,7 @@ export function CentralShipping({
     )
       void refreshAssurance();
   }
-  function book(address: ShippingAddress) {
+  function book(address: SenderAddress) {
     if (!selectionFits) return;
     try {
       const command = parseBookParcel(
@@ -206,6 +206,16 @@ export function CentralShipping({
               />
             </>
           )}
+          <Text style={uiStyles.label}>{addressCopy.title}</Text>
+          <Text selectable style={uiStyles.body}>
+            {parcel.sender.name}
+            {"\n"}
+            {parcel.sender.phone}
+            {"\n"}
+            {parcel.sender.street}
+            {"\n"}
+            {parcel.sender.postalCode} {parcel.sender.city}
+          </Text>
           <Text style={uiStyles.label}>{t.recipient}</Text>
           <Text selectable style={uiStyles.body}>
             {parcel.recipient.name}

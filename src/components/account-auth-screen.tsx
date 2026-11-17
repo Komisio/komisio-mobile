@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Keyboard, Platform, Text, View } from "react-native";
-import { Redirect, router, usePreventRemove } from "expo-router";
+import {
+  Redirect,
+  router,
+  useLocalSearchParams,
+  usePreventRemove,
+} from "expo-router";
 import { Button, Card, Field, Message, Screen, uiStyles } from "./ui";
 import { AppleAccountButton } from "./apple-account-button";
 import { GoogleAccountButton } from "./google-account-button";
@@ -15,8 +20,8 @@ import {
   type EmailTicket,
 } from "@/lib/account-auth";
 import { accountAuthCopy, accountErrorText } from "@/lib/account-auth-copy";
-import { emailLoginCopy } from "@/lib/email-login-copy";
-import { hasVerifiedPhone } from "@/lib/identity-gates";
+import { accountReturnPath } from "@/lib/account-return-path";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 
@@ -24,6 +29,7 @@ export function AccountAuthScreen({ link = false }: { link?: boolean }) {
   const { locale } = useI18n(),
     t = accountAuthCopy(locale);
   const { session, refreshAssurance } = useSession();
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const [providers, setProviders] = useState<{
     apple: boolean;
     google: boolean;
@@ -99,7 +105,8 @@ export function AccountAuthScreen({ link = false }: { link?: boolean }) {
       return false;
     });
   }
-  if (session && !link && !busy) return <Redirect href="/home" />;
+  if (hasVerifiedEmail(session?.user) && !link && !busy)
+    return <Redirect href={accountReturnPath(returnTo)} />;
   if (!session && link) return <Redirect href="/account-auth" />;
   const connected = (provider: string) =>
     session?.user.identities?.some(
@@ -149,14 +156,6 @@ export function AccountAuthScreen({ link = false }: { link?: boolean }) {
                 {session.user.email}
               </Text>
             </Card>
-          ) : null}
-          {link && hasVerifiedPhone(session?.user) ? (
-            <Button
-              label={emailLoginCopy(locale).title}
-              variant="secondary"
-              disabled={busy}
-              onPress={() => router.push("/email-login")}
-            />
           ) : null}
           {providers &&
           (!providers.google || (Platform.OS === "ios" && !providers.apple)) ? (
@@ -260,23 +259,18 @@ export function AccountAuthScreen({ link = false }: { link?: boolean }) {
               <Button
                 label={t.password}
                 variant="secondary"
-                onPress={() => router.push("/login")}
-                disabled={busy}
-              />
-              <Button
-                label={t.sms}
-                variant="text"
-                disabled={busy}
                 onPress={() =>
                   router.push({
-                    pathname: "/photo-phone",
-                    params: { destination: "requests" },
+                    pathname: "/login",
+                    params: {
+                      returnTo: typeof returnTo === "string" ? returnTo : "",
+                    },
                   })
                 }
+                disabled={busy}
               />
             </View>
           ) : null}
-          <Text style={uiStyles.note}>{t.phoneLater}</Text>
         </>
       ) : null}
       <PrivacyLink />
