@@ -24,7 +24,7 @@ import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { OfferAgreementLink } from "@/components/offer-agreement-link";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { hasCentralIdentity } from "@/lib/identity-gates";
 import { isId } from "@/lib/catalogue";
 import { createScopedRead } from "@/lib/scoped-read";
 import {
@@ -47,7 +47,7 @@ export default function ExternalOnboardingScreen() {
   const { offer } = useLocalSearchParams<{ offer: string }>();
   const { session } = useSession();
   const { locale } = useI18n();
-  if (!session || !hasVerifiedEmail(session.user) || !isId(offer))
+  if (!session || !hasCentralIdentity(session.user) || !isId(offer))
     return (
       <Screen topSafeArea={false}>
         <Message>{externalOfferCopy(locale).loadError}</Message>

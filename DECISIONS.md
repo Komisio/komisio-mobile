@@ -1,5 +1,8 @@
 # Decisions
 
+- 2026-11-18: Central navigation recognizes verified linked Apple/Google email on the same Auth identity when primary email is absent. Ordinary store email gates and session-switch safeguards remain. Profile always identifies the current sign-in (#106).
+- 2026-11-18: Photo suggestions may run before login through bounded guest AI. Keep capability and retries bound to the local draft, images and backend; authenticate before submission. Guest analysis never creates an account or request (#106).
+
 - 2026-11-18: Central item submission no longer checks or prompts for notification permission. Keep the once-per-install first-launch request and explicit profile controls; unavailable notifications must never block submission. Supersedes the 2026-11-14 reminder decision.
 
 - 2026-11-18: Request shipping protocol 2 and use the server's bounded item capacity, now 2500 g. The backend adds 100 g packaging. Preserve legacy reads and pending commands; release the compatible backend before this app update.

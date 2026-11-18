@@ -23,7 +23,7 @@ import {
   externalSubmission,
 } from "@/lib/external-submission-runtime";
 import type { ExternalRequestPage } from "@/lib/external-submission";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { hasCentralIdentity, hasVerifiedEmail } from "@/lib/identity-gates";
 import { useItemDraft } from "@/lib/use-item-draft";
 import { PhotoCapacity } from "./photo-flow-ui";
 import { ExternalItemRow } from "./external-item-row";
@@ -40,7 +40,7 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
     request?: string;
   }>();
   const owner = session?.user.id,
-    verified = hasVerifiedEmail(session?.user);
+    verified = hasCentralIdentity(session?.user);
   const { snapshot } = useItemDraft();
   const [offset, setOffset] = useState(0);
   const [group, setGroup] = useState<"active" | "history">("active");

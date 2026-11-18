@@ -17,7 +17,7 @@ function compile(file: string, modules: Record<string, unknown>) {
       externalOfferApi: () => ({ read: async () => null }),
     },
     "@/lib/identity-gates": {
-      hasVerifiedEmail: (user: any) =>
+      hasCentralIdentity: (user: any) =>
         Boolean(user?.email_confirmed_at && user?.email),
     },
     ...modules,

@@ -19,7 +19,7 @@ import {
 } from "@/lib/external-submission-copy";
 import { externalSubmission } from "@/lib/external-submission-runtime";
 import type { ExternalAttempt } from "@/lib/external-submission";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { hasCentralIdentity } from "@/lib/identity-gates";
 
 export function PhotoReviewScreen() {
   const { locale, d } = useI18n();
@@ -74,7 +74,7 @@ export function PhotoReviewScreen() {
     attempt?.state === "pending" || attempt?.state === "confirmed";
   async function send(resume = false, agreementVersionId?: string) {
     if (locked.current) return;
-    if (!owner || !hasVerifiedEmail(session?.user)) {
+    if (!owner || !hasCentralIdentity(session?.user)) {
       router.push("/account-auth?returnTo=photo-review");
       return;
     }
@@ -201,7 +201,7 @@ export function PhotoReviewScreen() {
   return (
     <Screen topSafeArea={false} keyboardInsets>
       <PhotoStep step={3} />
-      {!hasVerifiedEmail(session?.user) ? (
+      {!hasCentralIdentity(session?.user) ? (
         <Button
           label={s.login}
           onPress={() => router.push("/account-auth?returnTo=photo-review")}
@@ -269,7 +269,7 @@ export function PhotoReviewScreen() {
         </>
       ) : null}
       {progress ? <Message>{progress}</Message> : null}
-      {owner && hasVerifiedEmail(session?.user) ? (
+      {owner && hasCentralIdentity(session?.user) ? (
         <CentralIntakeSetup
           key={`${owner}:${draft.store.id}`}
           user={owner}
