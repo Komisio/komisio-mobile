@@ -5,7 +5,7 @@ import * as shipping from "../src/lib/central-shipping.ts";
 import { centralShippingCopy } from "../src/lib/central-shipping-copy.ts";
 import { shippingAddressCopy } from "../src/lib/shipping-address-copy.ts";
 
-test("package selection disables a sixth item and submits only the five selected items", async () => {
+async function verifySelection(limit: number) {
   const id = (n: number) =>
     `f7800000-0000-4000-8000-${String(n).padStart(12, "0")}`;
   const items = Array.from({ length: 10 }, (_, n) => ({
@@ -14,7 +14,7 @@ test("package selection disables a sixth item and submits only the five selected
     description: `Dress ${n + 1}`,
     reference: `H-${n + 1}`,
     status: "open",
-    selectionWeightG: 400,
+    selectionWeightG: limit / 5,
   }));
   const values: any[] = [];
   let cursor = 0;
@@ -27,7 +27,7 @@ test("package selection disables a sixth item and submits only the five selected
         available: true,
         measurementsOptional: true,
         bundlingAvailable: true,
-        selectionWeightLimitG: 2000,
+        selectionWeightLimitG: limit,
         eligibleItems: items,
         parcel: null,
       },
@@ -145,4 +145,8 @@ test("package selection disables a sixth item and submits only the five selected
   assert.equal(submitted.weightG, undefined);
   choices()[4].props.onPress();
   assert.equal(choices()[5].props.disabled, false);
-});
+}
+
+for (const limit of [2000, 2500])
+  test(`package selection at ${limit} g disables a sixth item and submits only the five selected items`, () =>
+    verifySelection(limit));
