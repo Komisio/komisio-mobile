@@ -1,6 +1,7 @@
 import type { ItemDraftSnapshot, DraftRevision } from "./photo-draft.ts";
 import { itemDetailsErrors, requestedPriceOre } from "./item-draft-details.ts";
 import type { CommandLock } from "./pending-command.ts";
+import type { GuestAnalysisProof } from "./guest-photo-analysis.ts";
 
 export type ExternalItemCommand = {
   action: "submit";
@@ -17,6 +18,7 @@ export type ExternalItemCommand = {
   priceBasis?: "seller_amount";
   approvalMode?: "fixed";
   agreementVersionId?: string;
+  guestAnalysis?: GuestAnalysisProof;
 };
 export type ExternalAttempt = {
   version: 1;
@@ -96,6 +98,11 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
   const c = value as ExternalItemCommand;
   if (
     !c ||
+    (c.guestAnalysis !== undefined &&
+      (!c.guestAnalysis ||
+        !identifier(c.guestAnalysis.id) ||
+        typeof c.guestAnalysis.token !== "string" ||
+        !/^[a-f0-9]{64}$/.test(c.guestAnalysis.token))) ||
     (c.approvalMode !== undefined && c.approvalMode !== "fixed") ||
     (c.approvalMode === "fixed" &&
       (!identifier(c.agreementVersionId) ||
@@ -135,6 +142,7 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
     desiredPriceOre: c.desiredPriceOre,
     currency: c.currency,
     photos: [...c.photos],
+    ...(c.guestAnalysis ? { guestAnalysis: { ...c.guestAnalysis } } : {}),
     ...(c.senderCountry ? { senderCountry: c.senderCountry } : {}),
     ...(c.priceBasis ? { priceBasis: c.priceBasis } : {}),
     ...(c.approvalMode
@@ -225,6 +233,9 @@ export function createExternalSubmission(deps: {
   uuid(): string;
   preparePhoto(uri: string): Promise<Uint8Array>;
   cachedPhotos?(snapshot: ItemDraftSnapshot): Promise<Uint8Array[] | null>;
+  guestAnalysis?(
+    snapshot: ItemDraftSnapshot,
+  ): Promise<GuestAnalysisProof | null>;
   recipient(): Promise<{ id: string; currency: string } | null>;
   finishDraft(expected: DraftRevision, preserve: boolean): Promise<void>;
   api: ExternalRequestApi;
@@ -317,6 +328,9 @@ export function createExternalSubmission(deps: {
         )
           throw new Error("STORE_CHANGED");
         const cached = await deps.cachedPhotos?.(frozen);
+        const guestAnalysis = cached
+          ? await deps.guestAnalysis?.(frozen)
+          : null;
         if (cached && cached.length !== photos.length)
           throw new Error("DRAFT_CHANGED");
         const command = parseExternalCommand({
@@ -324,6 +338,7 @@ export function createExternalSubmission(deps: {
           priceBasis: "seller_amount",
           approvalMode: "fixed",
           agreementVersionId,
+          ...(guestAnalysis ? { guestAnalysis } : {}),
           action: "submit",
           requestId:
             prior?.draft.draftId === draft.draftId

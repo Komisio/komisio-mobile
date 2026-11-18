@@ -7,6 +7,7 @@ import { dictionaries } from "../src/lib/dictionaries.ts";
 import { locales } from "../src/lib/locale.ts";
 import { pushCopy } from "../src/lib/push-copy.ts";
 import { accountDeletionCopy } from "../src/lib/account-deletion-copy.ts";
+import * as identityGates from "../src/lib/identity-gates.ts";
 
 const require = createRequire(import.meta.url);
 function compile(file: string, modules: Record<string, unknown>) {
@@ -50,12 +51,21 @@ function nodes(element: any): any[] {
 }
 test("profile exposes one store action, language detail, financial links and logout beside identity", async () => {
   const actions: unknown[] = [];
-  const screen = compile("../src/components/profile-screen.tsx", {
-    "@/lib/identity-gates": {
-      hasVerifiedEmail: () => true,
+  let session: any = {
+    user: {
+      id: "owner",
+      email: "seller@example.test",
+      email_confirmed_at: "2026-11-18",
     },
+  };
+  let store: { name: string } | null = { name: "Synthetic shop" };
+  const screen = compile("../src/components/profile-screen.tsx", {
+    "@/lib/identity-gates": identityGates,
     "@/lib/account-auth-copy": {
-      accountAuthCopy: () => ({ methods: "Sign-in methods" }),
+      accountAuthCopy: () => ({
+        methods: "Sign-in methods",
+        expired: "Complete sign-in",
+      }),
     },
     "./login-options": { LoginOptions: "LoginOptions" },
     "./central-shipping-address": {
@@ -89,8 +99,8 @@ test("profile exposes one store action, language detail, financial links and log
     },
     "@/lib/session": {
       useSession: () => ({
-        session: { user: { email: "seller@example.test" } },
-        store: { name: "Synthetic shop" },
+        session,
+        store,
         chooseStore: (store: null) => actions.push(store),
         signOut: async () => {
           actions.push("logout");
@@ -139,6 +149,49 @@ test("profile exposes one store action, language detail, financial links and log
         n.type === "Text" &&
         n.props.children === "seller@example.test" &&
         n.props.selectable,
+    ),
+  );
+  session = {
+    user: {
+      id: "owner",
+      email: "",
+      identities: [
+        {
+          user_id: "owner",
+          provider: "apple",
+          identity_data: { email: "relay@example.test", email_verified: true },
+        },
+      ],
+    },
+  };
+  store = null;
+  const central = nodes(screen.ProfileScreen());
+  assert.ok(
+    central.some(
+      (n) => n.type === "Text" && n.props.children === "relay@example.test",
+    ),
+  );
+  assert.equal(
+    central.filter((n) => n.type === "CentralShippingAddress").length,
+    1,
+  );
+  assert.ok(
+    !central.some(
+      (n) =>
+        n.type === "NavigationRow" &&
+        ["Bank", "Agreement"].includes(n.props.label),
+    ),
+  );
+  session = { user: { id: "owner", email: "" } };
+  const incomplete = nodes(screen.ProfileScreen());
+  assert.ok(
+    incomplete.some(
+      (n) => n.type === "Text" && n.props.children === "Complete sign-in",
+    ),
+  );
+  assert.ok(
+    !incomplete.some(
+      (n) => n.type === "Text" && n.props.children === "Signed in as",
     ),
   );
 });

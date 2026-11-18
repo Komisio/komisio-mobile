@@ -33,16 +33,21 @@ test("new submissions require an amount and the displayed agreement before prepa
 test("AI-prepared image bytes are copied to independent submission photo IDs", async () => {
   const f = fixture();
   const jpeg = new Uint8Array([255, 216, 255, 9]);
+  const proof = { id: id(970), token: "a".repeat(64) };
   const controller = createExternalSubmission({
     ...f.deps,
     preparePhoto: async () => {
       throw Error("unexpected re-encoding");
     },
     cachedPhotos: async () => [jpeg],
+    guestAnalysis: async () => proof,
   });
   const attempt = await controller.prepare(snapshot(), "SE", id(950));
   assert.notEqual(attempt.command.photos[0], snapshot().photos[0].id);
   assert.deepEqual(await f.storage.photo(attempt.command.photos[0]), jpeg);
+  assert.deepEqual(attempt.command.guestAnalysis, proof);
+  proof.token = "b".repeat(64);
+  assert.equal(attempt.command.guestAnalysis?.token, "a".repeat(64));
   await controller.resume();
   assert.equal(f.calls.filter((c) => c === "submit").length, 1);
 });

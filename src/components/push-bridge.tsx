@@ -17,7 +17,7 @@ import {
 } from "@/lib/push-contract";
 import { externalRequestApi } from "@/lib/external-submission-runtime";
 import { externalOfferApi } from "@/lib/external-offer-runtime";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { hasCentralIdentity } from "@/lib/identity-gates";
 import {
   ownsPush,
   pushDestination,
@@ -79,7 +79,7 @@ export function PushBridge() {
           return Boolean(
             current.ready &&
             !current.mfaRequired &&
-            hasVerifiedEmail(current.session?.user) &&
+            hasCentralIdentity(current.session?.user) &&
             current.session?.user.id === payload.ownerId &&
             sellerPush.getSnapshot().status === "on",
           );

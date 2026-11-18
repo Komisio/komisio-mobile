@@ -119,7 +119,7 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
           refreshAssurance: async () => {},
         }),
       },
-      "@/lib/identity-gates": { hasVerifiedEmail: () => true },
+      "@/lib/identity-gates": { hasCentralIdentity: () => true },
       "@/lib/use-item-draft": {
         useItemDraft: () => ({
           snapshot: {

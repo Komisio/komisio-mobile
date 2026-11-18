@@ -2,7 +2,6 @@ import type { Locale } from "./locale";
 const sv = {
   title: "Få hjälp av bilderna",
   upload: "Ladda upp bilder för AI-förslag",
-  verify: "Logga in för AI-förslag",
   uploading: "Laddar upp bild {done} av {total}…",
   uploaded: "Alla bilder är uppladdade.",
   analyze: "Få förslag med AI",
@@ -22,7 +21,6 @@ type Copy = { [K in keyof typeof sv]: string };
 const en: Copy = {
   title: "Let your photos help",
   upload: "Upload photos for AI suggestions",
-  verify: "Sign in for AI suggestions",
   uploading: "Uploading photo {done} of {total}…",
   uploaded: "All photos uploaded.",
   analyze: "Get AI suggestions",
@@ -44,7 +42,6 @@ const copies: Record<Locale, Copy> = {
   no: {
     title: "Få hjelp av bildene",
     upload: "Last opp bilder for AI-forslag",
-    verify: "Logg inn for AI-forslag",
     uploading: "Laster opp bilde {done} av {total}…",
     uploaded: "Alle bildene er lastet opp.",
     analyze: "Få forslag med AI",
@@ -62,7 +59,6 @@ const copies: Record<Locale, Copy> = {
   da: {
     title: "Få hjælp af billederne",
     upload: "Upload billeder til AI-forslag",
-    verify: "Log ind for AI-forslag",
     uploading: "Uploader billede {done} af {total}…",
     uploaded: "Alle billeder er uploadet.",
     analyze: "Få forslag med AI",
@@ -79,7 +75,6 @@ const copies: Record<Locale, Copy> = {
   fi: {
     title: "Apua kuvistasi",
     upload: "Lataa kuvat tekoälyehdotuksia varten",
-    verify: "Kirjaudu saadaksesi tekoälyehdotuksia",
     uploading: "Ladataan kuvaa {done}/{total}…",
     uploaded: "Kaikki kuvat on ladattu.",
     analyze: "Pyydä tekoälyehdotuksia",
@@ -97,7 +92,6 @@ const copies: Record<Locale, Copy> = {
   de: {
     title: "Hilfe anhand deiner Fotos",
     upload: "Fotos für KI-Vorschläge hochladen",
-    verify: "Für KI-Vorschläge anmelden",
     uploading: "Foto {done} von {total} wird hochgeladen…",
     uploaded: "Alle Fotos sind hochgeladen.",
     analyze: "KI-Vorschläge erhalten",
@@ -118,7 +112,6 @@ const copies: Record<Locale, Copy> = {
   es: {
     title: "Recibe ayuda con tus fotos",
     upload: "Subir fotos para sugerencias de IA",
-    verify: "Inicia sesión para recibir sugerencias de IA",
     uploading: "Subiendo foto {done} de {total}…",
     uploaded: "Todas las fotos están subidas.",
     analyze: "Obtener sugerencias de IA",
@@ -137,7 +130,6 @@ const copies: Record<Locale, Copy> = {
   it: {
     title: "Un aiuto dalle tue foto",
     upload: "Carica foto per i suggerimenti IA",
-    verify: "Accedi per i suggerimenti IA",
     uploading: "Caricamento foto {done} di {total}…",
     uploaded: "Tutte le foto sono caricate.",
     analyze: "Ottieni suggerimenti IA",

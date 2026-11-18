@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { pushCopy } from "@/lib/push-copy";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { centralIdentityEmail, hasVerifiedEmail } from "@/lib/identity-gates";
 import { CentralShippingAddress } from "./central-shipping-address";
 import { accountAuthCopy } from "@/lib/account-auth-copy";
 import { accountDeletionCopy } from "@/lib/account-deletion-copy";
@@ -28,6 +28,7 @@ export function ProfileScreen() {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const storeAccount = Boolean(store && hasVerifiedEmail(session?.user));
+  const identity = centralIdentityEmail(session?.user);
   const logout = async () => {
     if (busy) return;
     setBusy(true);
@@ -53,9 +54,13 @@ export function ProfileScreen() {
                   source={require("../../assets/icons/profile.svg")}
                 />
                 <View style={styles.identityText}>
-                  <Text style={styles.caption}>{d.profile.signedInAs}</Text>
+                  <Text style={styles.caption}>
+                    {identity
+                      ? d.profile.signedInAs
+                      : accountAuthCopy(locale).methods}
+                  </Text>
                   <Text selectable style={styles.email}>
-                    {session.user.email}
+                    {identity ?? accountAuthCopy(locale).expired}
                   </Text>
                 </View>
               </View>
@@ -80,7 +85,7 @@ export function ProfileScreen() {
             label={pushCopy[locale].title}
             onPress={() => router.push("/notifications")}
           />
-          {hasVerifiedEmail(session.user) ? (
+          {identity ? (
             <CentralShippingAddress
               key={session.user.id}
               user={session.user.id}

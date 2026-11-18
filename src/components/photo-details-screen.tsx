@@ -178,7 +178,6 @@ export function PhotoDetailsScreen() {
       <PhotoAnalysisPanel
         snapshot={snapshot}
         disabled={busy}
-        onVerify={() => void open("/account-auth?returnTo=photo-details")}
         onSuggestion={(output) => {
           if (!locked.current && alive.current)
             setValues((current) => applyPhotoSuggestion(current, output));

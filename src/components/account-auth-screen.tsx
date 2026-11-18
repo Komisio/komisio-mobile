@@ -21,7 +21,7 @@ import {
 } from "@/lib/account-auth";
 import { accountAuthCopy, accountErrorText } from "@/lib/account-auth-copy";
 import { accountReturnPath } from "@/lib/account-return-path";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { hasCentralIdentity, hasVerifiedEmail } from "@/lib/identity-gates";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 
@@ -105,8 +105,11 @@ export function AccountAuthScreen({ link = false }: { link?: boolean }) {
       return false;
     });
   }
-  if (hasVerifiedEmail(session?.user) && !link && !busy)
+  if (hasCentralIdentity(session?.user) && !link && !busy)
     return <Redirect href={accountReturnPath(returnTo)} />;
+  // A retained earlier session must be completed explicitly on the same
+  // account, not fed into the signed-out provider flow or silently replaced.
+  if (session && !link && !busy) return <Redirect href="/account-methods" />;
   if (!session && link) return <Redirect href="/account-auth" />;
   const connected = (provider: string) =>
     session?.user.identities?.some(
@@ -149,11 +152,11 @@ export function AccountAuthScreen({ link = false }: { link?: boolean }) {
               disabled={busy}
             />
           ) : null}
-          {link && session?.user.email_confirmed_at ? (
+          {link && hasVerifiedEmail(session?.user) ? (
             <Card>
               <Text style={uiStyles.label}>{t.emailLabel}</Text>
               <Text selectable style={uiStyles.body}>
-                {session.user.email}
+                {session?.user.email}
               </Text>
             </Card>
           ) : null}

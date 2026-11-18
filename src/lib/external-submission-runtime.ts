@@ -12,6 +12,7 @@ import { externalOutboxStorage } from "./external-outbox-storage";
 import { prepareExternalPhoto } from "./external-image";
 import { photoDraftRepository } from "./photo-draft-storage";
 import { photoAnalysis } from "./photo-analysis-runtime";
+import { guestPhotoAnalysis } from "./guest-photo-analysis-runtime";
 
 const endpoint = externalItemsEndpoint(process.env.EXPO_PUBLIC_KOMISIO_WEB_URL);
 const binding = JSON.stringify([
@@ -48,8 +49,19 @@ export function externalSubmission(ownerId: string) {
             lock: commandLock,
             uuid: randomUUID,
             preparePhoto: prepareExternalPhoto,
+            guestAnalysis: async (snapshot) => {
+              try {
+                return await (await guestPhotoAnalysis()).proof(snapshot);
+              } catch {
+                return null;
+              }
+            },
             cachedPhotos: async (snapshot) => {
               try {
+                const guest = await (
+                  await guestPhotoAnalysis()
+                ).cachedPhotos(snapshot);
+                if (guest) return guest;
                 // Copy prepared bytes into the independent submission journal.
                 // Analysis cleanup must never invalidate a pending submission.
                 return await (
