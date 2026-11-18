@@ -79,7 +79,8 @@ export function itemDetailsErrors(
   if (!details.description.trim()) errors.push("description");
   if (!details.condition) errors.push("condition");
   try {
-    requestedPriceOre(details.desiredSellerAmount);
+    if (requestedPriceOre(details.desiredSellerAmount) === null)
+      errors.push("desiredSellerAmount");
   } catch {
     errors.push("desiredSellerAmount");
   }

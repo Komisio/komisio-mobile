@@ -4,8 +4,9 @@ import { compilePreview } from "./helpers/compile-preview.ts";
 import * as shipping from "../src/lib/central-shipping.ts";
 import { centralShippingCopy } from "../src/lib/central-shipping-copy.ts";
 import { shippingAddressCopy } from "../src/lib/shipping-address-copy.ts";
+import { fixedIntakeCopy } from "../src/lib/fixed-intake-copy.ts";
 
-async function verifySelection(limit: number) {
+async function verifySelection(limit: number, staffManaged = false) {
   const id = (n: number) =>
     `f7800000-0000-4000-8000-${String(n).padStart(12, "0")}`;
   const items = Array.from({ length: 10 }, (_, n) => ({
@@ -24,6 +25,7 @@ async function verifySelection(limit: number) {
       status: "ready",
       data: {
         offerId: id(401),
+        staffManaged,
         available: true,
         measurementsOptional: true,
         bundlingAvailable: true,
@@ -76,6 +78,7 @@ async function verifySelection(limit: number) {
     },
     "@/lib/central-shipping": shipping,
     "@/lib/central-shipping-copy": { centralShippingCopy },
+    "@/lib/fixed-intake-copy": { fixedIntakeCopy },
     "@/lib/shipping-address-copy": { shippingAddressCopy },
     "./central-shipping-address": {
       CentralShippingAddress: ({ children }: any) =>
@@ -118,6 +121,20 @@ async function verifySelection(limit: number) {
   function choices() {
     return render().filter((v: any) => v.type === "Choice");
   }
+  if (staffManaged) {
+    assert.ok(render().includes(fixedIntakeCopy("sv").waitingShipping));
+    assert.equal(choices().length, 0);
+    assert.equal(
+      render().filter(
+        (v) =>
+          v.type === "Button" &&
+          v.props.label === centralShippingCopy("sv").bookTogether,
+      ).length,
+      0,
+    );
+    assert.equal(submitted, null);
+    return;
+  }
   for (let n = 1; n < 5; n++) {
     assert.equal(choices()[n].props.disabled, false);
     choices()[n].props.onPress();
@@ -150,3 +167,6 @@ async function verifySelection(limit: number) {
 for (const limit of [2000, 2500])
   test(`package selection at ${limit} g disables a sixth item and submits only the five selected items`, () =>
     verifySelection(limit));
+
+test("staff-managed shipping has no seller booking action", () =>
+  verifySelection(2500, true));

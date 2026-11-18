@@ -1,3 +1,4 @@
+import { fixedIntakeCopy } from "./fixed-intake-copy.ts";
 import type { Locale } from "./locale";
 
 const sv = {
@@ -228,4 +229,8 @@ const copies: Record<Locale, Copy> = {
     submitted: "Registrato il {date}",
   },
 };
-export const photoFlowCopy = (locale: Locale) => copies[locale];
+export const photoFlowCopy = (locale: Locale) => ({
+  ...copies[locale],
+  reviewHint: fixedIntakeCopy(locale).reviewHint,
+  sentHint: fixedIntakeCopy(locale).sentHint,
+});

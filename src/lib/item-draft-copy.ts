@@ -1,3 +1,4 @@
+import { fixedIntakeCopy } from "./fixed-intake-copy.ts";
 import { centralIntakeCopy } from "./central-intake-copy.ts";
 import type { Locale } from "./locale";
 import type { ItemCondition } from "./item-draft-details";
@@ -428,6 +429,8 @@ export function itemDraftCopy(locale: Locale): Copy {
     storeEmpty: c.unavailable,
     unavailable: c.unavailable,
     notReceiving: c.unavailable,
-    priceHint: c.priceHint,
+    desiredSellerAmount: fixedIntakeCopy(locale).price,
+    priceHint: fixedIntakeCopy(locale).priceHint,
+    invalidPrice: fixedIntakeCopy(locale).invalidPrice,
   };
 }

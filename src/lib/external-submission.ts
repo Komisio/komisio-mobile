@@ -15,6 +15,8 @@ export type ExternalItemCommand = {
   photos: string[];
   senderCountry?: "SE";
   priceBasis?: "seller_amount";
+  approvalMode?: "fixed";
+  agreementVersionId?: string;
 };
 export type ExternalAttempt = {
   version: 1;
@@ -62,6 +64,8 @@ export type ExternalRequest = {
   notes: string;
   desired_price_ore: string | null;
   price_basis?: "resale" | "seller_amount";
+  approval_mode?: "offer" | "fixed";
+  agreement_version_id?: string | null;
   currency: string;
   photos: string[];
   created_at: string;
@@ -92,6 +96,12 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
   const c = value as ExternalItemCommand;
   if (
     !c ||
+    (c.approvalMode !== undefined && c.approvalMode !== "fixed") ||
+    (c.approvalMode === "fixed" &&
+      (!identifier(c.agreementVersionId) ||
+        c.desiredPriceOre === null ||
+        c.priceBasis !== "seller_amount")) ||
+    (c.approvalMode === undefined && c.agreementVersionId !== undefined) ||
     (c.senderCountry !== undefined && c.senderCountry !== "SE") ||
     (c.priceBasis !== undefined && c.priceBasis !== "seller_amount") ||
     c.action !== "submit" ||
@@ -127,6 +137,12 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
     photos: [...c.photos],
     ...(c.senderCountry ? { senderCountry: c.senderCountry } : {}),
     ...(c.priceBasis ? { priceBasis: c.priceBasis } : {}),
+    ...(c.approvalMode
+      ? {
+          approvalMode: c.approvalMode,
+          agreementVersionId: c.agreementVersionId,
+        }
+      : {}),
   };
 }
 export function parseExternalAttempt(
@@ -178,6 +194,9 @@ export function requestMatches(
     request.notes === c.notes &&
     request.desired_price_ore === c.desiredPriceOre &&
     (request.price_basis ?? "resale") === (c.priceBasis ?? "resale") &&
+    (request.approval_mode ?? "offer") === (c.approvalMode ?? "offer") &&
+    (c.approvalMode !== "fixed" ||
+      request.agreement_version_id === c.agreementVersionId) &&
     request.currency === c.currency &&
     (request.sender_country ?? null) === (c.senderCountry ?? null) &&
     JSON.stringify(request.photos) === JSON.stringify(c.photos)
@@ -191,6 +210,10 @@ const refusals = new Set([
   "PHOTO_NOT_FOUND",
   "PHOTO_LIMIT",
   "PLAN_READ_ONLY",
+  "PRICE_REQUIRED",
+  "AGREEMENT_REQUIRED",
+  "AGREEMENT_CHANGED",
+  "ACCOUNT_REQUIRED",
 ]);
 
 /** One durable foreground operation per person. No background sender or financial journal. */
@@ -237,7 +260,11 @@ export function createExternalSubmission(deps: {
   }
   return {
     load: () => run(read),
-    prepare: (snapshot: ItemDraftSnapshot, senderCountry?: "SE") => {
+    prepare: (
+      snapshot: ItemDraftSnapshot,
+      senderCountry?: "SE",
+      agreementVersionId?: string,
+    ) => {
       // Capture before asynchronous image preparation or a cross-tab lock yields.
       const frozen: ItemDraftSnapshot = {
         draft: {
@@ -279,6 +306,8 @@ export function createExternalSubmission(deps: {
         )
           throw new Error("DRAFT_CHANGED");
         if (senderCountry !== "SE") throw new Error("SWEDEN_REQUIRED");
+        if (!identifier(agreementVersionId))
+          throw new Error("AGREEMENT_REQUIRED");
         const recipient = await deps.recipient();
         if (!recipient) throw new Error("STORE_UNAVAILABLE");
         if (
@@ -293,6 +322,8 @@ export function createExternalSubmission(deps: {
         const command = parseExternalCommand({
           senderCountry,
           priceBasis: "seller_amount",
+          approvalMode: "fixed",
+          agreementVersionId,
           action: "submit",
           requestId:
             prior?.draft.draftId === draft.draftId

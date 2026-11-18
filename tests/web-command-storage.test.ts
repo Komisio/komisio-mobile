@@ -96,6 +96,7 @@ test("onboarding bank payloads share logout and identity-switch cleanup", async 
 for (const key of [
   "komisio.pending.shipping.v1.user.offer",
   "komisio.pending.shipping-address.v1.user.tenant.seller",
+  "komisio.pending.intake-profile.v1.user.tenant",
 ])
   test(`shipping address journal ${key} is removed on logout and cannot be restored by a stale writer`, async () => {
     const f = fixture(),

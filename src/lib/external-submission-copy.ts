@@ -1,4 +1,5 @@
 import { centralIntakeCopy } from "./central-intake-copy.ts";
+import { fixedIntakeCopy } from "./fixed-intake-copy.ts";
 import type { Locale } from "./locale";
 const sv = {
   loginIntro:
@@ -301,6 +302,13 @@ export function externalSubmissionCopy(locale: Locale) {
 }
 export function externalSubmissionError(locale: Locale, code: string) {
   const t = externalSubmissionCopy(locale);
+  if (code === "PRICE_REQUIRED") return fixedIntakeCopy(locale).invalidPrice;
+  if (
+    ["AGREEMENT_REQUIRED", "AGREEMENT_CHANGED", "ACCOUNT_REQUIRED"].includes(
+      code,
+    )
+  )
+    return fixedIntakeCopy(locale).changed;
   if (code === "SWEDEN_REQUIRED")
     return centralIntakeCopy(locale).countryRequired;
   if (code === "SESSION_CHANGED") return t.sessionChanged;

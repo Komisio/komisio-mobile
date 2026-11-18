@@ -75,6 +75,10 @@ const ui = Object.fromEntries(
 );
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 function button(tree: any, label: string) {
+  if (label === externalSubmissionCopy("sv").send) {
+    const setup = nodes(tree).find((n) => n.type === "IntakeSetup");
+    if (setup) return { onPress: () => setup.props.onSubmit("agreement") };
+  }
   const b = nodes(tree).find(
     (n) => n.type === "Button" && n.props.label === label,
   );
@@ -104,6 +108,7 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
         usePreventRemove: () => () => {},
       },
       "./ui": { ...ui, uiStyles: {} },
+      "./central-intake-setup": { CentralIntakeSetup: "IntakeSetup" },
       "./photo-flow-ui": { PhotoStep: "Step", PhotoStrip: "Photos" },
       "@/lib/i18n": {
         useI18n: () => ({ locale: "sv", d: { retry: "Retry" } }),
@@ -172,10 +177,6 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
     async ready() {
       render();
       await tick();
-      if (!pending)
-        nodes(render())
-          .find((n) => n.type === "Choice")!
-          .props.onPress();
       return render();
     },
     switchUser: () => {
@@ -192,7 +193,12 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
 }
 test("submission never checks or requests notifications, including denied and failed permissions", async () => {
   for (const status of [
-    "off", "denied", "error", "on", "unavailable", null,
+    "off",
+    "denied",
+    "error",
+    "on",
+    "unavailable",
+    null,
   ] as const) {
     const f = review(status);
     const submit = button(await f.ready(), externalSubmissionCopy("sv").send);
