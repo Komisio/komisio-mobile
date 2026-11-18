@@ -10,6 +10,10 @@ export function externalItemsEndpoint(value: string | undefined) {
   return mobileEndpoint(value)?.replace(/\/seller$/, "/external-items") ?? null;
 }
 const safeErrors = new Set([
+  "PRICE_REQUIRED",
+  "AGREEMENT_REQUIRED",
+  "AGREEMENT_CHANGED",
+  "ACCOUNT_REQUIRED",
   "AUTH_REQUIRED",
   "MFA_REQUIRED",
   "PASSWORD_UPDATE_REQUIRED",
@@ -52,6 +56,12 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       throw new Error("SUBMISSION_UNAVAILABLE");
     const command = parseExternalCommand({
       senderCountry: row.sender_country ?? undefined,
+      ...(row.approval_mode === "fixed"
+        ? {
+            approvalMode: "fixed",
+            agreementVersionId: row.agreement_version_id,
+          }
+        : {}),
       action: "submit",
       requestId: row.id,
       tenantId: row.tenant_id,
@@ -87,6 +97,8 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
           (row.canWithdraw &&
             (row.lifecycleStatus !== "waiting" || row.active !== true)))) ||
       typeof row.store_name !== "string" ||
+      (row.approval_mode !== undefined &&
+        !["offer", "fixed"].includes(row.approval_mode)) ||
       (row.price_basis !== undefined &&
         !["resale", "seller_amount"].includes(row.price_basis)) ||
       row.store_name.length > 200 ||
@@ -109,6 +121,12 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       notes: command.notes,
       desired_price_ore: command.desiredPriceOre,
       ...(row.price_basis ? { price_basis: row.price_basis } : {}),
+      ...(row.approval_mode
+        ? {
+            approval_mode: row.approval_mode,
+            agreement_version_id: row.agreement_version_id,
+          }
+        : {}),
       currency: command.currency,
       photos: command.photos,
       created_at: row.created_at,

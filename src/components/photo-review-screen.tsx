@@ -1,8 +1,9 @@
+import { CentralIntakeSetup } from "./central-intake-setup";
 import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { useCallback, useRef, useState } from "react";
 import { Text } from "react-native";
 import { router, useFocusEffect, usePreventRemove } from "expo-router";
-import { Button, Card, Choice, Loading, Message, Screen, uiStyles } from "./ui";
+import { Button, Card, Loading, Message, Screen, uiStyles } from "./ui";
 
 import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
 import { photoFlowCopy } from "@/lib/photo-flow-copy";
@@ -29,7 +30,6 @@ export function PhotoReviewScreen() {
   const s = externalSubmissionCopy(locale);
   const central = centralIntakeCopy(locale);
   const flow = photoFlowCopy(locale);
-  const [countryConfirmed, setCountryConfirmed] = useState(false);
   const owner = session?.user.id;
   const [outbox, setOutbox] = useState<{
     owner: string;
@@ -72,17 +72,13 @@ export function PhotoReviewScreen() {
   const attempt = outbox?.owner === owner ? outbox?.attempt : null;
   const pending =
     attempt?.state === "pending" || attempt?.state === "confirmed";
-  async function send(resume = false) {
+  async function send(resume = false, agreementVersionId?: string) {
     if (locked.current) return;
     if (!owner || !hasVerifiedEmail(session?.user)) {
       router.push("/account-auth?returnTo=photo-review");
       return;
     }
     if (!resume && !snapshot) return;
-    if (!resume && !countryConfirmed) {
-      setError(central.countryRequired);
-      return;
-    }
     locked.current = true;
     setBusy(true);
     setError("");
@@ -93,7 +89,8 @@ export function PhotoReviewScreen() {
       if (!current()) return;
       const controller = await externalSubmission(owner);
       if (!current()) return;
-      if (!resume) await controller.prepare(snapshot!, "SE");
+      if (!resume)
+        await controller.prepare(snapshot!, "SE", agreementVersionId);
       const result = await controller.resume((done, total) => {
         if (current())
           setProgress(
@@ -260,14 +257,6 @@ export function PhotoReviewScreen() {
           </Card>
         </>
       )}
-      <Text style={uiStyles.note}>{flow.reviewHint}</Text>
-      <Choice
-        role="checkbox"
-        label={central.confirmCountry}
-        selected={countryConfirmed}
-        disabled={busy}
-        onPress={() => setCountryConfirmed((v) => !v)}
-      />
       {error ? <Message tone="error">{error}</Message> : null}
       {attempt?.state === "rejected" || recipientChanged ? (
         <>
@@ -280,12 +269,15 @@ export function PhotoReviewScreen() {
         </>
       ) : null}
       {progress ? <Message>{progress}</Message> : null}
-      <Button
-        label={s.send}
-        busy={busy}
-        disabled={!countryConfirmed || !hasVerifiedEmail(session?.user)}
-        onPress={() => void send()}
-      />
+      {owner && hasVerifiedEmail(session?.user) ? (
+        <CentralIntakeSetup
+          key={`${owner}:${draft.store.id}`}
+          user={owner}
+          tenant={draft.store.id}
+          disabled={busy}
+          onSubmit={(agreement) => send(false, agreement)}
+        />
+      ) : null}
     </Screen>
   );
 }

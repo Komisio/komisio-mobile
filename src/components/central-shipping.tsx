@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { fixedIntakeCopy } from "@/lib/fixed-intake-copy";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { Text } from "react-native";
 import { Image } from "expo-image";
@@ -226,6 +227,13 @@ export function CentralShipping({
           </Text>
         </Card>
       </>
+    );
+  if (state.data.staffManaged)
+    return withItemPreview(
+      <Card>
+        <Message>{fixedIntakeCopy(locale).waitingShipping}</Message>
+        <Button label={d.retry} onPress={() => void read.refresh()} />
+      </Card>,
     );
   if (itemCount !== 1) return withItemPreview(<Message>{t.grouped}</Message>);
   if (

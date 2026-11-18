@@ -38,6 +38,7 @@ export type ParcelItem = {
   selectionWeightG?: number;
 };
 export type ShippingState = {
+  staffManaged?: boolean;
   offerId: string;
   available: boolean;
   measurementsOptional: boolean;
@@ -227,6 +228,8 @@ export function parseShippingState(
   offer: string,
 ): ShippingState {
   const v = object(value);
+  if (v.staffManaged !== undefined && typeof v.staffManaged !== "boolean")
+    invalid();
   if (!isId(offer) || v.offerId !== offer || typeof v.available !== "boolean")
     invalid();
   if (

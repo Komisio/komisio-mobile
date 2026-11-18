@@ -15,6 +15,21 @@ const id = (n: number) =>
 const ownerId = id(1),
   binding = "synthetic project and endpoint";
 
+test("new submissions require an amount and the displayed agreement before preparing uploads", async () => {
+  const f = fixture();
+  await assert.rejects(
+    f.controller().prepare(snapshot(), "SE"),
+    /AGREEMENT_REQUIRED/,
+  );
+  const empty = snapshot();
+  empty.draft.details.desiredSellerAmount = "";
+  await assert.rejects(f.controller().prepare(empty, "SE", id(950)));
+  assert.equal(f.calls.length, 0);
+  const prepared = await f.controller().prepare(snapshot(), "SE", id(950));
+  assert.equal(prepared.command.approvalMode, "fixed");
+  assert.equal(prepared.command.agreementVersionId, id(950));
+});
+
 test("AI-prepared image bytes are copied to independent submission photo IDs", async () => {
   const f = fixture();
   const jpeg = new Uint8Array([255, 216, 255, 9]);
@@ -25,7 +40,7 @@ test("AI-prepared image bytes are copied to independent submission photo IDs", a
     },
     cachedPhotos: async () => [jpeg],
   });
-  const attempt = await controller.prepare(snapshot(), "SE");
+  const attempt = await controller.prepare(snapshot(), "SE", id(950));
   assert.notEqual(attempt.command.photos[0], snapshot().photos[0].id);
   assert.deepEqual(await f.storage.photo(attempt.command.photos[0]), jpeg);
   await controller.resume();
@@ -58,6 +73,8 @@ function snapshot(): ItemDraftSnapshot {
   };
 }
 const row = (c: ExternalItemCommand): ExternalRequest => ({
+  approval_mode: c.approvalMode ?? "offer",
+  agreement_version_id: c.agreementVersionId,
   sender_country: c.senderCountry ?? null,
   id: c.requestId,
   tenant_id: c.tenantId,
@@ -158,7 +175,7 @@ function fixture() {
 test("preparation freezes the displayed draft and exact ore before yielding", async () => {
   const f = fixture(),
     draft = snapshot();
-  const result = f.controller().prepare(draft, "SE");
+  const result = f.controller().prepare(draft, "SE", id(950));
   draft.draft.details.description = "Changed while preparing";
   const prepared = await result;
   assert.equal(prepared.command.description, "Jacket");
@@ -170,7 +187,7 @@ test("preparation freezes the displayed draft and exact ore before yielding", as
 test("a lost submission response reconciles the original ID without uploading or sending again", async () => {
   const f = fixture(),
     controller = f.controller();
-  const attempt = await controller.prepare(snapshot(), "SE");
+  const attempt = await controller.prepare(snapshot(), "SE", id(950));
   f.api.submit = async (c) => {
     f.calls.push("submit");
     f.setExisting(row(c));
@@ -188,7 +205,7 @@ test("a lost submission response reconciles the original ID without uploading or
 });
 test("server confirmation is durable before local draft cleanup", async () => {
   const f = fixture();
-  await f.controller().prepare(snapshot(), "SE");
+  await f.controller().prepare(snapshot(), "SE", id(950));
   f.deps.finishDraft = async () => {
     throw Error("disk unavailable");
   };
@@ -201,7 +218,7 @@ test("server confirmation is durable before local draft cleanup", async () => {
 });
 test("failure to persist confirmation never clears the original draft", async () => {
   const f = fixture();
-  await f.controller().prepare(snapshot(), "SE");
+  await f.controller().prepare(snapshot(), "SE", id(950));
   const write = f.storage.write;
   f.storage.write = async (a) => {
     if (a.state === "confirmed") throw Error("disk full");
@@ -217,7 +234,7 @@ test("failure to persist confirmation never clears the original draft", async ()
 });
 test("a prior saved version is recognized but newer local edits are preserved", async () => {
   const f = fixture();
-  const attempt = await f.controller().prepare(snapshot(), "SE");
+  const attempt = await f.controller().prepare(snapshot(), "SE", id(950));
   f.setExisting({ ...row(attempt.command), description: "An earlier version" });
   assert.equal((await f.controller().resume()).preserveDraft, true);
   assert.equal(f.finished[0].preserve, true);
@@ -225,7 +242,7 @@ test("a prior saved version is recognized but newer local edits are preserved", 
 });
 test("a confirmed refusal can be edited while retaining the request UUID", async () => {
   const f = fixture();
-  const first = await f.controller().prepare(snapshot(), "SE");
+  const first = await f.controller().prepare(snapshot(), "SE", id(950));
   f.api.submit = async () => {
     throw Error("STORE_CHANGED");
   };
@@ -233,7 +250,7 @@ test("a confirmed refusal can be edited while retaining the request UUID", async
   const changed = snapshot();
   changed.draft.revision++;
   changed.draft.details.description = "Updated jacket";
-  const next = await f.controller().prepare(changed, "SE");
+  const next = await f.controller().prepare(changed, "SE", id(950));
   assert.equal(next.command.requestId, first.command.requestId);
   assert.notDeepEqual(next.command.photos, first.command.photos);
   assert.equal(next.command.description, "Updated jacket");
@@ -241,7 +258,7 @@ test("a confirmed refusal can be edited while retaining the request UUID", async
 });
 test("failed unused-photo cleanup prevents overwriting an old intent", async () => {
   const f = fixture();
-  await f.controller().prepare(snapshot(), "SE");
+  await f.controller().prepare(snapshot(), "SE", id(950));
   f.api.submit = async () => {
     throw Error("ACTIVE_REQUEST_LIMIT");
   };
@@ -250,19 +267,22 @@ test("failed unused-photo cleanup prevents overwriting an old intent", async () 
   f.api.discardPhoto = async () => {
     throw Error("offline");
   };
-  await assert.rejects(f.controller().prepare(snapshot(), "SE"), /offline/);
+  await assert.rejects(
+    f.controller().prepare(snapshot(), "SE", id(950)),
+    /offline/,
+  );
   assert.deepEqual(f.read(), old);
 });
 test("changing the visible form cannot replace an uncertain frozen request", async () => {
   const f = fixture();
-  const first = await f.controller().prepare(snapshot(), "SE");
+  const first = await f.controller().prepare(snapshot(), "SE", id(950));
   const changed = snapshot();
   changed.draft.details.description = "Other";
-  assert.deepEqual(await f.controller().prepare(changed, "SE"), first);
+  assert.deepEqual(await f.controller().prepare(changed, "SE", id(950)), first);
 });
 test("another account or API project cannot replay the saved journal", async () => {
   const f = fixture();
-  const attempt = await f.controller().prepare(snapshot(), "SE");
+  const attempt = await f.controller().prepare(snapshot(), "SE", id(950));
   assert.throws(
     () => parseExternalAttempt(attempt, id(99), binding),
     /SUBMISSION_UNAVAILABLE/,
@@ -280,13 +300,16 @@ test("failed image preparation never creates a server operation or committed jou
   f.deps.preparePhoto = async () => {
     throw Error("bad image");
   };
-  await assert.rejects(f.controller().prepare(snapshot(), "SE"), /bad image/);
+  await assert.rejects(
+    f.controller().prepare(snapshot(), "SE", id(950)),
+    /bad image/,
+  );
   assert.equal(f.read(), null);
   assert.deepEqual(f.calls, []);
 });
 test("concurrent foreground retries do not dispatch the same journal twice", async () => {
   const f = fixture();
-  await f.controller().prepare(snapshot(), "SE");
+  await f.controller().prepare(snapshot(), "SE", id(950));
   let release!: () => void;
   f.api.lookup = () =>
     new Promise((resolve) => {
@@ -301,7 +324,7 @@ test("concurrent foreground retries do not dispatch the same journal twice", asy
 });
 test("a completed journal never causes a new dispatch", async () => {
   const f = fixture();
-  await f.controller().prepare(snapshot(), "SE");
+  await f.controller().prepare(snapshot(), "SE", id(950));
   await f.controller().resume();
   f.calls.length = 0;
   await f.controller().resume();
@@ -310,7 +333,7 @@ test("a completed journal never causes a new dispatch", async () => {
 
 test("an interrupted journal backup must be repaired before any network dispatch", async () => {
   const f = fixture();
-  await f.controller().prepare(snapshot(), "SE");
+  await f.controller().prepare(snapshot(), "SE", id(950));
   f.storage.write = async () => {
     throw Error("backup unavailable");
   };
@@ -321,10 +344,10 @@ test("an interrupted journal backup must be repaired before any network dispatch
 
 test("a late accepted attempt is reconciled before rejected photos are discarded", async () => {
   const f = fixture();
-  const prior = await f.controller().prepare(snapshot(), "SE");
+  const prior = await f.controller().prepare(snapshot(), "SE", id(950));
   f.setSaved({ ...prior, state: "rejected", rejection: "STORE_UNAVAILABLE" });
   f.setExisting(row(prior.command));
-  const result = await f.controller().prepare(snapshot(), "SE");
+  const result = await f.controller().prepare(snapshot(), "SE", id(950));
   assert.equal(result.state, "complete");
   assert.deepEqual(f.calls, ["lookup"]);
 });
@@ -333,7 +356,10 @@ test("a partial photo snapshot cannot silently submit fewer photos than the revi
   const f = fixture(),
     draft = snapshot();
   draft.draft.photoIds.push(id(5));
-  await assert.rejects(f.controller().prepare(draft, "SE"), /DRAFT_CHANGED/);
+  await assert.rejects(
+    f.controller().prepare(draft, "SE", id(950)),
+    /DRAFT_CHANGED/,
+  );
   assert.deepEqual(f.calls, []);
 });
 
@@ -347,7 +373,7 @@ test("a stale recipient cannot be silently replaced when preparing a submission"
   const f = fixture();
   f.deps.recipient = async () => ({ id: id(99), currency: "SEK" });
   await assert.rejects(
-    f.controller().prepare(snapshot(), "SE"),
+    f.controller().prepare(snapshot(), "SE", id(950)),
     /STORE_CHANGED/,
   );
   assert.equal(f.bytes.size, 0);
@@ -355,7 +381,7 @@ test("a stale recipient cannot be silently replaced when preparing a submission"
 });
 test("an accepted legacy attempt reconciles without inventing a residence declaration", async () => {
   const f = fixture();
-  const attempt = await f.controller().prepare(snapshot(), "SE");
+  const attempt = await f.controller().prepare(snapshot(), "SE", id(950));
   delete attempt.command.senderCountry;
   f.setSaved(attempt);
   f.setExisting(row(attempt.command));
@@ -366,7 +392,7 @@ test("an accepted legacy attempt reconciles without inventing a residence declar
 });
 test("an unsubmitted legacy attempt is held for country confirmation without uploading", async () => {
   const f = fixture();
-  const attempt = await f.controller().prepare(snapshot(), "SE");
+  const attempt = await f.controller().prepare(snapshot(), "SE", id(950));
   delete attempt.command.senderCountry;
   f.setSaved(attempt);
   const result = await f.controller().resume();

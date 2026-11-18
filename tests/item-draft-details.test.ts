@@ -150,6 +150,7 @@ test("price wishes use exact minor-unit strings and partial drafts remain editab
   assert.deepEqual(itemDetailsErrors(emptyItemDetails()), [
     "description",
     "condition",
+    "desiredSellerAmount",
   ]);
   assert.deepEqual(
     itemDetailsErrors({ ...details, desiredSellerAmount: "oops" }),
