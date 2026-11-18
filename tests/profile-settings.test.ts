@@ -64,7 +64,7 @@ test("profile exposes one store action, language detail, financial links and log
     "@/lib/account-auth-copy": {
       accountAuthCopy: () => ({
         methods: "Sign-in methods",
-        expired: "Complete sign-in",
+        needsIdentity: "Complete sign-in",
       }),
     },
     "./login-options": { LoginOptions: "LoginOptions" },

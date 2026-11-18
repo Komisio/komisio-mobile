@@ -17,6 +17,7 @@ const sv = {
   password: "Logga in med lösenord",
   link: "Logga in / skapa konto",
   methods: "Inloggningssätt",
+  needsIdentity: "Lägg till Apple, Google eller e-post.",
   methodsIntro:
     "Koppla fler sätt att logga in till samma konto. Dina varor och ditt saldo finns kvar.",
   connected: "Kopplat",
@@ -56,6 +57,7 @@ const copies: Record<Locale, Copy> = {
     password: "Sign in with a password",
     link: "Sign in / create account",
     methods: "Sign-in methods",
+    needsIdentity: "Add Apple, Google or email sign-in.",
     methodsIntro:
       "Connect more ways to sign in to the same account. Your items and balance stay with you.",
     connected: "Connected",
@@ -92,6 +94,7 @@ const copies: Record<Locale, Copy> = {
     password: "Logg inn med passord",
     link: "Logg inn / opprett konto",
     methods: "Innloggingsmåter",
+    needsIdentity: "Legg til Apple, Google eller e-post.",
     methodsIntro:
       "Koble flere innloggingsmåter til samme konto. Varene og saldoen din blir med.",
     connected: "Tilkoblet",
@@ -128,6 +131,7 @@ const copies: Record<Locale, Copy> = {
     password: "Log ind med adgangskode",
     link: "Log ind / opret konto",
     methods: "Loginmetoder",
+    needsIdentity: "Tilføj Apple, Google eller e-mail.",
     methodsIntro:
       "Knyt flere loginmetoder til samme konto. Dine varer og din saldo bliver hos dig.",
     connected: "Tilknyttet",
@@ -163,6 +167,7 @@ const copies: Record<Locale, Copy> = {
     password: "Kirjaudu salasanalla",
     link: "Kirjaudu / luo tili",
     methods: "Kirjautumistavat",
+    needsIdentity: "Lisää Apple-, Google- tai sähköpostikirjautuminen.",
     methodsIntro:
       "Liitä lisää kirjautumistapoja samaan tiliin. Tuotteesi ja saldosi säilyvät.",
     connected: "Liitetty",
@@ -199,6 +204,7 @@ const copies: Record<Locale, Copy> = {
     password: "Mit Passwort anmelden",
     link: "Anmelden / Konto erstellen",
     methods: "Anmeldemethoden",
+    needsIdentity: "Füge Apple, Google oder E-Mail hinzu.",
     methodsIntro:
       "Verbinde weitere Anmeldemethoden mit demselben Konto. Deine Artikel und dein Guthaben bleiben erhalten.",
     connected: "Verbunden",
@@ -236,6 +242,7 @@ const copies: Record<Locale, Copy> = {
     password: "Entrar con contraseña",
     link: "Entrar / crear cuenta",
     methods: "Métodos de acceso",
+    needsIdentity: "Añade Apple, Google o correo electrónico.",
     methodsIntro:
       "Conecta más formas de entrar a la misma cuenta. Tus artículos y tu saldo se conservan.",
     connected: "Conectado",
@@ -271,6 +278,7 @@ const copies: Record<Locale, Copy> = {
     password: "Accedi con password",
     link: "Accedi / crea account",
     methods: "Metodi di accesso",
+    needsIdentity: "Aggiungi Apple, Google o email.",
     methodsIntro:
       "Collega altri metodi di accesso allo stesso account. I tuoi articoli e il saldo restano con te.",
     connected: "Collegato",

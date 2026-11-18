@@ -60,7 +60,7 @@ export function ProfileScreen() {
                       : accountAuthCopy(locale).methods}
                   </Text>
                   <Text selectable style={styles.email}>
-                    {identity ?? accountAuthCopy(locale).expired}
+                    {identity ?? accountAuthCopy(locale).needsIdentity}
                   </Text>
                 </View>
               </View>
