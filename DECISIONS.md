@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-18: Central item submission no longer checks or prompts for notification permission. Keep the once-per-install first-launch request and explicit profile controls; unavailable notifications must never block submission. Supersedes the 2026-11-14 reminder decision.
+
 - 2026-11-18: Request shipping protocol 2 and use the server's bounded item capacity, now 2500 g. The backend adds 100 g packaging. Preserve legacy reads and pending commands; release the compatible backend before this app update.
 
 - 2026-11-14: Before a new central submission, check this account's device notifications and offer explicit activation or submission without them. Returning from phone settings never submits. Retries preserve their command. Name and postal address remain in the later onboarding/shipping flow.
