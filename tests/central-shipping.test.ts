@@ -86,7 +86,7 @@ test("five 400 g items fit; remaining items make a separate package", () => {
   };
   assert.equal(parseShippingState(read, offer).selectionWeightLimitG, 2000);
   assert.throws(() =>
-    parseShippingState({ ...read, selectionWeightLimitG: 3000 }, offer),
+    parseShippingState({ ...read, selectionWeightLimitG: 3001 }, offer),
   );
   for (const selectionWeightG of [0, -1, 1.5, 100001, "400", null]) {
     assert.throws(() =>
@@ -100,6 +100,43 @@ test("five 400 g items fit; remaining items make a separate package", () => {
     kind: "conflict",
     code: "PARCEL_WEIGHT_LIMIT",
   });
+});
+test("server capacity allows exactly 2.5 kg and rejects unsafe capacities", () => {
+  const items = Array.from({ length: 6 }, (_, n) => ({
+    offerId: `f7800000-0000-4000-8000-${String(401 + n).padStart(12, "0")}`,
+    handoverId: id,
+    description: "Dress",
+    reference: `H-${n + 1}`,
+    status: "open" as const,
+    selectionWeightG: n === 5 ? 1 : 500,
+  }));
+  const ids = items.map((item) => item.offerId);
+  const read = {
+    offerId: offer,
+    available: true,
+    parcel: null,
+    eligibleItems: items,
+    selectionWeightLimitG: 2500,
+  };
+  const parsed = parseShippingState(read, offer);
+  assert.equal(parsed.selectionWeightLimitG, 2500);
+  assert.equal(parcelSelectionFits(items, ids.slice(0, 5), 2500), true);
+  assert.equal(parcelSelectionFits(items, ids, 2500), false);
+  assert.equal(parcelSelectionFits(items, ids.slice(0, 5), 2000), false);
+  assert.equal(parcelSelectionFits(items, [ids[0], ids[0]], 2500), false);
+  assert.equal(parcelSelectionFits(items, [], 2500), false);
+  const unknown = [{ ...items[0], selectionWeightG: undefined }, items[1]];
+  assert.equal(parcelSelectionFits(unknown, [ids[0]], 2500), true);
+  assert.equal(parcelSelectionFits(unknown, ids.slice(0, 2), 2500), false);
+  for (const limit of [0, -1, 1.5, 3001, NaN, Infinity]) {
+    assert.throws(() =>
+      parseShippingState({ ...read, selectionWeightLimitG: limit }, offer),
+    );
+    assert.equal(parcelSelectionFits(items, [ids[0]], limit), false);
+  }
+  assert.throws(() =>
+    parseShippingState({ ...read, selectionWeightLimitG: "2500" }, offer),
+  );
 });
 test("postal input rejects injected destinations and invalid measurements", () => {
   assert.deepEqual(parseBookParcel(command, offer), command);

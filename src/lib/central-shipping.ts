@@ -76,6 +76,9 @@ function object(v: unknown): Record<string, unknown> {
 function text(v: unknown, max: number): v is string {
   return typeof v === "string" && v.trim().length > 0 && v.length <= max;
 }
+function validSelectionLimit(v: unknown): v is number {
+  return typeof v === "number" && Number.isInteger(v) && v > 0 && v <= 3000;
+}
 function address(v: unknown, full = false) {
   const a = object(v);
   if (
@@ -237,7 +240,10 @@ export function parseShippingState(
   )
     invalid();
   const eligibleItems = parcelItems(v.eligibleItems);
-  if (v.selectionWeightLimitG != null && v.selectionWeightLimitG !== 2000)
+  if (
+    v.selectionWeightLimitG != null &&
+    !validSelectionLimit(v.selectionWeightLimitG)
+  )
     invalid();
   if (eligibleItems.some((i) => i.status !== "open")) invalid();
   if (v.parcel !== null) {
@@ -325,7 +331,7 @@ export function parcelSelectionFits(
 ): boolean {
   if (limit == null) return true;
   if (
-    limit !== 2000 ||
+    !validSelectionLimit(limit) ||
     selected.length === 0 ||
     selected.length > 10 ||
     new Set(selected).size !== selected.length ||

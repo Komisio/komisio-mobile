@@ -31,6 +31,7 @@ export async function readShipping(user: string, offer: string) {
     await createExternalIdentityRead(shippingTransport(user))({
       action: "read",
       offerId: offer,
+      protocol: 2,
     }),
     offer,
   );
