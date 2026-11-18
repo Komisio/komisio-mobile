@@ -1,14 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { compilePreview } from "./helpers/compile-preview.ts";
-import { pushCopy } from "../src/lib/push-copy.ts";
-import { submissionNotificationsCopy } from "../src/lib/submission-notifications-copy.ts";
 import { externalSubmissionCopy } from "../src/lib/external-submission-copy.ts";
 import { photoDraftCopy } from "../src/lib/photo-draft-copy.ts";
 import { photoFlowCopy } from "../src/lib/photo-flow-copy.ts";
 import { itemDraftCopy } from "../src/lib/item-draft-copy.ts";
 import { centralIntakeCopy } from "../src/lib/central-intake-copy.ts";
-import { locales } from "../src/lib/locale.ts";
 import type { PushSnapshot } from "../src/lib/push-controller.ts";
 
 /** Exercise the real components, replacing only hooks and native/IO boundaries. */
@@ -85,137 +82,6 @@ function button(tree: any, label: string) {
   return b.props;
 }
 
-function reminder(status: PushSnapshot["status"] = "off") {
-  const h = hooks();
-  const state: PushSnapshot = { status, busy: false, error: null };
-  const calls: string[] = [];
-  let appState: (state: string) => void = () => {};
-  let outcome: PushSnapshot["status"] = "on";
-  let settingsFail = false;
-  const { SubmissionNotifications } = compilePreview(
-    "components/submission-notifications.tsx",
-    {
-      react: h.react,
-      "react-native": {
-        AppState: {
-          addEventListener: (_: string, fn: typeof appState) => {
-            appState = fn;
-            return {
-              remove: () => {
-                appState = () => {};
-              },
-            };
-          },
-        },
-        Linking: {
-          openSettings: async () => {
-            calls.push("settings");
-            if (settingsFail) throw Error("unavailable");
-          },
-        },
-      },
-      "@/lib/i18n": { useI18n: () => ({ locale: "sv" }) },
-      "@/lib/push-runtime": {
-        sellerPush: {
-          subscribe: () => () => {},
-          getSnapshot: () => state,
-          enable: async (user: string) => {
-            calls.push(`enable:${user}`);
-            state.status = outcome;
-          },
-        },
-      },
-      "@/lib/push-copy": { pushCopy },
-      "@/lib/submission-notifications-copy": { submissionNotificationsCopy },
-      "@/lib/external-submission-copy": { externalSubmissionCopy },
-      "./ui": ui,
-    },
-  );
-  return {
-    calls,
-    state,
-    render: () =>
-      h.render(() =>
-        SubmissionNotifications({
-          user: "one",
-          onContinue: () => calls.push("submit"),
-          onCancel: () => calls.push("cancel"),
-        }),
-      ),
-    app: (s: string) => appState(s),
-    outcome: (s: PushSnapshot["status"]) => {
-      outcome = s;
-    },
-    failSettings: () => {
-      settingsFail = true;
-    },
-    stop: h.stop,
-  };
-}
-test("reminder offers explicit consent, confirms activation and waits for Submit", async () => {
-  const f = reminder();
-  let tree = f.render();
-  button(tree, pushCopy.sv.enable).onPress();
-  await tick();
-  tree = f.render();
-  assert.deepEqual(f.calls, ["enable:one"]);
-  assert(
-    nodes(tree).some(
-      (n) => n.props?.children === submissionNotificationsCopy.sv.enabled,
-    ),
-  );
-  button(tree, externalSubmissionCopy("sv").send).onPress();
-  assert.deepEqual(f.calls, ["enable:one", "submit"]);
-  f.stop();
-});
-test("Settings return enables only after an explicit action, never submits, and cancels on unmount", async () => {
-  const f = reminder("denied");
-  let tree = f.render();
-  f.app("active");
-  assert.deepEqual(f.calls, []);
-  button(tree, pushCopy.sv.settings).onPress();
-  await tick();
-  f.app("background");
-  f.app("active");
-  await tick();
-  tree = f.render();
-  assert.deepEqual(f.calls, ["settings", "enable:one"]);
-  assert.equal(button(tree, externalSubmissionCopy("sv").send).disabled, false);
-  f.app("active");
-  assert.equal(f.calls.length, 2);
-  f.stop();
-  const gone = reminder("denied");
-  button(gone.render(), pushCopy.sv.settings).onPress();
-  await tick();
-  gone.stop();
-  gone.app("active");
-  assert.deepEqual(gone.calls, ["settings"]);
-});
-test("denial, registration failure and unavailable Settings retain Continue without and Back", async () => {
-  for (const outcome of ["denied", "error"] as const) {
-    const f = reminder();
-    f.outcome(outcome);
-    button(f.render(), pushCopy.sv.enable).onPress();
-    await tick();
-    const tree = f.render();
-    assert.equal(f.calls.includes("submit"), false);
-    button(tree, submissionNotificationsCopy.sv.without).onPress();
-    assert.equal(f.calls.at(-1), "submit");
-    f.stop();
-  }
-  const f = reminder("denied");
-  f.failSettings();
-  button(f.render(), pushCopy.sv.settings).onPress();
-  await tick();
-  const tree = f.render();
-  assert(nodes(tree).some((n) => n.props?.children === pushCopy.sv.failed));
-  f.app("active");
-  assert.deepEqual(f.calls, ["settings"]);
-  button(tree, submissionNotificationsCopy.sv.back).onPress();
-  assert.equal(f.calls.at(-1), "cancel");
-  f.stop();
-});
-
 function review(status: PushSnapshot["status"] | null, pending = false) {
   const h = hooks(),
     calls: string[] = [];
@@ -239,7 +105,6 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
       },
       "./ui": { ...ui, uiStyles: {} },
       "./photo-flow-ui": { PhotoStep: "Step", PhotoStrip: "Photos" },
-      "./submission-notifications": { SubmissionNotifications: "Reminder" },
       "@/lib/i18n": {
         useI18n: () => ({ locale: "sv", d: { retry: "Retry" } }),
       },
@@ -278,22 +143,24 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
         sellerPush: {
           checkBeforeSubmission: async () => {
             calls.push("check");
-            await hold;
             return status;
           },
         },
       },
       "@/lib/external-submission-runtime": {
-        externalSubmission: async () => ({
-          load: async () => (pending ? attempt : null),
-          prepare: async () => {
-            calls.push("prepare");
-          },
-          resume: async () => {
-            calls.push("submit");
-            return { state: "rejected", rejection: "test" };
-          },
-        }),
+        externalSubmission: async () => {
+          await hold;
+          return {
+            load: async () => (pending ? attempt : null),
+            prepare: async () => {
+              calls.push("prepare");
+            },
+            resume: async () => {
+              calls.push("submit");
+              return { state: "rejected", rejection: "test" };
+            },
+          };
+        },
       },
     },
   );
@@ -323,59 +190,40 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
     release: () => release!(),
   };
 }
-test("new submission pauses before any prepare/upload; Continue sends once and cancel sends nothing", async () => {
-  for (const status of ["off", "denied", "error"] as const) {
+test("submission never checks or requests notifications, including denied and failed permissions", async () => {
+  for (const status of [
+    "off", "denied", "error", "on", "unavailable", null,
+  ] as const) {
     const f = review(status);
-    button(await f.ready(), externalSubmissionCopy("sv").send).onPress();
+    const submit = button(await f.ready(), externalSubmissionCopy("sv").send);
+    submit.onPress();
+    submit.onPress();
     await tick();
-    let prompt = f.render();
-    assert.equal(prompt.type, "Reminder");
-    assert.deepEqual(f.calls, ["check"]);
-    prompt.props.onCancel();
-    button(f.render(), externalSubmissionCopy("sv").send).onPress();
-    await tick();
-    prompt = f.render();
-    prompt.props.onContinue();
-    prompt.props.onContinue();
-    await tick();
-    assert.deepEqual(f.calls, ["check", "check", "prepare", "submit"]);
+    assert.deepEqual(f.calls, ["prepare", "submit"]);
+    assert.notEqual(f.render().type, "Reminder");
     f.stop();
   }
 });
-test("enabled notifications and web keep normal submission; existing unknown writes resume without a new gate", async () => {
-  for (const status of ["on", "unavailable"] as const) {
-    const f = review(status);
-    button(await f.ready(), externalSubmissionCopy("sv").send).onPress();
-    await tick();
-    assert.deepEqual(f.calls, ["check", "prepare", "submit"]);
-    f.stop();
-  }
+
+test("existing unknown submissions resume without preparing again", async () => {
   const f = review("off", true);
   button(await f.ready(), externalSubmissionCopy("sv").resume).onPress();
   await tick();
   assert.deepEqual(f.calls, ["submit"]);
   f.stop();
 });
-test("leaving review or switching account while permission is checked prevents submission", async () => {
+
+test("leaving review or switching account before controller preparation prevents submission", async () => {
   for (const change of ["leave", "account"] as const) {
     const f = review("on");
+    const tree = await f.ready();
     f.hold();
-    button(await f.ready(), externalSubmissionCopy("sv").send).onPress();
+    button(tree, externalSubmissionCopy("sv").send).onPress();
     if (change === "leave") f.stop();
     else f.switchUser();
     f.release();
     await tick();
-    assert.deepEqual(f.calls, ["check"]);
+    assert.deepEqual(f.calls, []);
     f.stop();
-  }
-});
-test("all reminder copy is translated and has an explicit non-notification option", () => {
-  for (const locale of locales) {
-    for (const value of Object.values(submissionNotificationsCopy[locale]))
-      assert(value.trim());
-    assert.notEqual(
-      submissionNotificationsCopy[locale].without,
-      pushCopy[locale].enable,
-    );
   }
 });
