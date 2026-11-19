@@ -255,7 +255,6 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
               owner={owner!}
               offer={page?.offers?.find((o) => o.requestId === r.id)}
               offersLoaded={page?.offers !== null}
-              onChanged={refresh}
             />
           ))}
           {data.requests.some((r) => r.status === "declined") ? (
