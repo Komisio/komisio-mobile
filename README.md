@@ -338,7 +338,7 @@ transport to the in-process API and real local Supabase Auth/RPC. It lost a resp
 after commit, recreated the controller, replayed the request and verified one
 request/event, unchanged balance/reservation and a real balance-conflict response.
 This used synthetic local fixtures, Node transport and in-memory storage. Native
-network/storage recovery, browser interactions and independent Opus review remain
+network/storage recovery, browser interactions and independent review remain
 required before release; JavaScript export does not verify those behaviors.
 
 ## Statements (S54)
