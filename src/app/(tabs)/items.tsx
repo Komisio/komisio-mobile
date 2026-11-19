@@ -31,6 +31,7 @@ export default function ItemsTab() {
             key={`${session.user.id}:${account.tenantId}:${account.sellerId}`}
             tenant={account.tenantId}
             seller={account.sellerId}
+            storeName={store.name}
           />
         )}
     </SellerGate>

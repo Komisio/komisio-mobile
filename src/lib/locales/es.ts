@@ -280,7 +280,7 @@ export default {
     automatic:
       "La tienda aplica las rebajas previstas automáticamente. El plan puede cambiar.",
     manual:
-      "La tienda debe aplicar la rebaja. El precio previsto solo se aplica una vez registrado.",
+      "El precio previsto solo se aplica una vez registrado.",
     facts: "Información del artículo",
     missingDate: "Fecha no disponible",
   },

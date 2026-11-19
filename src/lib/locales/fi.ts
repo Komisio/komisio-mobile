@@ -277,7 +277,7 @@ export default {
     automatic:
       "Myymälä toteuttaa suunnitellut hinnanalennukset automaattisesti. Suunnitelma voi muuttua.",
     manual:
-      "Myymälän on toteutettava hinnanalennus. Suunniteltu hinta tulee voimaan vasta, kun se on kirjattu.",
+      "Suunniteltu hinta tulee voimaan vasta, kun se on kirjattu.",
     facts: "Tuotteen tiedot",
     missingDate: "Päivämäärä puuttuu",
   },

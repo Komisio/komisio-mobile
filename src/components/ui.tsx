@@ -69,7 +69,7 @@ export function StatusBadge({
 }: {
   children: ReactNode;
   attention?: boolean;
-  tone?: "neutral" | "positive" | "warning";
+  tone?: "neutral" | "positive" | "warning" | "info";
   live?: boolean;
 }) {
   return (
@@ -78,6 +78,7 @@ export function StatusBadge({
       style={[
         styles.badge,
         tone === "neutral" && styles.neutralBadge,
+        tone === "info" && styles.infoBadge,
         (attention || tone === "warning") && styles.attention,
       ]}
     >
@@ -85,6 +86,7 @@ export function StatusBadge({
         style={[
           styles.badgeText,
           tone === "neutral" && { color: colors.muted },
+          tone === "info" && { color: colors.info },
           (attention || tone === "warning") && { color: colors.warning },
         ]}
       >
@@ -552,6 +554,7 @@ const styles = StyleSheet.create({
   },
   attention: { backgroundColor: colors.warningSurface },
   neutralBadge: { backgroundColor: colors.neutralSurface },
+  infoBadge: { backgroundColor: colors.infoSurface },
   chip: {
     maxWidth: "100%",
     minHeight: 48,

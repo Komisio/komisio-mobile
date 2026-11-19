@@ -75,7 +75,6 @@ function screen(name: "login" | "mfa") {
       }),
     },
     "@/components/privacy-link": { PrivacyLink: "PrivacyLink" },
-    "@/components/photo-draft-entry": { PhotoDraftEntry: "PhotoDraftEntry" },
     "@/lib/session": {
       useSession: () => ({
         store: { name: "Synthetic store" },

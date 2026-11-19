@@ -51,7 +51,7 @@ export const sellerItemsCopy = {
     automatic:
       "Butiken tillämpar planerade prissänkningar automatiskt. Planen kan ändras.",
     manual:
-      "Butiken behöver genomföra prissänkningen. Det planerade priset gäller inte förrän det har registrerats.",
+      "Det planerade priset gäller inte förrän det har registrerats.",
     facts: "Varans uppgifter",
     missingDate: "Datum saknas",
   },
@@ -107,7 +107,7 @@ export const sellerItemsCopy = {
     automatic:
       "The store applies planned markdowns automatically. The plan can change.",
     manual:
-      "The store needs to apply the markdown. The planned price only takes effect once recorded.",
+      "The planned price only takes effect once recorded.",
     facts: "Item information",
     missingDate: "Date unavailable",
   },

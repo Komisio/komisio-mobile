@@ -145,6 +145,20 @@ export function sellerItemStatus(item: SellerItem) {
     return "forSale";
   return item.stage;
 }
+export function sellerItemTone(item: SellerItem) {
+  // Pending staff markdowns remain for sale at their recorded current price.
+  switch (sellerItemStatus(item)) {
+    case "forSale":
+      return "positive";
+    case "sold":
+      return "info";
+    case "period_ending":
+    case "period_ended":
+      return "warning";
+    case "ended":
+      return "neutral";
+  }
+}
 export function sellerItemDate(item: SellerItem) {
   if (item.stage === "sold")
     return { label: "soldAt" as const, value: item.soldAt };

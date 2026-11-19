@@ -19,6 +19,8 @@ export const colors = {
   warning: "#745018",
   warningSurface: "#fbf1dc",
   neutralSurface: "#eef0ed",
+  info: "#36576d",
+  infoSurface: "#edf2f7",
 };
 
 export const uiStyles = StyleSheet.create({
