@@ -316,7 +316,7 @@ test("all detail routes configure back navigation with their own fallback", () =
   assert.equal(screens[0].props.options, undefined);
   const expected: Record<string, string> = {
     "catalogue/[tenant]/[item]": "/(tabs)/items",
-    "store-info": "/(tabs)/profile",
+    "store-info": "/(tabs)/items",
     "my-items/[tenant]/[item]": "/(tabs)/items",
     "external-item/[request]": "/external-items",
     language: "/(tabs)/profile",
@@ -429,7 +429,11 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   ];
   assert.deepEqual(routes(), publicRoutes);
   state = { ...state, store: {} };
-  assert.deepEqual(routes(), publicRoutes);
+  assert.deepEqual(
+    routes().filter((route) => route !== "store-info"),
+    publicRoutes,
+  );
+  assert.ok(routes().includes("store-info"));
   state = {
     ...state,
     session: {

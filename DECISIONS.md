@@ -4,6 +4,8 @@
 
 # Decisions
 
+- 2026-11-19: Sell through a store opens My items for the active or last selected store. Show its published address and information in context. Only a confirmed disabled photo-submission policy for the linked seller account shows the in-person guidance (#123).
+
 - 2026-11-19: My items follows the active store, with an explicit Komisio/store selector. Central links select Komisio instead of retaining a source query override. Remember the previous store for switching back; preserve account and tenant gates (#115).
 
 - 2026-11-19: Store item views identify the selected store and omit central-intake shortcuts. List/detail badges share tones based on seller-visible status; pending staff markdowns remain for sale at the recorded price. Shorten manual-price copy without changing price rules (#113).

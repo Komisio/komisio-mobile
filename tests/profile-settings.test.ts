@@ -7,6 +7,7 @@ import { dictionaries } from "../src/lib/dictionaries.ts";
 import { locales } from "../src/lib/locale.ts";
 import { pushCopy } from "../src/lib/push-copy.ts";
 import { accountDeletionCopy } from "../src/lib/account-deletion-copy.ts";
+import { storeSellerCopy } from "../src/lib/store-seller-copy.ts";
 import * as identityGates from "../src/lib/identity-gates.ts";
 
 const require = createRequire(import.meta.url);
@@ -60,6 +61,7 @@ test("profile exposes one store action, language detail, financial links and log
   };
   let store: { name: string } | null = { name: "Synthetic shop" };
   const screen = compile("../src/components/profile-screen.tsx", {
+    "@/lib/store-seller-copy": { storeSellerCopy },
     "@/lib/identity-gates": identityGates,
     "@/lib/account-auth-copy": {
       accountAuthCopy: () => ({
@@ -124,25 +126,41 @@ test("profile exposes one store action, language detail, financial links and log
   const settings = tree.filter((n) => n.type === "ItemCard");
   assert.deepEqual(
     settings.map((n) => n.props.label),
-    ["Store: Synthetic shop", "Language: English"],
+    ["Language: English"],
   );
   settings.forEach((n) => n.props.onPress());
   const links = tree.filter((n) => n.type === "NavigationRow");
   links.forEach((n) => n.props.onPress());
   const buttons = tree.filter((n) => n.type === "Button");
-  assert.equal(buttons.length, 1);
+  assert.equal(buttons.length, 2);
+  const storeCard = tree.find(
+    (n) =>
+      n.type === "Card" &&
+      nodes(n).some(
+        (child) =>
+          child.type === "Text" && child.props.children === "Synthetic shop",
+      ),
+  );
+  assert.ok(storeCard);
+  assert.ok(
+    nodes(storeCard).some(
+      (n) => n.props.label === storeSellerCopy.en.handInInfo,
+    ),
+  );
+  assert.equal(buttons[1].props.label, storeSellerCopy.en.chooseAnother);
+  buttons[1].props.onPress();
   assert.equal(buttons[0].props.label, "Log out");
   buttons[0].props.onPress();
   await Promise.resolve();
   assert.deepEqual(actions, [
-    "/home/stores",
     "/language",
+    "/store-info",
     "/account-methods",
     "/notifications",
-    "/store-info",
     "/bank-account",
     "/agreement",
     "/account-deletion",
+    "/home/stores",
     "logout",
   ]);
   assert.ok(

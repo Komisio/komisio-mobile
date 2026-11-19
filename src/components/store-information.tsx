@@ -18,6 +18,7 @@ import {
 } from "@/lib/store-info";
 
 type Presentation = {
+  addressOnly?: boolean;
   children?: ReactNode;
   title?: string;
   topSafeArea?: boolean;
@@ -45,6 +46,7 @@ function ProfileRead({
   slug,
   name,
   retry,
+  addressOnly,
   children,
   title,
   topSafeArea = false,
@@ -81,6 +83,19 @@ function ProfileRead({
       return () => controller.abort();
     }, [slug]),
   );
+  if (addressOnly) {
+    if (state.status !== "ready") return null;
+    const address = state.info?.address;
+    const lines =
+      address && (address.street || address.city || address.postalCode)
+        ? addressLines(address)
+        : [];
+    return (
+      <Text selectable style={uiStyles.note}>
+        {lines.length ? lines.join(", ") : t.noAddress}
+      </Text>
+    );
+  }
   return (
     <Screen
       topSafeArea={topSafeArea}
@@ -162,18 +177,6 @@ function StoreContent({ info }: { info: StoreInfo }) {
   );
   return (
     <>
-      {!hasAddress &&
-      !contacts.length &&
-      !info.openingHours.length &&
-      !info.concept.trim() &&
-      !info.accepts.trim() ? (
-        <Message>{t.missing}</Message>
-      ) : null}
-      {info.concept.trim() ? (
-        <Section title={t.concept}>
-          <Text style={styles.text}>{info.concept}</Text>
-        </Section>
-      ) : null}
       {hasAddress ? (
         <Section title={t.address}>
           <Text selectable style={styles.text}>
@@ -189,6 +192,13 @@ function StoreContent({ info }: { info: StoreInfo }) {
               <Text style={styles.note}>{t.externalMap}</Text>
             </>
           ) : null}
+        </Section>
+      ) : (
+        <Message>{t.noAddress}</Message>
+      )}
+      {info.concept.trim() ? (
+        <Section title={t.concept}>
+          <Text style={styles.text}>{info.concept}</Text>
         </Section>
       ) : null}
       {info.openingHours.length ? (

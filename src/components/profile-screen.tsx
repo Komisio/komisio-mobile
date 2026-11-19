@@ -9,6 +9,7 @@ import { centralIdentityEmail, hasVerifiedEmail } from "@/lib/identity-gates";
 import { CentralShippingAddress } from "./central-shipping-address";
 import { accountAuthCopy } from "@/lib/account-auth-copy";
 import { accountDeletionCopy } from "@/lib/account-deletion-copy";
+import { storeSellerCopy } from "@/lib/store-seller-copy";
 import { LoginOptions } from "./login-options";
 import { PrivacyLink } from "./privacy-link";
 import {
@@ -46,37 +47,56 @@ export function ProfileScreen() {
       {!session ? (
         <LoginOptions />
       ) : (
-        <>
-          <Card>
-            <View style={styles.account}>
-              <View style={styles.identity}>
-                <SettingIcon
-                  source={require("../../assets/icons/profile.svg")}
-                />
-                <View style={styles.identityText}>
-                  <Text style={styles.caption}>
-                    {identity
-                      ? d.profile.signedInAs
-                      : accountAuthCopy(locale).methods}
-                  </Text>
-                  <Text selectable style={styles.email}>
-                    {identity ?? accountAuthCopy(locale).needsIdentity}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.logout}>
-                <Button
-                  label={d.account.logout}
-                  variant="text"
-                  busy={busy}
-                  onPress={() => void logout()}
-                />
+        <Card>
+          <View style={styles.account}>
+            <View style={styles.identity}>
+              <SettingIcon source={require("../../assets/icons/profile.svg")} />
+              <View style={styles.identityText}>
+                <Text style={styles.caption}>
+                  {identity
+                    ? d.profile.signedInAs
+                    : accountAuthCopy(locale).methods}
+                </Text>
+                <Text selectable style={styles.email}>
+                  {identity ?? accountAuthCopy(locale).needsIdentity}
+                </Text>
               </View>
             </View>
-            {failed ? (
-              <Message tone="error">{d.profile.logoutFailed}</Message>
-            ) : null}
-          </Card>
+            <View style={styles.logout}>
+              <Button
+                label={d.account.logout}
+                variant="text"
+                busy={busy}
+                onPress={() => void logout()}
+              />
+            </View>
+          </View>
+          {failed ? (
+            <Message tone="error">{d.profile.logoutFailed}</Message>
+          ) : null}
+        </Card>
+      )}
+      <Card>
+        <Text style={styles.caption}>
+          {storeSellerCopy[locale].selectedStore}
+        </Text>
+        <Text accessibilityRole="header" style={uiStyles.heading}>
+          {store?.name ?? "Komisio"}
+        </Text>
+        {store ? (
+          <NavigationRow
+            label={storeSellerCopy[locale].handInInfo}
+            onPress={() => router.push("/store-info")}
+          />
+        ) : null}
+        <Button
+          variant="text"
+          label={store ? storeSellerCopy[locale].chooseAnother : d.store.title}
+          onPress={() => router.push("/home/stores")}
+        />
+      </Card>
+      {session ? (
+        <>
           <NavigationRow
             label={accountAuthCopy(locale).methods}
             onPress={() => router.push("/account-methods")}
@@ -93,16 +113,8 @@ export function ProfileScreen() {
             />
           ) : null}
         </>
-      )}
+      ) : null}
       <View style={styles.group}>
-        <SettingRow
-          label={d.profile.store}
-          value={store?.name ?? d.store.title}
-          icon={require("../../assets/icons/store.svg")}
-          onPress={() => {
-            router.push("/home/stores");
-          }}
-        />
         <SettingRow
           label={d.language}
           value={d.languageName}
@@ -112,10 +124,6 @@ export function ProfileScreen() {
       </View>
       {storeAccount ? (
         <View style={styles.group}>
-          <NavigationRow
-            label={d.storeInfo.title}
-            onPress={() => router.push("/store-info")}
-          />
           <NavigationRow
             label={d.bank.title}
             onPress={() => router.push("/bank-account")}
