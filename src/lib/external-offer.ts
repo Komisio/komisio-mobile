@@ -4,6 +4,7 @@ import type { CommandOutcome } from "./pending-command.ts";
 import { isSaleMethod, type SaleMethod } from "./item-draft-details.ts";
 
 export type ExternalOffer = {
+  alternativeNote?: string | null;
   staffSelectsMethod?: boolean;
   saleMethod?: SaleMethod;
   purchaseCreditedAt?: string | null;
@@ -47,7 +48,7 @@ export type ExternalOfferDetail = ExternalOffer & {
   };
 };
 export type OfferResponse = {
-  action: "respond";
+  action: "respond" | "acceptAlternative";
   requestId: string;
   offerId: string;
   accepted: boolean;
@@ -75,6 +76,9 @@ export function parseExternalOffer(value: unknown): ExternalOffer {
     ![o.sellerAmountOre, o.expectedSalePriceOre].every(
       (v) => typeof v === "string" && /^[1-9]\d{0,10}$/.test(v),
     ) ||
+    (o.alternativeNote != null &&
+      (typeof o.alternativeNote !== "string" ||
+        o.alternativeNote.length > 1000)) ||
     o.currency !== "SEK" ||
     ![o.createdAt, o.expiresAt, o.serverNow].every(date) ||
     !["offered", "accepted", "declined", "expired", "superseded"].includes(
@@ -180,7 +184,8 @@ export function parseOfferResponse(
           "agreementVersionId",
         ].includes(k),
     ) ||
-    c.action !== "respond" ||
+    (c.action !== "respond" && c.action !== "acceptAlternative") ||
+    (c.action === "acceptAlternative" && c.accepted !== true) ||
     !isId(c.requestId) ||
     !isId(offerId) ||
     c.offerId !== offerId ||

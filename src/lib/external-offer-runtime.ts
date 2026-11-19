@@ -47,7 +47,11 @@ export function externalOfferWriter(user: string, offer: string) {
     storage: commandStorage,
     lock: commandLock,
     parse: (value) => parseOfferResponse(value, offer),
-    send: (command) =>
-      sendMobileCommand(command, transport(user), offerResponseOutcome),
+    send: (command) => {
+      const options = transport(user);
+      if (command.action === "acceptAlternative")
+        options.endpoint = base ? `${base}/shipping` : null;
+      return sendMobileCommand(command, options, offerResponseOutcome);
+    },
   });
 }

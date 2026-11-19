@@ -39,6 +39,29 @@ const detail = {
     language: "sv",
   },
 };
+test("a rejection with an alternative binds its exact amount, agreement and shipping action", () => {
+  const alternative = parseExternalOfferDetail({
+    ...detail,
+    alternativeNote: "Visible wear",
+  });
+  assert.equal(alternative.alternativeNote, "Visible wear");
+  assert.equal(alternative.sellerAmountOre, "40000");
+  assert.throws(() => parseExternalOffer({ ...offer, alternativeNote: 123 }));
+  const accept = {
+    action: "acceptAlternative",
+    accepted: true,
+    requestId: id(8),
+    offerId: offer.id,
+    agreementVersionId: offer.agreementVersionId,
+  };
+  assert.deepEqual(parseOfferResponse(accept, offer.id), accept);
+  for (const patch of [
+    { accepted: false },
+    { agreementVersionId: null },
+    { offerId: id(5) },
+  ])
+    assert.throws(() => parseOfferResponse({ ...accept, ...patch }, offer.id));
+});
 test("offer amounts render with iOS Hermes Intl capabilities", (t) => {
   const NativeFormat = Intl.NumberFormat;
   t.mock.method(Intl, "NumberFormat", function (locale?: string) {

@@ -1,6 +1,10 @@
 import type { Locale } from "./locale";
 const copy = {
   sv: {
+    alternativeHeading: "Komisio föreslår ett annat pris",
+    alternativeOriginal: "Du bad om {amount}.",
+    acceptAndBook: "Tacka ja och boka frakt",
+    alternativeBadge: "Prisförslag: {amount}",
     title: "Erbjudande",
     heading: "Komisio vill sälja din vara",
     guaranteed: "Du får garanterat",
@@ -32,6 +36,10 @@ const copy = {
       "Erbjudandena kunde inte hämtas. Försök igen för att se aktuella besked.",
   },
   en: {
+    alternativeHeading: "Komisio is offering a different price",
+    alternativeOriginal: "You asked for {amount}.",
+    acceptAndBook: "Accept and book shipping",
+    alternativeBadge: "New offer: {amount}",
     title: "Offer",
     heading: "Komisio would like to sell your item",
     guaranteed: "You are guaranteed",
@@ -63,6 +71,10 @@ const copy = {
     listError: "Could not load offers. Retry to see current responses.",
   },
   no: {
+    alternativeHeading: "Komisio foreslår en annen pris",
+    alternativeOriginal: "Du ba om {amount}.",
+    acceptAndBook: "Godta og bestill frakt",
+    alternativeBadge: "Prisforslag: {amount}",
     title: "Tilbud",
     heading: "Komisio vil selge varen din",
     guaranteed: "Du er garantert",
@@ -93,6 +105,10 @@ const copy = {
       "Kunne ikke hente tilbudene. Prøv igjen for å se gjeldende svar.",
   },
   da: {
+    alternativeHeading: "Komisio foreslår en anden pris",
+    alternativeOriginal: "Du bad om {amount}.",
+    acceptAndBook: "Acceptér og bestil fragt",
+    alternativeBadge: "Prisforslag: {amount}",
     title: "Tilbud",
     heading: "Komisio vil sælge din vare",
     guaranteed: "Du er garanteret",
@@ -123,6 +139,10 @@ const copy = {
       "Tilbuddene kunne ikke hentes. Prøv igen for at se aktuelle svar.",
   },
   fi: {
+    alternativeHeading: "Komisio ehdottaa toista hintaa",
+    alternativeOriginal: "Pyysit {amount}.",
+    acceptAndBook: "Hyväksy ja varaa lähetys",
+    alternativeBadge: "Hintaehdotus: {amount}",
     title: "Tarjous",
     heading: "Komisio haluaa myydä tuotteesi",
     guaranteed: "Saat taatusti",
@@ -153,6 +173,10 @@ const copy = {
       "Tarjouksia ei voitu ladata. Yritä uudelleen nähdäksesi nykyiset vastaukset.",
   },
   de: {
+    alternativeHeading: "Komisio schlägt einen anderen Preis vor",
+    alternativeOriginal: "Dein Wunschbetrag war {amount}.",
+    acceptAndBook: "Annehmen und Versand buchen",
+    alternativeBadge: "Preisvorschlag: {amount}",
     title: "Angebot",
     heading: "Komisio möchte Ihren Artikel verkaufen",
     guaranteed: "Garantierter Betrag",
@@ -184,6 +208,10 @@ const copy = {
       "Angebote konnten nicht geladen werden. Erneut versuchen, um aktuelle Antworten zu sehen.",
   },
   es: {
+    alternativeHeading: "Komisio propone otro precio",
+    alternativeOriginal: "Pediste {amount}.",
+    acceptAndBook: "Aceptar y reservar el envío",
+    alternativeBadge: "Nueva oferta: {amount}",
     title: "Oferta",
     heading: "Komisio quiere vender tu artículo",
     guaranteed: "Tienes garantizados",
@@ -215,6 +243,10 @@ const copy = {
       "No se pudieron cargar las ofertas. Reintenta para ver las respuestas actuales.",
   },
   it: {
+    alternativeHeading: "Komisio propone un altro prezzo",
+    alternativeOriginal: "Hai richiesto {amount}.",
+    acceptAndBook: "Accetta e prenota la spedizione",
+    alternativeBadge: "Nuova offerta: {amount}",
     title: "Offerta",
     heading: "Komisio vuole vendere il tuo articolo",
     guaranteed: "Importo garantito",
