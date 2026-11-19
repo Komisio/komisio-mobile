@@ -39,6 +39,7 @@ export function BankAccount({
   seller,
   slug,
   inTab = false,
+  embedded = false,
   onReturnToPayout,
 }: {
   user: string;
@@ -46,6 +47,7 @@ export function BankAccount({
   seller: string;
   slug?: string;
   inTab?: boolean;
+  embedded?: boolean;
   onReturnToPayout?: () => void;
 }) {
   const { d, locale } = useI18n(),
@@ -105,13 +107,8 @@ export function BankAccount({
     void writer.load();
     void countryRead.refresh();
   };
-  return (
-    <Screen
-      topSafeArea={inTab}
-      bottomSafeArea={!inTab}
-      title={t.title}
-      intro={onReturnToPayout ? centralPayoutCopy[locale].bankFirst : t.intro}
-    >
+  const content = (
+    <>
       {onReturnToPayout ? (
         <Button
           label={d.close}
@@ -251,6 +248,21 @@ export function BankAccount({
           }}
         />
       ) : null}
+    </>
+  );
+  return embedded ? (
+    <View style={uiStyles.card}>
+      <Text style={uiStyles.heading}>{t.title}</Text>
+      {content}
+    </View>
+  ) : (
+    <Screen
+      topSafeArea={inTab}
+      bottomSafeArea={!inTab}
+      title={t.title}
+      intro={onReturnToPayout ? centralPayoutCopy[locale].bankFirst : t.intro}
+    >
+      {content}
     </Screen>
   );
 }

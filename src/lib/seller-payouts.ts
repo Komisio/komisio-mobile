@@ -16,6 +16,7 @@ export type PayoutCommand = {
 };
 export type PendingPayout = { currency: string; command: PayoutCommand };
 export type PayoutPage = {
+  automatic?: boolean;
   bankAccountMissing?: boolean;
   currency: string;
   total: number;
@@ -106,6 +107,11 @@ export function parsePayoutPage(
   const thresholdOre = signedOre(p.thresholdOre);
   if (thresholdOre < 0) invalid();
   return {
+    ...(p.centralPayout !== undefined &&
+    object(p.centralPayout).automatic === true &&
+    p.currency === "SEK"
+      ? { automatic: true }
+      : {}),
     bankAccountMissing: p.bankAccountMissing as boolean | undefined,
     currency: currency(p.currency),
     total: p.total,

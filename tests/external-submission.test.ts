@@ -56,8 +56,8 @@ test("fixed-price submission survives a lost HTTP response and remains readable 
   const result = await restarted.resume();
   assert.equal(result.state, "complete");
   assert.equal(result.command.requestId, attempt.command.requestId);
-  assert.equal(result.command.saleMethod, "direct_purchase");
-  assert.equal((await api.list()).requests[0].sale_method, "direct_purchase");
+  assert.equal(result.command.staffSelectsMethod, true);
+  assert.equal((await api.list()).requests[0].staff_selects_method, true);
   assert.equal(submissions, 1);
   assert.equal(uploads, 1);
   assert.equal(f.finished.length, 1);
@@ -77,9 +77,11 @@ test("new submissions require an amount and the displayed agreement before prepa
   );
   const incomplete = snapshot();
   delete incomplete.draft.details.saleMethod;
-  await assert.rejects(
-    f.controller().prepare(incomplete, "SE", id(950)),
-    /DRAFT_CHANGED/,
+  const fresh = fixture();
+  assert.equal(
+    (await fresh.controller().prepare(incomplete, "SE", id(950))).command
+      .staffSelectsMethod,
+    true,
   );
   const empty = snapshot();
   empty.draft.details.desiredSellerAmount = "";
@@ -140,6 +142,7 @@ function snapshot(): ItemDraftSnapshot {
 }
 const row = (c: ExternalItemCommand): ExternalRequest => ({
   approval_mode: c.approvalMode ?? "offer",
+  staff_selects_method: c.staffSelectsMethod,
   sale_method: c.saleMethod,
   agreement_version_id: c.agreementVersionId,
   sender_country: c.senderCountry ?? null,

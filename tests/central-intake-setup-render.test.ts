@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { compilePreview } from "./helpers/compile-preview.ts";
+import { centralIntakeCopy } from "../src/lib/central-intake-copy.ts";
 import { fixedIntakeCopy } from "../src/lib/fixed-intake-copy.ts";
 import { shippingAddressCopy } from "../src/lib/shipping-address-copy.ts";
 import { centralShippingCopy } from "../src/lib/central-shipping-copy.ts";
@@ -15,7 +16,11 @@ const agreement = {
   body: "Synthetic terms",
   language: "sv",
 };
-function fixture(existing: boolean, accepted = existing) {
+function fixture(
+  existing: boolean,
+  accepted = existing,
+  hasPreference = existing,
+) {
   const values: any[] = [];
   let cursor = 0,
     submitted = 0,
@@ -36,6 +41,9 @@ function fixture(existing: boolean, accepted = existing) {
   };
   const data = {
     tenantId: id(2),
+    payoutPreference: hasPreference
+      ? { id: id(7), method: "swish", phone: "+46700000000" }
+      : null,
     agreement,
     agreementAccepted: accepted,
     account: existing
@@ -97,6 +105,8 @@ function fixture(existing: boolean, accepted = existing) {
         intakeProfileWriter: () => writer,
       },
       "@/lib/central-intake-profile": { parseSaveIntakeProfile },
+      "./central-payout-preference": { CentralPayoutPreference: "Preference" },
+      "@/lib/central-intake-copy": { centralIntakeCopy },
       "@/lib/fixed-intake-copy": { fixedIntakeCopy },
       "@/lib/shipping-address-copy": { shippingAddressCopy },
       "@/lib/central-shipping-copy": { centralShippingCopy },
@@ -181,7 +191,7 @@ test("first submission collects six sender fields and explicit consent, never a 
     nodes.find(
       (n) =>
         n.type === "Button" &&
-        n.props.label === externalSubmissionCopy("sv").send,
+        n.props.label === centralIntakeCopy("sv").continue,
     ).props.disabled,
     true,
   );
@@ -189,17 +199,27 @@ test("first submission collects six sender fields and explicit consent, never a 
   nodes = f.render();
   const button = nodes.find(
     (n) =>
-      n.type === "Button" &&
-      n.props.label === externalSubmissionCopy("sv").send,
+      n.type === "Button" && n.props.label === centralIntakeCopy("sv").continue,
   );
   button.props.onPress();
   button.props.onPress();
   await new Promise(setImmediate);
-  assert.equal(f.get().submitted, 1);
+  assert.equal(f.get().submitted, 0);
   assert.equal(f.get().saved.agreementVersionId, id(3));
   assert.equal(f.get().saved.address.postalCode, "12345");
   assert.equal(f.get().saved.expectedRevision, -1);
   assert.equal(f.get().saved.acceptAgreement, true);
+});
+test("an existing sender without a payout preference can send only after confirming a destination", async () => {
+  const f = fixture(true, true, false);
+  const nodes = f.render();
+  const panel = nodes.find((n) => n.type === "Preference");
+  assert.ok(panel);
+  assert.equal(f.get().submitted, 0);
+  await panel.props.onSaved(false);
+  assert.equal(f.get().submitted, 0);
+  await panel.props.onSaved(true);
+  assert.equal(f.get().submitted, 1);
 });
 test("new terms show consent again while preserving the saved sender summary", () => {
   const nodes = fixture(true, false).render();

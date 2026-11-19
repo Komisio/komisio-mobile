@@ -16,12 +16,10 @@ import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
 import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { useI18n } from "@/lib/i18n";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
-import { externalLifecycleCopy } from "@/lib/external-lifecycle-copy";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import {
   emptyItemDetails,
   itemConditions,
-  saleMethods,
   itemDetailsErrors,
   type ItemDraftDetails,
 } from "@/lib/item-draft-details";
@@ -36,6 +34,7 @@ export function PhotoDetailsScreen() {
   const t = itemDraftCopy(locale);
   const photo = photoDraftCopy(locale);
   const [values, setValues] = useState<ItemDraftDetails>(emptyItemDetails);
+  const [showPayoutInfo, setShowPayoutInfo] = useState(false);
   const [busy, setBusy] = useState(false);
   const locked = useRef(false);
   const alive = useRef(true);
@@ -171,7 +170,6 @@ export function PhotoDetailsScreen() {
     description: t.requiredDescription,
     condition: t.requiredCondition,
     desiredSellerAmount: t.invalidPrice,
-    saleMethod: t.chooseMethod,
   };
   return (
     <Screen topSafeArea={false} keyboardInsets>
@@ -277,32 +275,22 @@ export function PhotoDetailsScreen() {
           </View>
           <Text style={uiStyles.body}>{currency}</Text>
         </View>
-        <Text style={uiStyles.note}>{t.priceHint}</Text>
-        <Text style={uiStyles.note}>
-          {externalLifecycleCopy(locale).minimumGuidance}
-        </Text>
-      </View>
-      <View
-        style={{ gap: 10 }}
-        accessibilityRole="radiogroup"
-        accessibilityLabel={t.methodTitle}
-      >
-        <Text style={uiStyles.label}>{t.methodTitle}</Text>
-        {saleMethods.map((method) => (
-          <Choice
-            key={method}
-            role="radio"
-            listRow
-            label={t[method]}
-            hint={
-              method === "direct_purchase" ? t.directHint : t.consignmentHint
-            }
-            selected={values.saleMethod === method}
-            disabled={busy}
-            onPress={() => change("saleMethod", method)}
-          />
-        ))}
-        <Text style={uiStyles.note}>{t.decisionBeforeShipping}</Text>
+        <Button
+          label={t.payoutQuestion}
+          variant="text"
+          expanded={showPayoutInfo}
+          onPress={() => setShowPayoutInfo(true)}
+        />
+        {showPayoutInfo ? (
+          <DetailSheet
+            open
+            title={t.payoutQuestion}
+            onClose={() => setShowPayoutInfo(false)}
+          >
+            <Text style={uiStyles.body}>{t.payoutTiming}</Text>
+            <Text style={uiStyles.body}>{t.payoutRequest}</Text>
+          </DetailSheet>
+        ) : null}
       </View>
       {issues.length ? (
         <Message tone="error">

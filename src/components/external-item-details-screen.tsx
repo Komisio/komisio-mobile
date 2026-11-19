@@ -163,9 +163,11 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
           <Card>
             {payout?.congratulate ? (
               <Text accessibilityRole="header" style={uiStyles.heading}>
-                {data.item.sale_method === "direct_purchase"
-                  ? t.directApproval
-                  : t.approvalGreeting}
+                {data.item.staff_selects_method && !data.item.sale_method
+                  ? t.receiptApproval
+                  : data.item.sale_method === "direct_purchase"
+                    ? t.directApproval
+                    : t.approvalGreeting}
               </Text>
             ) : null}
             {data.item.sale_method && data.item.approval_mode === "fixed" ? (
@@ -212,7 +214,7 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
           (data.offer?.purchaseCreditedAt ||
             data.offer?.guarantee?.creditedAt) ? (
             <Button
-              label={centralPayoutCopy[locale].open}
+              label={centralPayoutCopy[locale].viewPayouts}
               onPress={() =>
                 router.push({
                   pathname: "/central-money",
@@ -229,7 +231,11 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
             >
               <Text style={uiStyles.label}>{data.item.description}</Text>
               <Text style={uiStyles.body}>{payout.message}</Text>
-              <Text style={uiStyles.note}>{t.fromBalance}</Text>
+              <Text style={uiStyles.note}>
+                {data.item.staff_selects_method
+                  ? t.payoutRequest
+                  : t.fromBalance}
+              </Text>
             </DetailSheet>
           ) : null}
           <View style={{ gap: 4 }}>

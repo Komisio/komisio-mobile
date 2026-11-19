@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
+import { CentralPayoutPreference } from "./central-payout-preference";
 import { PendingDiscard } from "./pending-discard";
 import { BalanceCard } from "./balance-card";
 import { BankAccount } from "./bank-account";
@@ -230,17 +231,28 @@ export function SellerPayouts({
       ) : data ? (
         <>
           <BalanceCard balance={data.balance} currency={data.currency} />
-          <View style={styles.views}>
-            {(["request", "history"] as const).map((value) => (
-              <Choice
-                key={value}
-                label={value === "request" ? t.request : t.historyShort}
-                selected={value === view}
-                onPress={() => setView(value)}
+          {central || data.automatic ? (
+            <>
+              <CentralPayoutPreference
+                user={user}
+                tenant={tenant}
+                seller={seller}
               />
-            ))}
-          </View>
-          {view === "request" ? (
+              <Text style={styles.heading}>{t.historyShort}</Text>
+            </>
+          ) : (
+            <View style={styles.views}>
+              {(["request", "history"] as const).map((value) => (
+                <Choice
+                  key={value}
+                  label={value === "request" ? t.request : t.historyShort}
+                  selected={value === view}
+                  onPress={() => setView(value)}
+                />
+              ))}
+            </View>
+          )}
+          {!central && !data.automatic && view === "request" ? (
             <>
               {change.status === "ready" ? (
                 <PayoutForm
@@ -319,21 +331,23 @@ export function SellerPayouts({
           )}
         </>
       ) : null}
-      <View style={{ gap: 8 }}>
-        <NavigationRow
-          label={d.bank.title}
-          onPress={() =>
-            router.push(
-              central
-                ? {
-                    pathname: "/central-money",
-                    params: { tenant, section: "bank" },
-                  }
-                : "/bank-account",
-            )
-          }
-        />
-      </View>
+      {!central && !data?.automatic ? (
+        <View style={{ gap: 8 }}>
+          <NavigationRow
+            label={d.bank.title}
+            onPress={() =>
+              router.push(
+                central
+                  ? {
+                      pathname: "/central-money",
+                      params: { tenant, section: "bank" },
+                    }
+                  : "/bank-account",
+              )
+            }
+          />
+        </View>
+      ) : null}
     </Screen>
   );
 }

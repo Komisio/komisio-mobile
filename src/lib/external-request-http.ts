@@ -128,6 +128,9 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       brand: command.brand,
       condition: command.condition,
       notes: command.notes,
+      ...(row.staff_selects_method === true
+        ? { staff_selects_method: true }
+        : {}),
       ...(row.sale_method ? { sale_method: row.sale_method } : {}),
       desired_price_ore: command.desiredPriceOre,
       ...(row.price_basis ? { price_basis: row.price_basis } : {}),

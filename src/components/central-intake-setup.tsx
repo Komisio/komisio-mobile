@@ -19,11 +19,13 @@ import {
   parseSaveIntakeProfile,
   type IntakeProfile,
 } from "@/lib/central-intake-profile";
+import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { fixedIntakeCopy } from "@/lib/fixed-intake-copy";
 import { shippingAddressCopy } from "@/lib/shipping-address-copy";
 import { centralShippingCopy } from "@/lib/central-shipping-copy";
 import { externalSubmissionCopy } from "@/lib/external-submission-copy";
 import { phoneEntryValue } from "@/lib/phone-entry";
+import { CentralPayoutPreference } from "./central-payout-preference";
 import { OfferAgreementLink } from "./offer-agreement-link";
 import { Button, Card, Choice, Field, Loading, Message, uiStyles } from "./ui";
 
@@ -187,7 +189,8 @@ function IntakeEditor({
       if (!active.current) return;
       const result = writer.getState();
       if (result.status === "success") {
-        if (agreement === data.agreement.id) await onSubmit(data.agreement.id);
+        if (agreement === data.agreement.id && data.payoutPreference)
+          await onSubmit(data.agreement.id);
         if (active.current) refresh();
       } else if (
         ["AUTH_REQUIRED", "MFA_REQUIRED", "PASSWORD_UPDATE_REQUIRED"].includes(
@@ -315,12 +318,36 @@ function IntakeEditor({
       </Card>
       <Text style={uiStyles.note}>{t.reviewHint}</Text>
       {error ? <Message tone="error">{error}</Message> : null}
-      <Button
-        label={externalSubmissionCopy(locale).send}
-        busy={busy}
-        disabled={!accepted}
-        onPress={() => void submit()}
-      />
+      {account &&
+      !editing &&
+      data.agreementAccepted &&
+      !data.payoutPreference ? (
+        <CentralPayoutPreference
+          user={user}
+          tenant={tenant}
+          seller={account.sellerId}
+          disabled={busy}
+          submitLabel={externalSubmissionCopy(locale).send}
+          onSaved={async (sendItem) => {
+            try {
+              if (sendItem && active.current) await onSubmit(data.agreement.id);
+            } finally {
+              if (active.current) refresh();
+            }
+          }}
+        />
+      ) : (
+        <Button
+          label={
+            data.payoutPreference
+              ? externalSubmissionCopy(locale).send
+              : centralIntakeCopy(locale).continue
+          }
+          busy={busy}
+          disabled={!accepted}
+          onPress={() => void submit()}
+        />
+      )}
     </>
   );
 }

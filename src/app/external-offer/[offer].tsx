@@ -220,7 +220,8 @@ function Offer({ user, id }: { user: string; id: string }) {
             >
               {amount}
             </Text>
-            {o.saleMethod !== "direct_purchase" ? (
+            {o.saleMethod !== "direct_purchase" &&
+            !(o.staffSelectsMethod && !o.saleMethod) ? (
               <Text style={[uiStyles.note, { color: colors.onBrandMuted }]}>
                 {t.planned.replace(
                   "{amount}",
@@ -229,7 +230,13 @@ function Offer({ user, id }: { user: string; id: string }) {
               </Text>
             ) : null}
           </View>
-          {o.saleMethod === "direct_purchase" ? (
+          {o.staffSelectsMethod && !o.saleMethod ? (
+            <Card>
+              <Text style={uiStyles.body}>
+                {externalItemDetailCopy(locale).receiptPending}
+              </Text>
+            </Card>
+          ) : o.saleMethod === "direct_purchase" ? (
             <Card>
               <Text style={uiStyles.label}>
                 {externalItemDetailCopy(locale).direct_purchase}
