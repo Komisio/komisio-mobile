@@ -248,6 +248,9 @@ export function PhotoReviewScreen() {
                 </Text>
               </>
             ) : null}
+            {details.saleMethod ? (
+              <Text style={uiStyles.rowTitle}>{t[details.saleMethod]}</Text>
+            ) : null}
             <Button
               label={t.editDetails}
               variant="text"

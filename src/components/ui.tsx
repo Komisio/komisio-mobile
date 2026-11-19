@@ -194,6 +194,7 @@ export function Choice({
   disabled = false,
   role = "button",
   listRow = false,
+  hint,
 }: {
   label: string;
   selected: boolean;
@@ -201,11 +202,13 @@ export function Choice({
   disabled?: boolean;
   role?: "button" | "radio" | "checkbox";
   listRow?: boolean;
+  hint?: string;
 }) {
   const { focused, focusProps } = useControlFocus();
   return (
     <Pressable
       accessibilityRole={role}
+      accessibilityHint={hint}
       accessibilityLabel={label}
       accessibilityState={
         role === "button"
@@ -235,6 +238,7 @@ export function Choice({
       style={({ pressed }) => [
         styles.chip,
         listRow && styles.choiceRow,
+        hint && { flexDirection: "column", alignItems: "stretch", gap: 4 },
         selected && styles.chipSelected,
         focused && styles.focused,
         pressed && styles.dimmed,
@@ -244,14 +248,22 @@ export function Choice({
       <Text
         style={[
           styles.chipText,
-          listRow && styles.choiceRowText,
+          listRow && !hint && styles.choiceRowText,
           selected && styles.chipSelectedText,
         ]}
       >
         {role === "checkbox" ? `${selected ? "☑" : "☐"} ` : ""}
+        {role === "radio" && hint ? `${selected ? "◉" : "○"} ` : ""}
         {label}
       </Text>
-      {listRow && selected ? (
+      {hint ? (
+        <Text
+          style={[uiStyles.note, selected && { color: colors.onBrandMuted }]}
+        >
+          {hint}
+        </Text>
+      ) : null}
+      {listRow && !hint && selected ? (
         <Text accessible={false} aria-hidden style={styles.selectedMark}>
           ✓
         </Text>

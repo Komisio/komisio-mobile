@@ -1,7 +1,11 @@
 import { isId } from "./catalogue.ts";
 import type { CommandOutcome } from "./pending-command.ts";
 
+import { isSaleMethod, type SaleMethod } from "./item-draft-details.ts";
+
 export type ExternalOffer = {
+  saleMethod?: SaleMethod;
+  purchaseCreditedAt?: string | null;
   id: string;
   requestId: string;
   tenantId: string;
@@ -109,6 +113,16 @@ export function parseExternalOffer(value: unknown): ExternalOffer {
     )
       invalid();
   }
+  if (
+    (o.saleMethod !== undefined && !isSaleMethod(o.saleMethod)) ||
+    (o.saleMethod === "direct_purchase" && o.guarantee != null) ||
+    (o.purchaseCreditedAt != null &&
+      (o.saleMethod !== "direct_purchase" ||
+        o.status !== "accepted" ||
+        object(o.handover).status !== "received" ||
+        !date(o.purchaseCreditedAt)))
+  )
+    invalid();
   if (o.guarantee != null) {
     const g = object(o.guarantee),
       h = object(o.handover);

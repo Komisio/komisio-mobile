@@ -29,6 +29,7 @@ const details = {
   condition: "good" as const,
   notes: "Small mark",
   desiredSellerAmount: "1000,50",
+  saleMethod: "consignment" as const,
 };
 test("legacy resale wishes are cleared without losing the saved item details", () => {
   const { desiredSellerAmount: _, ...rest } = details;
@@ -151,6 +152,7 @@ test("price wishes use exact minor-unit strings and partial drafts remain editab
     "description",
     "condition",
     "desiredSellerAmount",
+    "saleMethod",
   ]);
   assert.deepEqual(
     itemDetailsErrors({ ...details, desiredSellerAmount: "oops" }),

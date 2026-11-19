@@ -56,6 +56,8 @@ test("fixed-price submission survives a lost HTTP response and remains readable 
   const result = await restarted.resume();
   assert.equal(result.state, "complete");
   assert.equal(result.command.requestId, attempt.command.requestId);
+  assert.equal(result.command.saleMethod, "direct_purchase");
+  assert.equal((await api.list()).requests[0].sale_method, "direct_purchase");
   assert.equal(submissions, 1);
   assert.equal(uploads, 1);
   assert.equal(f.finished.length, 1);
@@ -72,6 +74,12 @@ test("new submissions require an amount and the displayed agreement before prepa
   await assert.rejects(
     f.controller().prepare(snapshot(), "SE"),
     /AGREEMENT_REQUIRED/,
+  );
+  const incomplete = snapshot();
+  delete incomplete.draft.details.saleMethod;
+  await assert.rejects(
+    f.controller().prepare(incomplete, "SE", id(950)),
+    /DRAFT_CHANGED/,
   );
   const empty = snapshot();
   empty.draft.details.desiredSellerAmount = "";
@@ -124,6 +132,7 @@ function snapshot(): ItemDraftSnapshot {
         condition: "good",
         notes: "",
         desiredSellerAmount: "100,50",
+        saleMethod: "direct_purchase",
       },
     },
     photos: [{ id: id(3), uri: "file:///private/original.image" }],
@@ -131,6 +140,7 @@ function snapshot(): ItemDraftSnapshot {
 }
 const row = (c: ExternalItemCommand): ExternalRequest => ({
   approval_mode: c.approvalMode ?? "offer",
+  sale_method: c.saleMethod,
   agreement_version_id: c.agreementVersionId,
   sender_country: c.senderCountry ?? null,
   id: c.requestId,

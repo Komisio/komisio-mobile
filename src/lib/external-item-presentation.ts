@@ -138,11 +138,12 @@ export function agreedItemPayout(
       timeZone: "Europe/Stockholm",
     }).format(new Date(iso));
 
-  if (guarantee?.creditedAt)
+  const creditedAt = offer.purchaseCreditedAt ?? guarantee?.creditedAt;
+  if (creditedAt)
     return {
       message: t.credited
         .replace("{amount}", amount)
-        .replace("{date}", date(guarantee.creditedAt)),
+        .replace("{date}", date(creditedAt)),
       congratulate: false,
     };
   const status = item.lifecycleStatus;
@@ -159,6 +160,17 @@ export function agreedItemPayout(
       ].includes(status))
   )
     return { message: t.noCreditInfo, congratulate: false };
+  if (
+    offer.saleMethod === "direct_purchase" ||
+    item.sale_method === "direct_purchase"
+  )
+    return {
+      message: t.directHint,
+      congratulate:
+        !["received", "registered", "sold", "acquired"].includes(
+          status ?? "",
+        ) && handover?.status !== "received",
+    };
   if (guarantee && Date.parse(offer.serverNow) >= Date.parse(guarantee.dueAt))
     return {
       message: t.overdue.replace("{date}", date(guarantee.dueAt)),
