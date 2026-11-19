@@ -62,6 +62,7 @@ const ui = Object.fromEntries(
     "Text",
     "StatusBadge",
     "Button",
+    "IconButton",
     "Card",
     "Loading",
     "Message",
@@ -158,11 +159,18 @@ function detailHarness(
     },
   };
   let assuranceRefreshes = 0;
+  let sheetOpen = false;
   const pushed: any[] = [];
   const { ExternalItemDetailsScreen } = compilePreview(
     "components/external-item-details-screen.tsx",
     {
       react: {
+        useState: () => [
+          sheetOpen,
+          (open: boolean) => {
+            sheetOpen = open;
+          },
+        ],
         useMemo: (f: () => any) => read ?? f(),
         useCallback: (f: any) => f,
         useSyncExternalStore: (_: any, get: any) => get(),
@@ -216,6 +224,11 @@ function detailHarness(
       "@/lib/external-offer": offerModule,
       "@/lib/locale": localeModule,
       "./external-photo-pager": { ExternalPhotoPager: "PhotoPager" },
+      "./detail-sheet": {
+        DetailSheet: (props: any) =>
+          props.open ? { type: "Sheet", props } : null,
+      },
+      "./brand": { InfoIcon: "InfoIcon" },
       "./withdraw-external-request": { WithdrawExternalRequest: "Withdraw" },
       "./ui": { ...ui, uiStyles: {} },
     },
@@ -273,6 +286,99 @@ test("offer and shipping actions remain reachable without exposing withdrawal fo
     assert.equal(h.pushed[0].params.offer, offer.id);
   }
 });
+test("an approved item's info button opens and dismisses its own payout sheet", async () => {
+  const h = detailHarness({ ...item, lifecycleStatus: "open" }, offer);
+  h.render();
+  await h.refresh();
+  const t = externalItemDetailCopy("sv");
+  const closed = h.render();
+  assert.ok(closed.includes(t.approvalGreeting));
+  assert.ok(!closed.some((n) => n.type === "Sheet"));
+  const info = closed.find((n) => n.type === "IconButton");
+  assert.equal(info.props.label, t.payoutTitle);
+  info.props.onPress();
+  const sheet = h.render().find((n) => n.type === "Sheet");
+  const content = flatten(sheet.props.children);
+  assert.ok(content.includes(item.description));
+  assert.ok(content.includes(t.payoutRule.replace("{amount}", "600 kr")));
+  assert.ok(content.includes(t.fromBalance));
+  sheet.props.onClose();
+  assert.ok(!h.render().some((n) => n.type === "Sheet"));
+  assert.deepEqual(h.pushed, []);
+  for (const current of [undefined, { ...offer, status: "offered" as const }]) {
+    const pending = detailHarness(item, current);
+    pending.render();
+    await pending.refresh();
+    assert.ok(
+      !pending
+        .render()
+        .some((n) => n.type === "IconButton" || n === t.approvalGreeting),
+    );
+  }
+});
+
+test("payout dates follow this guarantee and credit evidence in Swedish time", () => {
+  const receivedAt = "2026-11-13T23:30:00Z";
+  const dueAt = "2026-12-28T23:30:00Z";
+  const received: ExternalOffer = {
+    ...offer,
+    serverNow: receivedAt,
+    handover: {
+      id: id(8),
+      reference: "H-2",
+      itemCount: 2,
+      status: "received",
+      receivedAt,
+    },
+    guarantee: {
+      id: id(9),
+      currency: "SEK",
+      amountOre: "60000",
+      receivedAt,
+      dueAt,
+      creditedAt: null,
+    },
+  };
+  const t = externalItemDetailCopy("sv");
+  const payout = (
+    status: ExternalRequest["lifecycleStatus"],
+    record: ExternalOffer,
+  ) =>
+    presentation.agreedItemPayout(
+      { ...item, lifecycleStatus: status },
+      record,
+      "sv",
+    )!;
+  const pending = payout("registered", received);
+  assert.match(pending.message, /600 kr.*29 december 2026/);
+  assert.equal(pending.congratulate, false);
+  assert.equal(
+    payout("received", { ...received, serverNow: dueAt }).message,
+    t.overdue.replace("{date}", "29 december 2026"),
+  );
+  for (const historical of ["cancelled", "ended", "sold", "acquired"] as const)
+    assert.deepEqual(payout(historical, offer), {
+      message: t.noCreditInfo,
+      congratulate: false,
+    });
+  assert.equal(
+    payout("sold", {
+      ...received,
+      guarantee: { ...received.guarantee!, creditedAt: "2026-11-14T23:45:00Z" },
+    }).message,
+    "600 kr lades till på ditt saldo den 15 november 2026.",
+  );
+  const legacy = payout("received", { ...received, guarantee: null });
+  assert.equal(legacy.message, t.payoutRule.replace("{amount}", "600 kr"));
+  assert.equal(legacy.congratulate, false);
+  for (const locale of localeModule.locales) {
+    for (const model of [offer, received, { ...received, serverNow: dueAt }]) {
+      const info = presentation.agreedItemPayout(item, model, locale)!;
+      assert.ok(info.message && !info.message.includes("{"));
+    }
+  }
+});
+
 test("an unavailable offer leaves item details readable, while missing items and auth failures fail closed", async () => {
   const partial = detailHarness(item, undefined, "NETWORK_ERROR");
   partial.render();

@@ -41,6 +41,7 @@ import {
 } from "@/lib/external-onboarding";
 import { offerAmount, type ExternalOfferDetail } from "@/lib/external-offer";
 import { externalHandoverCopy } from "@/lib/external-handover-copy";
+import { externalItemDetailCopy } from "@/lib/external-item-detail-copy";
 import { formattingLocale } from "@/lib/locale";
 
 export default function ExternalOnboardingScreen() {
@@ -416,7 +417,7 @@ function Handover({
           ? t.received
           : h.status === "cancelled"
             ? t.cancelled
-            : centralShippingCopy(locale).title}
+            : externalItemDetailCopy(locale).approvalGreeting}
       </Text>
       {h.status === "received" &&
       offer.guarantee &&
