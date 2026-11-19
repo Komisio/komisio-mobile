@@ -113,6 +113,10 @@ export function ProfileScreen() {
       {storeAccount ? (
         <View style={styles.group}>
           <NavigationRow
+            label={d.storeInfo.title}
+            onPress={() => router.push("/store-info")}
+          />
+          <NavigationRow
             label={d.bank.title}
             onPress={() => router.push("/bank-account")}
           />

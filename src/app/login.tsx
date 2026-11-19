@@ -61,9 +61,7 @@ export default function Login() {
         href={
           accountReturnPath(returnTo) !== "/home"
             ? accountReturnPath(returnTo)
-            : store
-              ? "/home/shop"
-              : "/(tabs)/items"
+            : "/(tabs)/items"
         }
       />
     );

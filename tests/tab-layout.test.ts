@@ -315,8 +315,8 @@ test("all detail routes configure back navigation with their own fallback", () =
   assert.equal(screens[0].props.name, "(tabs)");
   assert.equal(screens[0].props.options, undefined);
   const expected: Record<string, string> = {
-    "catalogue/[tenant]/[item]": "/(tabs)",
-    "store-info": "/(tabs)",
+    "catalogue/[tenant]/[item]": "/(tabs)/items",
+    "store-info": "/(tabs)/profile",
     "my-items/[tenant]/[item]": "/(tabs)/items",
     "external-item/[request]": "/external-items",
     language: "/(tabs)/profile",

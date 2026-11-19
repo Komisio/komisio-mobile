@@ -27,6 +27,7 @@ test("the selected store wins over a stale central source parameter", () => {
     "@/lib/identity-gates": { hasVerifiedEmail },
     "@/components/seller-gate": { SellerGate: "Gate" },
     "@/components/seller-items": { SellerItems: "StoreItems" },
+    "@/components/store-introduction": { StoreIntroduction: "Introduction" },
     "@/components/external-items-screen": {
       ExternalItemsScreen: "CentralItems",
     },
@@ -52,6 +53,8 @@ test("the selected store wins over a stale central source parameter", () => {
     "Never render another tenant's account",
   );
   current = { ...current, session: null };
+  assert.equal(screen.default().type, "Introduction");
+  current = { ...current, store: null };
   assert.equal(screen.default().type, "Screen");
 });
 
@@ -132,8 +135,7 @@ test("the visible picker switches back to the remembered store and clears stale 
   assert.equal(params[1].request, undefined);
   assert.equal(params[1].source, undefined);
   rendered.props.children[1].props.onPress();
-  assert.equal(routes[0].pathname, "/home/stores");
-  assert.equal(routes[0].params.returnTo, "items");
+  assert.equal(routes[0], "/home/stores");
 });
 
 function provider(saved: Record<string, string>) {
@@ -233,7 +235,7 @@ test("central intake retains the previous store and rapid switches persist the f
   assert.equal(restored.render().lastStore.id, store.id);
 });
 
-test("choosing a store from My items returns to My items; Home still opens the catalogue", () => {
+test("choosing a store from either My items or Home opens the seller's own items", () => {
   let returnTo: string | undefined = "items",
     cursor = 0;
   const routes: string[] = [],
@@ -282,6 +284,6 @@ test("choosing a store from My items returns to My items; Home still opens the c
   assert.equal(routes[0], "/(tabs)/items");
   returnTo = undefined;
   choose();
-  assert.equal(routes[1], "/home/shop");
+  assert.equal(routes[1], "/(tabs)/items");
   assert.equal(chosen.length, 2);
 });

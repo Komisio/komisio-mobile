@@ -71,8 +71,8 @@ function Routes() {
           name="catalogue/[tenant]/[item]"
           options={({ navigation }) =>
             detailHeaderOptions(
-              "/(tabs)",
-              d.catalogue.back,
+              "/(tabs)/items",
+              d.items.back,
               navigation.canGoBack(),
             )
           }
@@ -81,8 +81,8 @@ function Routes() {
           name="store-info"
           options={({ navigation }) =>
             detailHeaderOptions(
-              "/(tabs)",
-              d.storeInfo.back,
+              "/(tabs)/profile",
+              d.profile.back,
               navigation.canGoBack(),
             )
           }

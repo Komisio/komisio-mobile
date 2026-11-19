@@ -6,10 +6,13 @@ import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { ExternalItemsScreen } from "@/components/external-items-screen";
 import { LoginOptions } from "@/components/login-options";
 import { Screen } from "@/components/ui";
+import { StoreIntroduction } from "@/components/store-introduction";
 
 export default function ItemsTab() {
   const { d } = useI18n();
   const { account, session, store } = useSession();
+  if (store && (!session || !hasVerifiedEmail(session.user)))
+    return <StoreIntroduction />;
   if (!session)
     return (
       <Screen title={d.tabs.items} bottomSafeArea={false}>
@@ -19,7 +22,11 @@ export default function ItemsTab() {
   if (!store || !hasVerifiedEmail(session.user))
     return <ExternalItemsScreen inTab />;
   return (
-    <SellerGate bottomSafeArea={false} title={d.tabs.items}>
+    <SellerGate
+      bottomSafeArea={false}
+      title={d.tabs.items}
+      missing={<StoreIntroduction />}
+    >
       {account &&
         account !== "failed" &&
         session &&
