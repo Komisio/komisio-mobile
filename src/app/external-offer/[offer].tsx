@@ -20,6 +20,7 @@ import {
 } from "@/lib/external-offer-runtime";
 import { offerAmount, offerIsExpired } from "@/lib/external-offer";
 import { externalOfferCopy } from "@/lib/external-offer-copy";
+import { externalItemDetailCopy } from "@/lib/external-item-detail-copy";
 import { externalOnboardingCopy } from "@/lib/external-onboarding-copy";
 import { externalHandoverCopy } from "@/lib/external-handover-copy";
 import { useSession } from "@/lib/session";
@@ -190,7 +191,9 @@ function Offer({ user, id }: { user: string; id: string }) {
             </View>
           </View>
           <Text accessibilityRole="header" style={uiStyles.heading}>
-            {t.heading}
+            {o.status === "offered" && !expired
+              ? externalItemDetailCopy(locale).approvalGreeting
+              : t.heading}
           </Text>
           <View
             style={[

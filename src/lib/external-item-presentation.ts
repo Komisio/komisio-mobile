@@ -2,6 +2,7 @@ import type { ExternalRequest } from "./external-submission.ts";
 import { offerAmount, type ExternalOffer } from "./external-offer.ts";
 import { externalOfferCopy } from "./external-offer-copy.ts";
 import { externalHandoverCopy } from "./external-handover-copy.ts";
+import { externalItemDetailCopy } from "./external-item-detail-copy.ts";
 import { externalSubmissionCopy } from "./external-submission-copy.ts";
 import { externalLifecycleCopy } from "./external-lifecycle-copy.ts";
 import { photoFlowCopy } from "./photo-flow-copy.ts";
@@ -117,4 +118,65 @@ export function externalItemAmounts(
     });
   }
   return amounts;
+}
+
+export function agreedItemPayout(
+  item: ExternalRequest,
+  offer: ExternalOffer | undefined,
+  locale: Locale,
+) {
+  if (!offer || offer.status !== "accepted") return null;
+  const t = externalItemDetailCopy(locale);
+  const tag = formattingLocale(locale);
+  const amount = offerAmount(offer.sellerAmountOre, tag, offer.currency);
+  const { guarantee, handover } = offer;
+  const date = (iso: string) =>
+    new Intl.DateTimeFormat(tag, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "Europe/Stockholm",
+    }).format(new Date(iso));
+
+  if (guarantee?.creditedAt)
+    return {
+      message: t.credited
+        .replace("{amount}", amount)
+        .replace("{date}", date(guarantee.creditedAt)),
+      congratulate: false,
+    };
+  const status = item.lifecycleStatus;
+  if (
+    handover?.status === "cancelled" ||
+    (status &&
+      [
+        "cancelled",
+        "ended",
+        "withdrawn",
+        "rejected",
+        "declined",
+        "expired",
+      ].includes(status))
+  )
+    return { message: t.noCreditInfo, congratulate: false };
+  if (guarantee && Date.parse(offer.serverNow) >= Date.parse(guarantee.dueAt))
+    return {
+      message: t.overdue.replace("{date}", date(guarantee.dueAt)),
+      congratulate: false,
+    };
+  if (status === "sold" || status === "acquired")
+    return { message: t.noCreditInfo, congratulate: false };
+  if (guarantee)
+    return {
+      message: externalHandoverCopy(locale)
+        .due.replace("{amount}", amount)
+        .replace("{date}", date(guarantee.dueAt)),
+      congratulate: false,
+    };
+  return {
+    message: t.payoutRule.replace("{amount}", amount),
+    congratulate:
+      handover?.status !== "received" &&
+      (!status || status === "accepted" || status === "open"),
+  };
 }

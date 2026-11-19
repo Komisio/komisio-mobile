@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { Text, View } from "react-native";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSession } from "@/lib/session";
@@ -14,14 +14,18 @@ import { itemDraftCopy } from "@/lib/item-draft-copy";
 import {
   externalItemPresentation,
   externalItemAmounts,
+  agreedItemPayout,
 } from "@/lib/external-item-presentation";
 import { offerAmount, type ExternalOffer } from "@/lib/external-offer";
 import { formattingLocale } from "@/lib/locale";
 import { ExternalPhotoPager } from "./external-photo-pager";
+import { DetailSheet } from "./detail-sheet";
+import { InfoIcon } from "./brand";
 import { WithdrawExternalRequest } from "./withdraw-external-request";
 import {
   Button,
   Card,
+  IconButton,
   Loading,
   Message,
   Screen,
@@ -53,6 +57,7 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
     { refreshAssurance } = useSession();
   const t = externalItemDetailCopy(locale),
     draft = itemDraftCopy(locale);
+  const [showPayoutInfo, setShowPayoutInfo] = useState(false);
   const read = useMemo(
     () =>
       createScopedRead(async () => {
@@ -103,7 +108,10 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
   useFocusEffect(
     useCallback(() => {
       refresh();
-      return () => read.cancel();
+      return () => {
+        setShowPayoutInfo(false);
+        read.cancel();
+      };
     }, [read, refresh]),
   );
   const data = state.data;
@@ -111,6 +119,7 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
     ? externalItemPresentation(data.item, data.offer, locale)
     : null;
   const amounts = data ? externalItemAmounts(data.item, data.offer) : [];
+  const payout = data && agreedItemPayout(data.item, data.offer, locale);
   return (
     <Screen
       topSafeArea={false}
@@ -151,10 +160,35 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
             <Text style={uiStyles.note}>{presentation.date}</Text>
           </View>
           <Card>
+            {payout?.congratulate ? (
+              <Text accessibilityRole="header" style={uiStyles.heading}>
+                {t.approvalGreeting}
+              </Text>
+            ) : null}
             {amounts.length ? (
               amounts.map((amount) => (
                 <View key={amount.label} style={{ gap: 4 }}>
-                  <Text style={uiStyles.label}>{t[amount.label]}</Text>
+                  {amount.label === "agreedAmount" && payout ? (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <Text style={[uiStyles.label, { flexShrink: 1 }]}>
+                        {t.agreedAmount}
+                      </Text>
+                      <IconButton
+                        label={t.payoutTitle}
+                        onPress={() => setShowPayoutInfo(true)}
+                      >
+                        <InfoIcon />
+                      </IconButton>
+                    </View>
+                  ) : (
+                    <Text style={uiStyles.label}>{t[amount.label]}</Text>
+                  )}
                   <Text selectable style={uiStyles.amount}>
                     {offerAmount(
                       amount.ore,
@@ -168,6 +202,17 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
               <Text style={uiStyles.note}>{t.noAmount}</Text>
             )}
           </Card>
+          {payout ? (
+            <DetailSheet
+              title={t.payoutTitle}
+              open={showPayoutInfo}
+              onClose={() => setShowPayoutInfo(false)}
+            >
+              <Text style={uiStyles.label}>{data.item.description}</Text>
+              <Text style={uiStyles.body}>{payout.message}</Text>
+              <Text style={uiStyles.note}>{t.fromBalance}</Text>
+            </DetailSheet>
+          ) : null}
           <View style={{ gap: 4 }}>
             <Text style={uiStyles.label}>{draft.condition}</Text>
             <Text style={uiStyles.body}>

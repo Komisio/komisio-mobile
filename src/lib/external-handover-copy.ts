@@ -11,7 +11,7 @@ const copy: Record<
   }
 > = {
   sv: {
-    due: "{amount} till ditt saldo när varan säljs, senast {date}.",
+    due: "Du får {amount} på ditt saldo när varan säljs, senast den {date}.",
     open: "Skicka varan",
     received: "Mottagen",
     cancelled: "Inlämning avbruten",
