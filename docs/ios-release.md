@@ -6,14 +6,17 @@ Use the existing **Komisio** App Store record, not **Komisio (Dev)**:
 
 | Setting           | Value                                  |
 | ----------------- | -------------------------------------- |
-| Apple app ID      | `6753813071`                           |
-| Bundle identifier | `com.inority.komisio`                  |
-| EAS owner / slug  | `chrillenilsson` / `komisio`           |
+| Apple app ID      | `6753813071`                            |
+| Bundle identifier | `com.inority.komisio`                   |
+| EAS slug          | `komisio`                              |
 | EAS project ID    | `aa98c8e5-440a-4860-92e1-829f6b3bc1a1` |
 | Release version   | `2.0.2`                                |
 
 The npm package and GitHub repository remain `komisio-mobile`. The Expo slug
 identifies the existing publishing project, not the source repository.
+Confirm the authorized owner in the EAS dashboard using the project ID. The
+explicit owner in app configuration remains bound to the existing publishing
+account until an organization transfer is separately verified.
 
 Apple approved version `2.0.0` and closed that release train. Build `56` was
 uploaded successfully but subsequently rejected with ITMS-90186 and ITMS-90062.
