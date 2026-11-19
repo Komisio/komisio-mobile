@@ -116,9 +116,14 @@ export function createAccountAuth(deps: {
     }
     return session;
   }
-  async function api(path: string, body?: object, token?: string) {
+  async function api(
+    path: string,
+    body?: object,
+    token?: string,
+    method = body ? "POST" : "GET",
+  ) {
     const r = await deps.request(`${deps.url}/auth/v1/${path}`, {
-      method: body ? "POST" : "GET",
+      method,
       redirect: "error",
       headers: {
         apikey: deps.key,
@@ -202,6 +207,55 @@ export function createAccountAuth(deps: {
     return p;
   }
   return {
+    // Financial endpoints require a confirmed primary email. Legacy accounts
+    // can verify one on their original Auth ID while keeping their seller history.
+    confirmPayoutEmail(owner: string, value: string, locale: string) {
+      return exclusive(async () => {
+        const session = await initiating(true);
+        if (!session || session.user.id !== owner)
+          throw new Error("AUTH_CHANGED");
+        const address = email(value);
+        const verified = await deps.auth.getUser(session.access_token);
+        if (
+          verified.error ||
+          verified.data.user?.id !== owner ||
+          (verified.data.user.email && verified.data.user.email_confirmed_at)
+        )
+          throw new Error("AUTH_CHANGED");
+        const redirect = new URL("/auth/callback", deps.portal);
+        redirect.searchParams.set("next", "/account");
+        redirect.searchParams.set("locale", locale === "da" ? "dk" : locale);
+        await same(owner);
+        const result = await api(
+          `user?redirect_to=${encodeURIComponent(redirect.href)}`,
+          { email: address },
+          session.access_token,
+          "PUT",
+        );
+        if (result.id !== owner) throw new Error("AUTH_CHANGED");
+        await same(owner);
+      });
+    },
+    refreshPayoutEmail(owner: string) {
+      return exclusive(async () => {
+        const session = await initiating(true);
+        if (!session || session.user.id !== owner)
+          throw new Error("AUTH_CHANGED");
+        const verified = await deps.auth.getUser(session.access_token);
+        if (verified.error || verified.data.user?.id !== owner)
+          throw new Error("AUTH_CHANGED");
+        if (!verified.data.user.email || !verified.data.user.email_confirmed_at)
+          return false;
+        await same(owner);
+        const updated = await deps.auth.refreshSession();
+        if (updated.error || updated.data.session?.user.id !== owner)
+          throw new Error("AUTH_CHANGED");
+        return Boolean(
+          updated.data.session.user.email &&
+          updated.data.session.user.email_confirmed_at,
+        );
+      });
+    },
     async providers() {
       const result = await api("settings");
       const external = result.external as Record<string, unknown> | undefined;

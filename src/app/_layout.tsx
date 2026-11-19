@@ -126,6 +126,17 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
         <Stack.Screen
+          name="central-money"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/(tabs)/items",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: "Komisio",
+          })}
+        />
+        <Stack.Screen
           name="external-item/[request]"
           options={({ navigation }) => ({
             ...detailHeaderOptions(

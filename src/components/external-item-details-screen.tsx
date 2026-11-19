@@ -9,6 +9,7 @@ import { createScopedRead } from "@/lib/scoped-read";
 import { externalRequestApi } from "@/lib/external-submission-runtime";
 import { externalOfferApi } from "@/lib/external-offer-runtime";
 import { externalItemDetailCopy } from "@/lib/external-item-detail-copy";
+import { centralPayoutCopy } from "@/lib/central-payout-copy";
 import { externalOfferCopy } from "@/lib/external-offer-copy";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
 import {
@@ -207,6 +208,19 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
               <Text style={uiStyles.note}>{t.noAmount}</Text>
             )}
           </Card>
+          {payout &&
+          (data.offer?.purchaseCreditedAt ||
+            data.offer?.guarantee?.creditedAt) ? (
+            <Button
+              label={centralPayoutCopy[locale].open}
+              onPress={() =>
+                router.push({
+                  pathname: "/central-money",
+                  params: { tenant: data.item.tenant_id },
+                })
+              }
+            />
+          ) : null}
           {payout ? (
             <DetailSheet
               title={t.payoutTitle}

@@ -7,7 +7,7 @@ import { useI18n } from "@/lib/i18n";
 import { colors } from "@/components/ui";
 import { TabIcon } from "@/components/brand";
 import { useSession } from "@/lib/session";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
+import { hasCentralIdentity, hasVerifiedEmail } from "@/lib/identity-gates";
 import { homeCopy } from "@/lib/home-copy";
 
 export const unstable_settings = { initialRouteName: "home" };
@@ -107,7 +107,11 @@ export default function TabsLayout() {
         name="money"
         options={{
           title: d.tabs.money,
-          href: storeViews ? undefined : null,
+          href:
+            storeViews ||
+            (!store && !mfaRequired && hasCentralIdentity(session?.user))
+              ? undefined
+              : null,
           tabBarButtonTestID: "tab-money",
           tabBarIcon: (props) => <TabIcon name="money" {...props} />,
         }}

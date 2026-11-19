@@ -43,7 +43,7 @@ function fixture() {
       signed = session(user);
       return { data: { session: signed }, error: null };
     },
-    refreshSession: async (original: Session) => {
+    refreshSession: async (original: Session = signed!) => {
       writes.push(`refresh:${original.access_token}`);
       signed = session(user);
       return { data: { session: signed }, error: null };
@@ -79,6 +79,8 @@ function fixture() {
       requests.push({ url, init });
       duringRequest?.();
       if (failure) return failure;
+      if (url.pathname === "/auth/v1/user" && init.method === "PUT")
+        return Response.json({ id: first });
       if (url.pathname.endsWith("/otp")) return Response.json({});
       if (url.pathname.endsWith("/settings"))
         return Response.json({ external: { apple: true, google: true } });
@@ -121,6 +123,53 @@ function fixture() {
 function callback(flow: { id: string; redirect: string }) {
   return `${flow.redirect}&code=provider-code`;
 }
+
+test("a central seller without a primary email confirms it on the original account", async () => {
+  const f = fixture();
+  f.changeResult({ email: "", email_confirmed_at: undefined });
+  f.signIn();
+  await f.api.confirmPayoutEmail(first, " Seller@Example.Test ", "sv");
+  const [{ init, url }] = f.requests;
+  assert.equal(init.method, "PUT");
+  assert.equal(url.pathname, "/auth/v1/user");
+  assert.equal(
+    new Headers(init.headers).get("Authorization"),
+    "Bearer original:" + first,
+  );
+  assert.deepEqual(JSON.parse(String(init.body)), {
+    email: "seller@example.test",
+  });
+  assert.equal(await f.api.refreshPayoutEmail(first), false);
+  assert.deepEqual(f.writes, []);
+  f.changeResult({
+    email: "seller@example.test",
+    email_confirmed_at: "2026-11-19",
+  });
+  f.signIn();
+  assert.equal(await f.api.refreshPayoutEmail(first), true);
+  assert.deepEqual(f.writes, ["refresh:original:" + first]);
+});
+test("central financial email confirmation rejects a different session, an existing primary email and missing MFA", async () => {
+  const f = fixture();
+  f.signIn();
+  await assert.rejects(
+    f.api.confirmPayoutEmail(first, "new@example.test", "en"),
+    /AUTH_CHANGED/,
+  );
+  f.changeResult({ email: "", email_confirmed_at: undefined });
+  f.signIn(other);
+  await assert.rejects(
+    f.api.confirmPayoutEmail(first, "new@example.test", "en"),
+    /AUTH_CHANGED/,
+  );
+  f.signIn();
+  f.blockMfa();
+  await assert.rejects(
+    f.api.confirmPayoutEmail(first, "new@example.test", "en"),
+    /MFA_REQUIRED/,
+  );
+  assert.deepEqual(f.requests, []);
+});
 
 test("email registration is store-independent and accepts only the verified requested address", async () => {
   const f = fixture(),
