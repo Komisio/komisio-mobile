@@ -47,53 +47,34 @@ export function ProfileScreen() {
       {!session ? (
         <LoginOptions />
       ) : (
-        <>
-          <Card>
-            <View style={styles.account}>
-              <View style={styles.identity}>
-                <SettingIcon
-                  source={require("../../assets/icons/profile.svg")}
-                />
-                <View style={styles.identityText}>
-                  <Text style={styles.caption}>
-                    {identity
-                      ? d.profile.signedInAs
-                      : accountAuthCopy(locale).methods}
-                  </Text>
-                  <Text selectable style={styles.email}>
-                    {identity ?? accountAuthCopy(locale).needsIdentity}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.logout}>
-                <Button
-                  label={d.account.logout}
-                  variant="text"
-                  busy={busy}
-                  onPress={() => void logout()}
-                />
+        <Card>
+          <View style={styles.account}>
+            <View style={styles.identity}>
+              <SettingIcon source={require("../../assets/icons/profile.svg")} />
+              <View style={styles.identityText}>
+                <Text style={styles.caption}>
+                  {identity
+                    ? d.profile.signedInAs
+                    : accountAuthCopy(locale).methods}
+                </Text>
+                <Text selectable style={styles.email}>
+                  {identity ?? accountAuthCopy(locale).needsIdentity}
+                </Text>
               </View>
             </View>
-            {failed ? (
-              <Message tone="error">{d.profile.logoutFailed}</Message>
-            ) : null}
-          </Card>
-          <NavigationRow
-            label={accountAuthCopy(locale).methods}
-            onPress={() => router.push("/account-methods")}
-          />
-          <NavigationRow
-            label={pushCopy[locale].title}
-            onPress={() => router.push("/notifications")}
-          />
-          {identity ? (
-            <CentralShippingAddress
-              key={session.user.id}
-              user={session.user.id}
-              hideUnavailable
-            />
+            <View style={styles.logout}>
+              <Button
+                label={d.account.logout}
+                variant="text"
+                busy={busy}
+                onPress={() => void logout()}
+              />
+            </View>
+          </View>
+          {failed ? (
+            <Message tone="error">{d.profile.logoutFailed}</Message>
           ) : null}
-        </>
+        </Card>
       )}
       <Card>
         <Text style={styles.caption}>
@@ -114,6 +95,25 @@ export function ProfileScreen() {
           onPress={() => router.push("/home/stores")}
         />
       </Card>
+      {session ? (
+        <>
+          <NavigationRow
+            label={accountAuthCopy(locale).methods}
+            onPress={() => router.push("/account-methods")}
+          />
+          <NavigationRow
+            label={pushCopy[locale].title}
+            onPress={() => router.push("/notifications")}
+          />
+          {identity ? (
+            <CentralShippingAddress
+              key={session.user.id}
+              user={session.user.id}
+              hideUnavailable
+            />
+          ) : null}
+        </>
+      ) : null}
       <View style={styles.group}>
         <SettingRow
           label={d.language}

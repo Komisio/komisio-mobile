@@ -154,9 +154,9 @@ test("profile exposes one store action, language detail, financial links and log
   await Promise.resolve();
   assert.deepEqual(actions, [
     "/language",
+    "/store-info",
     "/account-methods",
     "/notifications",
-    "/store-info",
     "/bank-account",
     "/agreement",
     "/account-deletion",
