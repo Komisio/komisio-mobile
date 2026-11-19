@@ -286,7 +286,7 @@ export default {
     automatic:
       "Das Geschäft wendet geplante Preissenkungen automatisch an. Der Plan kann sich ändern.",
     manual:
-      "Das Geschäft muss die Preissenkung durchführen. Der geplante Preis gilt erst nach der Erfassung.",
+      "Der geplante Preis gilt erst nach der Erfassung.",
     facts: "Artikelinformationen",
     missingDate: "Datum nicht verfügbar",
   },

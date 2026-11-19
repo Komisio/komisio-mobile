@@ -15,6 +15,7 @@ import {
   sellerItemDate,
   sellerItemPrice,
   sellerItemStatus,
+  sellerItemTone,
   type SellerItemDetail,
 } from "@/lib/seller-items";
 import { useSession } from "@/lib/session";
@@ -113,12 +114,7 @@ function ItemRead({
             {item.title ?? t.untitled}
           </Text>
           {item.category && <Text style={styles.muted}>{item.category}</Text>}
-          <StatusBadge
-            tone={item.stage === "sold" ? "positive" : "neutral"}
-            attention={
-              item.stage === "period_ending" || item.stage === "period_ended"
-            }
-          >
+          <StatusBadge tone={sellerItemTone(item)}>
             {t.statuses[sellerItemStatus(item)]}
           </StatusBadge>
           <Text style={styles.muted}>

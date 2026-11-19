@@ -279,7 +279,7 @@ export default {
     automatic:
       "Il negozio applica automaticamente i ribassi previsti. Il piano può cambiare.",
     manual:
-      "Il negozio deve applicare il ribasso. Il prezzo previsto entra in vigore solo dopo la registrazione.",
+      "Il prezzo previsto entra in vigore solo dopo la registrazione.",
     facts: "Informazioni sull'articolo",
     missingDate: "Data non disponibile",
   },

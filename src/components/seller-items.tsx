@@ -10,12 +10,12 @@ import {
   sellerItemDate,
   sellerItemPrice,
   sellerItemStatus,
+  sellerItemTone,
   type ItemFilter,
   type SellerItem,
 } from "@/lib/seller-items";
 import { useI18n } from "@/lib/i18n";
 import { DetailSheet } from "./detail-sheet";
-import { PhotoDraftEntry } from "./photo-draft-entry";
 import {
   Button,
   colors,
@@ -32,9 +32,11 @@ import {
 export function SellerItems({
   tenant,
   seller,
+  storeName,
 }: {
   tenant: string;
   seller: string;
+  storeName: string;
 }) {
   const { d, locale } = useI18n();
   const t = d.items;
@@ -83,8 +85,7 @@ export function SellerItems({
   };
   const header = (
     <View style={styles.header}>
-      <PageHeading title={t.title} />
-      <PhotoDraftEntry />
+      <PageHeading title={t.title} intro={storeName} />
       <View style={styles.searchRow}>
         <View style={styles.search}>
           <Field
@@ -180,13 +181,7 @@ export function SellerItems({
                 {item.category ? ` · ${item.category}` : ""}
               </Text>
               <View style={styles.itemMeta}>
-                <StatusBadge
-                  tone={item.stage === "sold" ? "positive" : "neutral"}
-                  attention={
-                    item.stage === "period_ending" ||
-                    item.stage === "period_ended"
-                  }
-                >
+                <StatusBadge tone={sellerItemTone(item)}>
                   {t.statuses[sellerItemStatus(item)]}
                 </StatusBadge>
                 <Text style={styles.date}>

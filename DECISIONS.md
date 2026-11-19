@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-19: Store item views identify the selected store and omit central-intake shortcuts. List/detail badges share tones based on seller-visible status; pending staff markdowns remain for sale at the recorded price. Shorten manual-price copy without changing price rules (#113).
+
 - 2026-11-19: Central item rows open owner-scoped details with description, labelled amounts and native photo paging. Move offer/shipping/withdrawal actions into details. Reuse private short-lived photos without persistent caching or new native dependencies (#110).
 
 - 2026-11-19: Request reads retain the server's seller-amount basis when validating fixed-price rows. Preserve legacy offer reads and frozen agreement/amount validation so saved submissions and retries remain readable without resending (#108).

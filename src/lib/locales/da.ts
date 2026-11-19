@@ -277,7 +277,7 @@ export default {
     automatic:
       "Butikken gennemfører planlagte prisnedsættelser automatisk. Planen kan ændres.",
     manual:
-      "Butikken skal gennemføre prisnedsættelsen. Den planlagte pris gælder først, når den er registreret.",
+      "Den planlagte pris gælder først, når den er registreret.",
     facts: "Vareoplysninger",
     missingDate: "Dato mangler",
   },
