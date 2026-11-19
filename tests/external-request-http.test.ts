@@ -86,6 +86,59 @@ test("lookup fails closed on a different request or an incomplete page", async (
   f.reply(200, { activeCount: 1, hasMore: true, requests: [row] });
   await assert.rejects(f.api.lookup(id(1)), /SUBMISSION_UNAVAILABLE/);
 });
+
+test("fixed-price requests load by ID and alongside legacy offer requests", async () => {
+  const f = fixture();
+  const fixed = {
+    ...row,
+    sender_country: "SE",
+    price_basis: "seller_amount",
+    approval_mode: "fixed",
+    agreement_version_id: id(6),
+    lifecycleStatus: "waiting",
+    active: true,
+    canWithdraw: true,
+  };
+  f.reply(200, { activeCount: 1, hasMore: false, requests: [fixed] });
+  assert.deepEqual(await f.api.lookup(row.id), fixed);
+  const legacy = {
+    ...row,
+    id: id(7),
+    sender_country: null,
+    price_basis: "resale",
+    approval_mode: "offer",
+    agreement_version_id: null,
+  };
+  f.reply(200, { activeCount: 2, hasMore: false, requests: [fixed, legacy] });
+  assert.deepEqual((await f.api.list()).requests, [fixed, legacy]);
+});
+
+test("fixed-price reads still reject missing or inconsistent price and agreement evidence", () => {
+  const fixed = {
+    ...row,
+    price_basis: "seller_amount",
+    approval_mode: "fixed",
+    agreement_version_id: id(6),
+  };
+  for (const patch of [
+    { price_basis: undefined },
+    { price_basis: "resale" },
+    { price_basis: "unexpected" },
+    { agreement_version_id: null },
+    { agreement_version_id: undefined },
+    { agreement_version_id: "invalid" },
+    { desired_price_ore: null },
+    { desired_price_ore: "0" },
+    { desired_price_ore: "150.00" },
+  ])
+    assert.throws(() =>
+      parseExternalPage({
+        activeCount: 1,
+        hasMore: false,
+        requests: [{ ...fixed, ...patch }],
+      }),
+    );
+});
 test("upload requires an exact photo receipt and bounded bytes", async () => {
   const f = fixture();
   f.reply(200, { id: id(3) });

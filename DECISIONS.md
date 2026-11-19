@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-19: Request reads retain the server's seller-amount basis when validating fixed-price rows. Preserve legacy offer reads and frozen agreement/amount validation so saved submissions and retries remain readable without resending (#108).
+
 - 2026-11-18: Central navigation recognizes verified linked Apple/Google email on the same Auth identity when primary email is absent. Ordinary store email gates and session-switch safeguards remain. Profile always identifies the current sign-in (#106).
 - 2026-11-18: Photo suggestions may run before login through bounded guest AI. Keep capability and retries bound to the local draft, images and backend; authenticate before submission. Guest analysis never creates an account or request (#106).
 

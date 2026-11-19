@@ -10,10 +10,62 @@ import {
   type ExternalOutboxStorage,
 } from "../src/lib/external-submission.ts";
 import type { ItemDraftSnapshot } from "../src/lib/photo-draft.ts";
+import { createExternalRequestApi } from "../src/lib/external-request-http.ts";
 const id = (n: number) =>
   `f6200000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const ownerId = id(1),
   binding = "synthetic project and endpoint";
+
+test("fixed-price submission survives a lost HTTP response and remains readable without resending", async () => {
+  const f = fixture();
+  let persisted: ExternalRequest | null = null;
+  let uploads = 0;
+  let submissions = 0;
+  const api = createExternalRequestApi({
+    ownerId,
+    endpoint: "https://app.example.invalid/api/mobile/v1/external-items",
+    session: async () => ({ user: ownerId, token: "synthetic-token" }),
+    request: async (url, init) => {
+      const reply = (body: unknown) => ({
+        status: 200,
+        text: async () => JSON.stringify(body),
+      });
+      if (url.includes("/photos?")) {
+        uploads++;
+        return reply({ id: new URL(url).searchParams.get("photoId") });
+      }
+      const command = JSON.parse(String(init.body));
+      if (command.action === "list")
+        return reply({
+          activeCount: persisted ? 1 : 0,
+          activeLimit: 30,
+          hasMore: false,
+          requests: persisted ? [persisted] : [],
+        });
+      assert.equal(command.action, "submit");
+      submissions++;
+      persisted = row(command);
+      throw Error("lost HTTP response after commit");
+    },
+  });
+  const controller = createExternalSubmission({ ...f.deps, api });
+  const attempt = await controller.prepare(snapshot(), "SE", id(950));
+  await assert.rejects(controller.resume(), /lost HTTP response/);
+  assert.equal(f.read().state, "pending");
+  const restarted = createExternalSubmission({ ...f.deps, api });
+  const result = await restarted.resume();
+  assert.equal(result.state, "complete");
+  assert.equal(result.command.requestId, attempt.command.requestId);
+  assert.equal(submissions, 1);
+  assert.equal(uploads, 1);
+  assert.equal(f.finished.length, 1);
+  assert.equal(f.finished[0].preserve, false);
+  assert.equal(
+    (await api.lookup(attempt.command.requestId))?.desired_price_ore,
+    "10050",
+  );
+  assert.equal((await api.list()).requests[0].agreement_version_id, id(950));
+});
 
 test("new submissions require an amount and the displayed agreement before preparing uploads", async () => {
   const f = fixture();

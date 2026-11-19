@@ -56,6 +56,9 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       throw new Error("SUBMISSION_UNAVAILABLE");
     const command = parseExternalCommand({
       senderCountry: row.sender_country ?? undefined,
+      ...(row.price_basis === "seller_amount"
+        ? { priceBasis: "seller_amount" }
+        : {}),
       ...(row.approval_mode === "fixed"
         ? {
             approvalMode: "fixed",
