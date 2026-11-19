@@ -9,11 +9,13 @@ export function SellerGate({
   title,
   bottomSafeArea = true,
   topSafeArea = true,
+  missing,
 }: {
   children: ReactNode;
   title: string;
   bottomSafeArea?: boolean;
   topSafeArea?: boolean;
+  missing?: ReactNode;
 }) {
   const { account, store, retryAccount } = useSession();
   const { d } = useI18n();
@@ -29,6 +31,7 @@ export function SellerGate({
         <Button label={d.retry} onPress={retryAccount} />
       </Screen>
     );
+  if (!account && missing) return missing;
   if (!account)
     return (
       <Screen

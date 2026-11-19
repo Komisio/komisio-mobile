@@ -36,6 +36,7 @@ test("sign-in resumes only a known photo step; a contact phone never authorizes 
   assert.equal(accountReturnPath("photo-details"), "/photo-details");
   assert.equal(accountReturnPath("photo-review"), "/photo-review");
   assert.equal(accountReturnPath("external-items"), "/external-items");
+  assert.equal(accountReturnPath("items"), "/(tabs)/items");
   for (const path of [
     "https://evil.test",
     "//evil.test",

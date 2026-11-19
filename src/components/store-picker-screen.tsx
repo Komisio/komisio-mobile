@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
 import { useSession, type AppStore } from "@/lib/session";
 import { LanguagePicker } from "@/components/language-picker";
-import { hasVerifiedEmail } from "@/lib/identity-gates";
 import {
   Button,
   NavigationRow,
@@ -18,8 +17,7 @@ import {
 // S01: stores that chose to appear in the app (public_app_stores).
 export default function ChooseStore() {
   const { d } = useI18n();
-  const { chooseStore, session } = useSession();
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+  const { chooseStore } = useSession();
   const [stores, setStores] = useState<AppStore[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [query, setQuery] = useState("");
@@ -84,13 +82,7 @@ export default function ChooseStore() {
                 label={s.name}
                 onPress={() => {
                   chooseStore(s);
-                  if (returnTo === "items" && hasVerifiedEmail(session?.user)) {
-                    router.dismissTo("/(tabs)/items");
-                    return;
-                  }
-                  router.push(
-                    hasVerifiedEmail(session?.user) ? "/home/shop" : "/login",
-                  );
+                  router.dismissTo("/(tabs)/items");
                 }}
               />
             ))}

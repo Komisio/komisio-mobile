@@ -1,3 +1,5 @@
+- 2026-11-19: The app focuses on each seller's own items. Store selection goes to My items; former catalogue routes redirect there. Guests and missing seller accounts see published store information and registration guidance. Keep tenant/MFA gates, central switching and the portal unchanged (#117).
+
 # Decisions
 
 - 2026-11-19: My items follows the active store, with an explicit Komisio/store selector. Central links select Komisio instead of retaining a source query override. Remember the previous store for switching back; preserve account and tenant gates (#115).
