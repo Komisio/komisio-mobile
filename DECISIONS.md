@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-19: Central item rows open owner-scoped details with description, labelled amounts and native photo paging. Move offer/shipping/withdrawal actions into details. Reuse private short-lived photos without persistent caching or new native dependencies (#110).
+
 - 2026-11-19: Request reads retain the server's seller-amount basis when validating fixed-price rows. Preserve legacy offer reads and frozen agreement/amount validation so saved submissions and retries remain readable without resending (#108).
 
 - 2026-11-18: Central navigation recognizes verified linked Apple/Google email on the same Auth identity when primary email is absent. Ordinary store email gates and session-switch safeguards remain. Profile always identifies the current sign-in (#106).

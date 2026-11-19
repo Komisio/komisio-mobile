@@ -14,6 +14,7 @@ import { itemDraftCopy } from "@/lib/item-draft-copy";
 import { externalSubmissionCopy } from "@/lib/external-submission-copy";
 import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { externalOfferCopy } from "@/lib/external-offer-copy";
+import { externalItemDetailCopy } from "@/lib/external-item-detail-copy";
 import { externalOnboardingCopy } from "@/lib/external-onboarding-copy";
 import { photoFlowCopy } from "@/lib/photo-flow-copy";
 
@@ -119,6 +120,17 @@ function Routes() {
       </Stack.Protected>
 
       <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
+        <Stack.Screen
+          name="external-item/[request]"
+          options={({ navigation }) => ({
+            ...detailHeaderOptions(
+              "/external-items",
+              d.close,
+              navigation.canGoBack(),
+            ),
+            title: externalItemDetailCopy(locale).title,
+          })}
+        />
         <Stack.Screen
           name="account-deletion"
           options={({ navigation }) =>

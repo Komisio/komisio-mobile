@@ -233,6 +233,9 @@ test("native back is preserved with history; direct links retain an accessible e
 
 test("all detail routes configure back navigation with their own fallback", () => {
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/external-item-detail-copy": {
+      externalItemDetailCopy: () => ({ title: "About the item" }),
+    },
     "@/lib/external-onboarding-copy": {
       externalOnboardingCopy: () => ({ title: "Account" }),
     },
@@ -315,6 +318,7 @@ test("all detail routes configure back navigation with their own fallback", () =
     "catalogue/[tenant]/[item]": "/(tabs)",
     "store-info": "/(tabs)",
     "my-items/[tenant]/[item]": "/(tabs)/items",
+    "external-item/[request]": "/external-items",
     language: "/(tabs)/profile",
     notifications: "/(tabs)/profile",
     "account-methods": "/(tabs)/profile",
@@ -340,6 +344,9 @@ test("all detail routes configure back navigation with their own fallback", () =
 test("photo drafts are available in the signed app while preserving login, MFA and seller guards", () => {
   let state: Record<string, unknown> = { ready: true };
   const layout = compile("../src/app/_layout.tsx", {
+    "@/lib/external-item-detail-copy": {
+      externalItemDetailCopy: () => ({ title: "About the item" }),
+    },
     "@/lib/external-onboarding-copy": {
       externalOnboardingCopy: () => ({ title: "Account" }),
     },
@@ -432,7 +439,8 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 22);
+  assert.equal(routes().length, 23);
+  assert.ok(routes().includes("external-item/[request]"));
   assert.ok(routes().includes("account-deletion"));
   assert.ok(routes().includes("(tabs)"));
   assert.ok(routes().includes("photo-draft"));
@@ -453,6 +461,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "account-auth",
     "login",
     "language",
+    "external-item/[request]",
     "account-deletion",
     "account-methods",
     "notifications",

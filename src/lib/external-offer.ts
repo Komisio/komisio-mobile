@@ -201,7 +201,7 @@ export function offerResponseOutcome(
       : "UNKNOWN",
   };
 }
-export function offerAmount(ore: string, locale: string) {
+export function offerAmount(ore: string, locale: string, currency = "SEK") {
   if (!/^[1-9]\d{0,10}$/.test(ore)) invalid();
   const minor = BigInt(ore),
     fraction = minor % 100n;
@@ -210,7 +210,7 @@ export function offerAmount(ore: string, locale: string) {
   const formatter = new Intl.NumberFormat(locale);
   const whole = formatter.format(Number(minor / 100n));
   const decimal = formatter.format(1.1).replace(/[0-9]/g, "");
-  return `${whole}${fraction ? decimal + String(fraction).padStart(2, "0") : ""} ${locale.startsWith("sv") ? "kr" : "SEK"}`;
+  return `${whole}${fraction ? decimal + String(fraction).padStart(2, "0") : ""} ${currency === "SEK" && locale.startsWith("sv") ? "kr" : currency}`;
 }
 /** Server time plus elapsed monotonic time; a wrong device clock cannot extend an offer. */
 export function offerIsExpired(offer: ExternalOffer, elapsedMs: number) {
