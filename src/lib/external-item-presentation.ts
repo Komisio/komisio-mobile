@@ -45,7 +45,10 @@ export function externalItemPresentation(
               ? h[offer.handover.status]
               : offer
                 ? offer.status === "offered"
-                  ? o.offerBadge.replace(
+                  ? (offer.alternativeNote != null
+                      ? o.alternativeBadge
+                      : o.offerBadge
+                    ).replace(
                       "{amount}",
                       offerAmount(
                         offer.sellerAmountOre,

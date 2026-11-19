@@ -105,9 +105,16 @@ function Offer({ user, id }: { user: string; id: string }) {
       };
     }, [read, writer, reload]),
   );
-  async function finish(work: Promise<void>) {
+  async function finish(work: Promise<void>, showShipping = false) {
     await work;
     const state = writer.getState();
+    if (state.status === "success" && showShipping) {
+      router.replace({
+        pathname: "/external-onboarding/[offer]",
+        params: { offer: id },
+      });
+      return;
+    }
     if (state.status === "success" || state.status === "conflict") reload();
     if (
       ["AUTH_REQUIRED", "MFA_REQUIRED", "PASSWORD_UPDATE_REQUIRED"].includes(
@@ -144,18 +151,19 @@ function Offer({ user, id }: { user: string; id: string }) {
       !ready ||
       busy ||
       pending ||
-      accepted ||
+      (accepted && (o.alternativeNote == null || !o.canAccept || expired)) ||
       (!accepted && !o.canDecline)
     )
       return;
     void finish(
       writer.submit({
-        action: "respond",
+        action: accepted ? "acceptAlternative" : "respond",
         requestId: randomUUID(),
         offerId: o.id,
         accepted,
         agreementVersionId: accepted ? o.agreementVersionId : null,
       }),
+      accepted,
     );
   };
   return (
@@ -191,9 +199,11 @@ function Offer({ user, id }: { user: string; id: string }) {
             </View>
           </View>
           <Text accessibilityRole="header" style={uiStyles.heading}>
-            {o.status === "offered" && !expired
-              ? externalItemDetailCopy(locale).approvalGreeting
-              : t.heading}
+            {o.alternativeNote != null
+              ? t.alternativeHeading
+              : o.status === "offered" && !expired
+                ? externalItemDetailCopy(locale).approvalGreeting
+                : t.heading}
           </Text>
           <View
             style={[
@@ -230,6 +240,26 @@ function Offer({ user, id }: { user: string; id: string }) {
               </Text>
             ) : null}
           </View>
+          {o.alternativeNote != null ? (
+            <View style={{ gap: 6 }}>
+              {data.item.desired_price_ore ? (
+                <Text style={uiStyles.body}>
+                  {t.alternativeOriginal.replace(
+                    "{amount}",
+                    offerAmount(
+                      data.item.desired_price_ore,
+                      formattingLocale(locale),
+                    ),
+                  )}
+                </Text>
+              ) : null}
+              {o.alternativeNote ? (
+                <Text selectable style={uiStyles.body}>
+                  {o.alternativeNote}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
           {o.staffSelectsMethod && !o.saleMethod ? (
             <Card>
               <Text style={uiStyles.body}>
@@ -305,7 +335,12 @@ function Offer({ user, id }: { user: string; id: string }) {
               <Button
                 label={d.retry}
                 busy={busy}
-                onPress={() => void finish(writer.retry())}
+                onPress={() =>
+                  void finish(
+                    writer.retry(),
+                    change.command?.action === "acceptAlternative",
+                  )
+                }
               />
             </>
           ) : null}
@@ -328,14 +363,16 @@ function Offer({ user, id }: { user: string; id: string }) {
           ) : null}
           {o.canAccept && !expired && !pending ? (
             <Button
-              label={t.yes}
+              label={o.alternativeNote != null ? t.acceptAndBook : t.yes}
               busy={busy}
               disabled={!ready}
               onPress={() =>
-                router.push({
-                  pathname: "/external-onboarding/[offer]",
-                  params: { offer: o.id },
-                })
+                o.alternativeNote != null
+                  ? send(true)
+                  : router.push({
+                      pathname: "/external-onboarding/[offer]",
+                      params: { offer: o.id },
+                    })
               }
             />
           ) : null}
