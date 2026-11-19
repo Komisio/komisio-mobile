@@ -1,5 +1,10 @@
 import type { ItemDraftSnapshot, DraftRevision } from "./photo-draft.ts";
-import { itemDetailsErrors, requestedPriceOre } from "./item-draft-details.ts";
+import {
+  isSaleMethod,
+  itemDetailsErrors,
+  requestedPriceOre,
+  type SaleMethod,
+} from "./item-draft-details.ts";
 import type { CommandLock } from "./pending-command.ts";
 import type { GuestAnalysisProof } from "./guest-photo-analysis.ts";
 
@@ -17,6 +22,7 @@ export type ExternalItemCommand = {
   senderCountry?: "SE";
   priceBasis?: "seller_amount";
   approvalMode?: "fixed";
+  saleMethod?: SaleMethod;
   agreementVersionId?: string;
   guestAnalysis?: GuestAnalysisProof;
 };
@@ -67,6 +73,7 @@ export type ExternalRequest = {
   desired_price_ore: string | null;
   price_basis?: "resale" | "seller_amount";
   approval_mode?: "offer" | "fixed";
+  sale_method?: SaleMethod;
   agreement_version_id?: string | null;
   currency: string;
   photos: string[];
@@ -103,6 +110,8 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
         !identifier(c.guestAnalysis.id) ||
         typeof c.guestAnalysis.token !== "string" ||
         !/^[a-f0-9]{64}$/.test(c.guestAnalysis.token))) ||
+    (c.saleMethod !== undefined &&
+      (c.approvalMode !== "fixed" || !isSaleMethod(c.saleMethod))) ||
     (c.approvalMode !== undefined && c.approvalMode !== "fixed") ||
     (c.approvalMode === "fixed" &&
       (!identifier(c.agreementVersionId) ||
@@ -148,6 +157,7 @@ export function parseExternalCommand(value: unknown): ExternalItemCommand {
     ...(c.approvalMode
       ? {
           approvalMode: c.approvalMode,
+          ...(c.saleMethod ? { saleMethod: c.saleMethod } : {}),
           agreementVersionId: c.agreementVersionId,
         }
       : {}),
@@ -203,6 +213,8 @@ export function requestMatches(
     request.desired_price_ore === c.desiredPriceOre &&
     (request.price_basis ?? "resale") === (c.priceBasis ?? "resale") &&
     (request.approval_mode ?? "offer") === (c.approvalMode ?? "offer") &&
+    (request.sale_method ?? "consignment") ===
+      (c.saleMethod ?? "consignment") &&
     (c.approvalMode !== "fixed" ||
       request.agreement_version_id === c.agreementVersionId) &&
     request.currency === c.currency &&
@@ -337,6 +349,7 @@ export function createExternalSubmission(deps: {
           senderCountry,
           priceBasis: "seller_amount",
           approvalMode: "fixed",
+          saleMethod: draft.details.saleMethod,
           agreementVersionId,
           ...(guestAnalysis ? { guestAnalysis } : {}),
           action: "submit",

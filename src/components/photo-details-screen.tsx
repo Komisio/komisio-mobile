@@ -21,6 +21,7 @@ import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import {
   emptyItemDetails,
   itemConditions,
+  saleMethods,
   itemDetailsErrors,
   type ItemDraftDetails,
 } from "@/lib/item-draft-details";
@@ -170,6 +171,7 @@ export function PhotoDetailsScreen() {
     description: t.requiredDescription,
     condition: t.requiredCondition,
     desiredSellerAmount: t.invalidPrice,
+    saleMethod: t.chooseMethod,
   };
   return (
     <Screen topSafeArea={false} keyboardInsets>
@@ -279,6 +281,28 @@ export function PhotoDetailsScreen() {
         <Text style={uiStyles.note}>
           {externalLifecycleCopy(locale).minimumGuidance}
         </Text>
+      </View>
+      <View
+        style={{ gap: 10 }}
+        accessibilityRole="radiogroup"
+        accessibilityLabel={t.methodTitle}
+      >
+        <Text style={uiStyles.label}>{t.methodTitle}</Text>
+        {saleMethods.map((method) => (
+          <Choice
+            key={method}
+            role="radio"
+            listRow
+            label={t[method]}
+            hint={
+              method === "direct_purchase" ? t.directHint : t.consignmentHint
+            }
+            selected={values.saleMethod === method}
+            disabled={busy}
+            onPress={() => change("saleMethod", method)}
+          />
+        ))}
+        <Text style={uiStyles.note}>{t.decisionBeforeShipping}</Text>
       </View>
       {issues.length ? (
         <Message tone="error">

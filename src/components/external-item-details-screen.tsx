@@ -162,8 +162,13 @@ function ItemDetails({ owner, id }: { owner: string; id: string }) {
           <Card>
             {payout?.congratulate ? (
               <Text accessibilityRole="header" style={uiStyles.heading}>
-                {t.approvalGreeting}
+                {data.item.sale_method === "direct_purchase"
+                  ? t.directApproval
+                  : t.approvalGreeting}
               </Text>
+            ) : null}
+            {data.item.sale_method && data.item.approval_mode === "fixed" ? (
+              <Text style={uiStyles.body}>{t[data.item.sale_method]}</Text>
             ) : null}
             {amounts.length ? (
               amounts.map((amount) => (

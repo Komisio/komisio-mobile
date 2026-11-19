@@ -1,3 +1,4 @@
+import { centralSaleMethodCopy } from "./central-sale-method-copy.ts";
 import type { Locale } from "./locale";
 
 const sv = {
@@ -187,6 +188,7 @@ const copies: Record<Locale, Copy> = {
     swipePhotos: "Scorri lateralmente per vedere altre foto.",
   },
 };
-export function externalItemDetailCopy(locale: Locale): Copy {
-  return copies[locale];
+
+export function externalItemDetailCopy(locale: Locale) {
+  return { ...copies[locale], ...centralSaleMethodCopy(locale) };
 }

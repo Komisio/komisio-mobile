@@ -1,5 +1,6 @@
 import { fixedIntakeCopy } from "./fixed-intake-copy.ts";
 import { centralIntakeCopy } from "./central-intake-copy.ts";
+import { centralSaleMethodCopy } from "./central-sale-method-copy.ts";
 import type { Locale } from "./locale";
 import type { ItemCondition } from "./item-draft-details";
 const sv = {
@@ -420,10 +421,12 @@ const copies: Record<Locale, Copy> = {
     },
   },
 };
-export function itemDraftCopy(locale: Locale): Copy {
+
+export function itemDraftCopy(locale: Locale) {
   const c = centralIntakeCopy(locale);
   return {
     ...copies[locale],
+    ...centralSaleMethodCopy(locale),
     storeTitle: c.title,
     storeIntro: c.intro,
     storeEmpty: c.unavailable,

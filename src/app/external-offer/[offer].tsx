@@ -220,28 +220,41 @@ function Offer({ user, id }: { user: string; id: string }) {
             >
               {amount}
             </Text>
-            <Text style={[uiStyles.note, { color: colors.onBrandMuted }]}>
-              {t.planned.replace(
-                "{amount}",
-                offerAmount(o.expectedSalePriceOre, formattingLocale(locale)),
-              )}
-            </Text>
+            {o.saleMethod !== "direct_purchase" ? (
+              <Text style={[uiStyles.note, { color: colors.onBrandMuted }]}>
+                {t.planned.replace(
+                  "{amount}",
+                  offerAmount(o.expectedSalePriceOre, formattingLocale(locale)),
+                )}
+              </Text>
+            ) : null}
           </View>
-          <Card>
-            <View style={{ gap: 6 }}>
-              <StatusBadge>{t.sold}</StatusBadge>
-              <Text style={uiStyles.body}>
-                {t.soldText.replace("{amount}", amount)}
+          {o.saleMethod === "direct_purchase" ? (
+            <Card>
+              <Text style={uiStyles.label}>
+                {externalItemDetailCopy(locale).direct_purchase}
               </Text>
-            </View>
-            <View style={{ gap: 6 }}>
-              <StatusBadge tone="neutral">{t.day45}</StatusBadge>
               <Text style={uiStyles.body}>
-                {t.day45Text.replace("{amount}", amount)}
+                {externalItemDetailCopy(locale).directHint}
               </Text>
-            </View>
-            <Text style={uiStyles.note}>{t.fixed}</Text>
-          </Card>
+            </Card>
+          ) : (
+            <Card>
+              <View style={{ gap: 6 }}>
+                <StatusBadge>{t.sold}</StatusBadge>
+                <Text style={uiStyles.body}>
+                  {t.soldText.replace("{amount}", amount)}
+                </Text>
+              </View>
+              <View style={{ gap: 6 }}>
+                <StatusBadge tone="neutral">{t.day45}</StatusBadge>
+                <Text style={uiStyles.body}>
+                  {t.day45Text.replace("{amount}", amount)}
+                </Text>
+              </View>
+              <Text style={uiStyles.note}>{t.fixed}</Text>
+            </Card>
+          )}
           {o.status === "accepted" ? (
             <>
               <StatusBadge>

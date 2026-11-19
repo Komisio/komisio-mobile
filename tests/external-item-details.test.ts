@@ -349,6 +349,18 @@ test("payout dates follow this guarantee and credit evidence in Swedish time", (
       record,
       "sv",
     )!;
+  const direct: ExternalOffer = {
+    ...received,
+    saleMethod: "direct_purchase",
+    guarantee: null,
+  };
+  assert.equal(payout("received", direct).message, t.directHint);
+  assert.equal(
+    payout("acquired", { ...direct, purchaseCreditedAt: dueAt }).message,
+    t.credited
+      .replace("{amount}", "600 kr")
+      .replace("{date}", "29 december 2026"),
+  );
   const pending = payout("registered", received);
   assert.match(pending.message, /600 kr.*29 december 2026/);
   assert.equal(pending.congratulate, false);

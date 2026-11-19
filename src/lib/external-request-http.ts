@@ -62,6 +62,7 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       ...(row.approval_mode === "fixed"
         ? {
             approvalMode: "fixed",
+            saleMethod: row.sale_method,
             agreementVersionId: row.agreement_version_id,
           }
         : {}),
@@ -100,6 +101,11 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
           (row.canWithdraw &&
             (row.lifecycleStatus !== "waiting" || row.active !== true)))) ||
       typeof row.store_name !== "string" ||
+      (row.sale_method !== undefined &&
+        row.sale_method !== "consignment" &&
+        !(
+          row.sale_method === "direct_purchase" && row.approval_mode === "fixed"
+        )) ||
       (row.approval_mode !== undefined &&
         !["offer", "fixed"].includes(row.approval_mode)) ||
       (row.price_basis !== undefined &&
@@ -122,6 +128,7 @@ export function parseExternalPage(value: unknown): ExternalRequestPage {
       brand: command.brand,
       condition: command.condition,
       notes: command.notes,
+      ...(row.sale_method ? { sale_method: row.sale_method } : {}),
       desired_price_ore: command.desiredPriceOre,
       ...(row.price_basis ? { price_basis: row.price_basis } : {}),
       ...(row.approval_mode
