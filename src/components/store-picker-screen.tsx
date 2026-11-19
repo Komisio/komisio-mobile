@@ -82,7 +82,9 @@ export default function ChooseStore() {
                 label={s.name}
                 onPress={() => {
                   chooseStore(s);
-                  router.dismissTo("/(tabs)/items");
+                  // Finish the Home stack before selecting the sibling tab.
+                  router.dismissTo("/home");
+                  router.navigate("/(tabs)/items");
                 }}
               />
             ))}
