@@ -1,3 +1,4 @@
+import { centralPayoutCopy } from "../src/lib/central-payout-copy.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { compilePreview } from "./helpers/compile-preview.ts";
@@ -217,6 +218,7 @@ function detailHarness(
           };
         },
       },
+      "@/lib/central-payout-copy": { centralPayoutCopy },
       "@/lib/external-item-detail-copy": { externalItemDetailCopy },
       "@/lib/external-offer-copy": { externalOfferCopy },
       "@/lib/item-draft-copy": { itemDraftCopy },
@@ -243,6 +245,29 @@ function detailHarness(
     assuranceRefreshes: () => assuranceRefreshes,
   };
 }
+test("only a confirmed credit offers the item's central payout account", async () => {
+  for (const credited of [false, true]) {
+    const h = detailHarness(
+      { ...item, lifecycleStatus: "acquired" },
+      {
+        ...offer,
+        saleMethod: "direct_purchase",
+        purchaseCreditedAt: credited ? item.created_at : null,
+      },
+    );
+    h.render();
+    await h.refresh();
+    const button = h
+      .render()
+      .find((n) => n?.props?.label === centralPayoutCopy.sv.open);
+    assert.equal(Boolean(button), credited);
+    if (button) {
+      button.props.onPress();
+      assert.equal(h.pushed[0].pathname, "/central-money");
+      assert.equal(h.pushed[0].params.tenant, item.tenant_id);
+    }
+  }
+});
 test("details show description, notes, own photos and seller amount; opening never submits an action", async () => {
   const h = detailHarness(item);
   assert.ok(h.render().some((n) => n.type === "Loading"));

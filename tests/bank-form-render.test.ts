@@ -11,9 +11,9 @@ const require = createRequire(import.meta.url);
 const { transformSync } = require("@babel/core");
 const compiled = transformSync(
   readFileSync(
-    new URL("../src/app/bank-account.tsx", import.meta.url),
+    new URL("../src/components/bank-account.tsx", import.meta.url),
     "utf8",
-  ) + "\nexport {BankForm, BankAccount};",
+  ) + "\nexport {BankForm};",
   {
     filename: "bank-account.tsx",
     configFile: false,
@@ -92,6 +92,8 @@ function harness(
       },
     },
     "@/lib/bank-account": bank,
+    "@/lib/external-stores": {},
+    "@/lib/supabase": {},
     "@/lib/bank-country-names": { bankCountryName },
     "@/lib/bank-account-api": {
       bankEndpoint: "https://example.test",

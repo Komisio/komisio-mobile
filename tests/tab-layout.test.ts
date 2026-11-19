@@ -3,7 +3,10 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
-import { hasVerifiedEmail } from "../src/lib/identity-gates.ts";
+import {
+  hasCentralIdentity,
+  hasVerifiedEmail,
+} from "../src/lib/identity-gates.ts";
 
 const require = createRequire(import.meta.url);
 const { transformSync } = require("@babel/core");
@@ -95,7 +98,10 @@ test("tabs reserve the home inset once and grow/shrink with measured labels", ()
     "@/lib/session": {
       useSession: () => ({ store: {}, session: { user: {} } }),
     },
-    "@/lib/identity-gates": { hasVerifiedEmail: () => true },
+    "@/lib/identity-gates": {
+      hasCentralIdentity,
+      hasVerifiedEmail: () => true,
+    },
     "@/lib/home-copy": { homeCopy: () => ({ home: "Hem" }) },
     react: {
       useState: () => [
@@ -443,7 +449,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
   };
   assert.deepEqual(routes(), ["mfa"]);
   state = { ...state, mfaRequired: false };
-  assert.equal(routes().length, 23);
+  assert.equal(routes().length, 24);
   assert.ok(routes().includes("external-item/[request]"));
   assert.ok(routes().includes("account-deletion"));
   assert.ok(routes().includes("(tabs)"));
@@ -465,6 +471,7 @@ test("photo drafts are available in the signed app while preserving login, MFA a
     "account-auth",
     "login",
     "language",
+    "central-money",
     "external-item/[request]",
     "account-deletion",
     "account-methods",

@@ -35,10 +35,14 @@ export function SellerPayouts({
   user,
   tenant,
   seller,
+  central = false,
+  inTab = true,
 }: {
   user: string;
   tenant: string;
   seller: string;
+  central?: boolean;
+  inTab?: boolean;
 }) {
   const { d, locale } = useI18n(),
     t = d.payouts;
@@ -88,8 +92,9 @@ export function SellerPayouts({
   const data = state.data;
   return (
     <Screen
-      title={d.tabs.money}
-      bottomSafeArea={false}
+      title={central ? `${d.tabs.money} · Komisio` : d.tabs.money}
+      bottomSafeArea={!inTab}
+      topSafeArea={inTab}
       refresh={{
         refreshing: state.status === "loading",
         onRefresh: () => void read.refresh(),
@@ -188,7 +193,7 @@ export function SellerPayouts({
             {state.failure === "denied" ? t.denied : t.failed}
           </Message>
           <Button label={d.retry} onPress={() => void read.refresh()} />
-          {state.failure === "denied" ? (
+          {state.failure === "denied" && !central ? (
             <Button
               label={d.login.changeStore}
               onPress={() => {
@@ -288,7 +293,16 @@ export function SellerPayouts({
       <View style={{ gap: 8 }}>
         <NavigationRow
           label={d.bank.title}
-          onPress={() => router.push("/bank-account")}
+          onPress={() =>
+            router.push(
+              central
+                ? {
+                    pathname: "/central-money",
+                    params: { tenant, section: "bank" },
+                  }
+                : "/bank-account",
+            )
+          }
         />
       </View>
     </Screen>
