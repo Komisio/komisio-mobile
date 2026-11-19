@@ -33,6 +33,9 @@ test("overview filter intent clears old search once and does not override later 
   const reads: string[] = [];
   const modules: Record<string, unknown> = {
     "./item-list-context-picker": { ItemListContextPicker: "ContextPicker" },
+    "./store-submission-notice": {
+      StoreSubmissionNotice: "StoreSubmissionNotice",
+    },
     react: {
       useState: () => {
         const index = hook++;

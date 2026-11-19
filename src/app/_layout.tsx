@@ -78,16 +78,6 @@ function Routes() {
           }
         />
         <Stack.Screen
-          name="store-info"
-          options={({ navigation }) =>
-            detailHeaderOptions(
-              "/(tabs)/profile",
-              d.profile.back,
-              navigation.canGoBack(),
-            )
-          }
-        />
-        <Stack.Screen
           name="my-items/[tenant]/[item]"
           options={({ navigation }) =>
             detailHeaderOptions(
@@ -119,6 +109,21 @@ function Routes() {
         />
       </Stack.Protected>
 
+      <Stack.Protected
+        guard={Boolean(store) && !mfaRequired}
+        redirectTo={homeRoute}
+      >
+        <Stack.Screen
+          name="store-info"
+          options={({ navigation }) =>
+            detailHeaderOptions(
+              "/(tabs)/items",
+              d.items.back,
+              navigation.canGoBack(),
+            )
+          }
+        />
+      </Stack.Protected>
       <Stack.Protected guard={signedIn} redirectTo={homeRoute}>
         <Stack.Screen
           name="external-item/[request]"

@@ -11,6 +11,113 @@ const user = {
   email_confirmed_at: "2026-11-19",
 };
 
+test("the store card opens the named store, restores it from central, or opens the picker on first use", () => {
+  let active: typeof store | null = store;
+  let previous: typeof store | null = store;
+  const routes: string[] = [];
+  const home = compilePreview("components/home-screen.tsx", {
+    "expo-image": { Image: "Image" },
+    "expo-router": {
+      router: {
+        navigate: (s: string) => routes.push(s),
+        push: (s: string) => routes.push(s),
+      },
+    },
+    "react-native": { StyleSheet: { create: (s: unknown) => s }, Text: "Text" },
+    "@/lib/session": {
+      useSession: () => ({
+        store: active,
+        lastStore: previous,
+        chooseStore: (s: typeof active) => {
+          active = s;
+        },
+      }),
+    },
+    "@/lib/i18n": { useI18n: () => ({ locale: "sv" }) },
+    "@/lib/home-copy": { homeCopy: () => ({ store: "Sälj via en butik" }) },
+    "@/lib/account-auth-copy": { accountAuthCopy: () => ({}) },
+    "../../assets/photos/home-dress.png": "image",
+    "./ui": {
+      Button: "Button",
+      ItemCard: "ItemCard",
+      Screen: "Screen",
+      uiStyles: {},
+    },
+  });
+  const card = () => home.HomeScreen().props.children[3];
+  assert.match(card().props.label, /Example store/);
+  card().props.onPress();
+  active = null;
+  card().props.onPress();
+  assert.deepEqual(active, store);
+  active = previous = null;
+  card().props.onPress();
+  assert.deepEqual(routes, ["/(tabs)/items", "/(tabs)/items", "/home/stores"]);
+});
+
+test("only the linked seller's confirmed disabled policy shows the digital submission notice", async () => {
+  let disabled = false;
+  let onFocus: () => () => void;
+  let result: any;
+  const notice = compilePreview(
+    "components/store-submission-notice.tsx",
+    {
+      react: {
+        useState: () => [
+          disabled,
+          (v: boolean) => {
+            disabled = v;
+          },
+        ],
+        useCallback: (f: unknown) => f,
+      },
+      "expo-router": {
+        useFocusEffect: (f: () => () => void) => {
+          onFocus = f;
+        },
+      },
+      "react-native": { Text: "Text" },
+      "./ui": { uiStyles: {} },
+      "@/lib/i18n": { useI18n: () => ({ locale: "sv" }) },
+      "@/lib/store-seller-copy": { storeSellerCopy },
+      "@/lib/supabase": {
+        supabase: {
+          rpc: (name: string, args: any) => {
+            assert.equal(name, "my_submission_settings");
+            assert.equal(args.p_tenant, "tenant-a");
+            assert.equal(args.p_seller, "seller-a");
+            return { abortSignal: async () => result };
+          },
+        },
+      },
+    },
+    { AbortController },
+  );
+  const render = () =>
+    notice.StoreSubmissionNotice({ tenant: "tenant-a", seller: "seller-a" });
+  for (const [response, expected] of [
+    [{ data: { enabled: false } }, true],
+    [{ data: { enabled: true } }, false],
+    [{ data: null, error: {} }, false],
+    [{ data: {} }, false],
+  ] as const) {
+    result = response;
+    render();
+    const cleanup = onFocus!();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(
+      render()?.props.children ?? null,
+      expected ? storeSellerCopy.sv.photosOff : null,
+    );
+    cleanup();
+  }
+  result = { data: { enabled: false } };
+  render();
+  onFocus!()();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(render(), null);
+});
+
 test("old catalogue routes resume My items without reading catalogue data", () => {
   for (const file of [
     "app/(tabs)/home/shop.tsx",

@@ -96,6 +96,16 @@ test("the visible picker switches back to the remembered store and clears stale 
   const params: any[] = [],
     routes: any[] = [];
   const picker = compilePreview("components/item-list-context-picker.tsx", {
+    "@/lib/store-seller-copy": {
+      storeSellerCopy: {
+        sv: {
+          handInInfo: "Inlämning och butiksinformation",
+          chooseAnother: "Välj annan butik",
+        },
+      },
+    },
+    "./brand": { InfoIcon: "InfoIcon" },
+    "./store-information": { StoreInformation: "StoreInformation" },
     "react-native": { View: "View" },
     "expo-router": {
       router: {
@@ -104,7 +114,7 @@ test("the visible picker switches back to the remembered store and clears stale 
       },
     },
     "@/lib/i18n": {
-      useI18n: () => ({ d: { login: { changeStore: "Choose store" } } }),
+      useI18n: () => ({ locale: "sv", d: { store: { title: "Välj butik" } } }),
     },
     "@/lib/session": {
       useSession: () => ({
@@ -117,12 +127,21 @@ test("the visible picker switches back to the remembered store and clears stale 
       }),
     },
     "@/lib/identity-gates": { hasVerifiedEmail },
-    "./ui": { Button: "Button", Choice: "Choice", uiStyles: {} },
+    "./ui": {
+      Button: "Button",
+      Choice: "Choice",
+      ItemCard: "ItemCard",
+      uiStyles: {},
+    },
   });
   let rendered = picker.ItemListContextPicker();
   let choices = rendered.props.children[0].props.children;
   assert.equal(choices[1].props.label, store.name);
   assert.equal(choices[1].props.selected, true);
+  assert.match(rendered.props.children[1].props.label, new RegExp(store.name));
+  rendered.props.children[1].props.onPress();
+  assert.equal(routes.shift(), "/store-info");
+  assert.equal(rendered.props.children[2].props.label, "Välj annan butik");
   choices[0].props.onPress();
   assert.equal(active, null);
   rendered = picker.ItemListContextPicker();
@@ -134,7 +153,7 @@ test("the visible picker switches back to the remembered store and clears stale 
   assert.equal(params.length, 2);
   assert.equal(params[1].request, undefined);
   assert.equal(params[1].source, undefined);
-  rendered.props.children[1].props.onPress();
+  rendered.props.children[2].props.onPress();
   assert.equal(routes[0], "/home/stores");
 });
 

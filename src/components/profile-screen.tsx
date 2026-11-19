@@ -9,6 +9,7 @@ import { centralIdentityEmail, hasVerifiedEmail } from "@/lib/identity-gates";
 import { CentralShippingAddress } from "./central-shipping-address";
 import { accountAuthCopy } from "@/lib/account-auth-copy";
 import { accountDeletionCopy } from "@/lib/account-deletion-copy";
+import { storeSellerCopy } from "@/lib/store-seller-copy";
 import { LoginOptions } from "./login-options";
 import { PrivacyLink } from "./privacy-link";
 import {
@@ -94,15 +95,26 @@ export function ProfileScreen() {
           ) : null}
         </>
       )}
-      <View style={styles.group}>
-        <SettingRow
-          label={d.profile.store}
-          value={store?.name ?? d.store.title}
-          icon={require("../../assets/icons/store.svg")}
-          onPress={() => {
-            router.push("/home/stores");
-          }}
+      <Card>
+        <Text style={styles.caption}>
+          {storeSellerCopy[locale].selectedStore}
+        </Text>
+        <Text accessibilityRole="header" style={uiStyles.heading}>
+          {store?.name ?? "Komisio"}
+        </Text>
+        {store ? (
+          <NavigationRow
+            label={storeSellerCopy[locale].handInInfo}
+            onPress={() => router.push("/store-info")}
+          />
+        ) : null}
+        <Button
+          variant="text"
+          label={store ? storeSellerCopy[locale].chooseAnother : d.store.title}
+          onPress={() => router.push("/home/stores")}
         />
+      </Card>
+      <View style={styles.group}>
         <SettingRow
           label={d.language}
           value={d.languageName}
@@ -112,10 +124,6 @@ export function ProfileScreen() {
       </View>
       {storeAccount ? (
         <View style={styles.group}>
-          <NavigationRow
-            label={d.storeInfo.title}
-            onPress={() => router.push("/store-info")}
-          />
           <NavigationRow
             label={d.bank.title}
             onPress={() => router.push("/bank-account")}

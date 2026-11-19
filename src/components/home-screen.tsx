@@ -9,7 +9,8 @@ import { Button, ItemCard, Screen, uiStyles } from "./ui";
 
 export function HomeScreen() {
   const { locale } = useI18n();
-  const { chooseStore, session } = useSession();
+  const { store, lastStore, chooseStore, session } = useSession();
+  const destinationStore = store ?? lastStore;
   const t = homeCopy(locale);
   return (
     <Screen brand bottomSafeArea={false}>
@@ -35,12 +36,20 @@ export function HomeScreen() {
         <Text style={uiStyles.note}>{t.komisioHint}</Text>
       </ItemCard>
       <ItemCard
-        label={t.store}
+        label={
+          destinationStore ? `${t.store} · ${destinationStore.name}` : t.store
+        }
         tone="soft"
-        onPress={() => router.push("/home/stores")}
+        onPress={() => {
+          if (!destinationStore) return router.push("/home/stores");
+          if (!store) chooseStore(destinationStore);
+          router.navigate("/(tabs)/items");
+        }}
       >
         <Text style={uiStyles.heading}>{t.store}</Text>
-        <Text style={uiStyles.note}>{t.storeHint}</Text>
+        <Text style={uiStyles.note}>
+          {destinationStore?.name ?? t.storeHint}
+        </Text>
       </ItemCard>
       {!session ? (
         <Button
