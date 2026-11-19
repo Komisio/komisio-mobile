@@ -2,6 +2,7 @@ import { fetch } from "expo/fetch";
 import { supabase } from "./supabase";
 import { commandStorage } from "./command-storage";
 import { commandLock } from "./command-lock";
+import { readBank } from "./bank-account-api";
 import { createPendingCommand } from "./pending-command";
 import { mobileEndpoint, sendMobileCommand } from "./mobile-command-http";
 import {
@@ -18,6 +19,7 @@ export async function readPayouts(
   seller: string,
   offset: number,
   signal: AbortSignal,
+  central = false,
 ) {
   const { data, error } = await supabase
     // This stable RPC only reads. GET enables the SDK's bounded transport retries.
@@ -29,7 +31,12 @@ export async function readPayouts(
     .setHeader("Cache-Control", "no-cache, no-store")
     .abortSignal(signal);
   if (error) throw error;
-  return parsePayoutPage(data, tenant, seller, offset);
+  const page = parsePayoutPage(data, tenant, seller, offset);
+  if (central && page.bankAccountMissing === undefined) {
+    // A server that predates the boolean still has the seller-owned bank read.
+    page.bankAccountMissing = (await readBank(tenant, seller, signal)) === null;
+  }
+  return page;
 }
 export function payoutWriter(user: string, tenant: string, seller: string) {
   return createPendingCommand<PendingPayout>({

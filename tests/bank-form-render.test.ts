@@ -32,6 +32,7 @@ function harness(
   country: string | null = "SE",
   countryStatus = "ready",
   pending = false,
+  saved = false,
 ) {
   let readIndex = 0;
   let retries = 0;
@@ -68,10 +69,16 @@ function harness(
       Text: "Text",
       View: "View",
     },
-    "expo-router": { router: {}, useFocusEffect: () => {} },
+    "expo-router": {
+      router: {},
+      useFocusEffect: (effect: () => unknown) => effects.push(effect),
+    },
     "expo-crypto": {},
     "@/components/pending-discard": {},
     "@/components/seller-gate": {},
+    "@/lib/central-payout-copy": {
+      centralPayoutCopy: { sv: { bankFirst: "bank" } },
+    },
     "@/components/ui": {
       ...Object.fromEntries(
         ["Button", "Field", "Loading", "Message", "Screen"].map((n) => [n, n]),
@@ -88,7 +95,7 @@ function harness(
     "@/lib/scoped-read": {
       createScopedRead: () => {
         const index = readIndex++;
-        return { getState: () => reads[index] };
+        return { getState: () => reads[index], refresh: () => {} };
       },
     },
     "@/lib/bank-account": bank,
@@ -98,8 +105,9 @@ function harness(
     "@/lib/bank-account-api": {
       bankEndpoint: "https://example.test",
       bankWriter: () => ({
+        load: () => {},
         getState: () => ({
-          status: pending ? "pending" : "ready",
+          status: pending ? "pending" : saved ? "success" : "ready",
           command: null,
         }),
         retry: () => {
@@ -109,6 +117,7 @@ function harness(
     },
   };
   const exports: Record<string, (props: unknown) => unknown> = {};
+  const effects: (() => unknown)[] = [];
   runInNewContext(compiled, {
     exports,
     Error,
@@ -119,6 +128,7 @@ function harness(
   });
   return {
     exports,
+    effects,
     retries: () => retries,
     renderForm: (props: unknown) => {
       cursor = 0;
@@ -131,6 +141,27 @@ function elements(node: any): Element[] {
   if (Array.isArray(node)) return node.flatMap(elements);
   return node?.props ? [node, ...elements(node.props.children)] : [];
 }
+
+test("the first-payout form returns only after a confirmed bank save", () => {
+  for (const [pending, saved] of [
+    [false, false],
+    [true, false],
+    [false, true],
+  ]) {
+    const h = harness("SE", "ready", pending, saved);
+    let returns = 0;
+    h.exports.BankAccount({
+      user: "u",
+      tenant: "t",
+      seller: "s",
+      onReturnToPayout: () => {
+        returns++;
+      },
+    });
+    for (const effect of h.effects) effect();
+    assert.equal(returns, saved ? 1 : 0);
+  }
+});
 
 test("compiled bank form exposes exactly the three local fields and saves store country", () => {
   const { exports } = harness("DK");

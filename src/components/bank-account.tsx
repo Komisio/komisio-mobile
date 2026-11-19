@@ -14,6 +14,7 @@ import {
   Screen,
 } from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
+import { centralPayoutCopy } from "@/lib/central-payout-copy";
 import { useSession } from "@/lib/session";
 import { createScopedRead } from "@/lib/scoped-read";
 import { bankCountryName } from "@/lib/bank-country-names";
@@ -37,13 +38,17 @@ export function BankAccount({
   tenant,
   seller,
   slug,
+  inTab = false,
+  onReturnToPayout,
 }: {
   user: string;
   tenant: string;
   seller: string;
   slug?: string;
+  inTab?: boolean;
+  onReturnToPayout?: () => void;
 }) {
-  const { d } = useI18n(),
+  const { d, locale } = useI18n(),
     t = d.bank;
   const { signOut, refreshAssurance } = useSession();
   const read = useMemo(
@@ -81,6 +86,11 @@ export function BankAccount({
   );
   useFocusEffect(
     useCallback(() => {
+      if (change.status === "success") onReturnToPayout?.();
+    }, [change.status, onReturnToPayout]),
+  );
+  useFocusEffect(
+    useCallback(() => {
       void read.refresh();
       void writer.load();
       void countryRead.refresh();
@@ -96,7 +106,20 @@ export function BankAccount({
     void countryRead.refresh();
   };
   return (
-    <Screen topSafeArea={false} title={t.title} intro={t.intro}>
+    <Screen
+      topSafeArea={inTab}
+      bottomSafeArea={!inTab}
+      title={t.title}
+      intro={onReturnToPayout ? centralPayoutCopy[locale].bankFirst : t.intro}
+    >
+      {onReturnToPayout ? (
+        <Button
+          label={d.close}
+          variant="text"
+          disabled={change.status === "busy"}
+          onPress={onReturnToPayout}
+        />
+      ) : null}
       {!bankEndpoint ? <Message>{t.notConfigured}</Message> : null}
       {change.status === "idle" || change.status === "busy" ? (
         <Loading />
