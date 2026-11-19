@@ -82,7 +82,7 @@ export function requestedPriceOre(input: string): string | null {
 }
 export function itemDetailsErrors(
   details: ItemDraftDetails,
-): ("description" | "condition" | "desiredSellerAmount" | "saleMethod")[] {
+): ("description" | "condition" | "desiredSellerAmount")[] {
   const errors: ReturnType<typeof itemDetailsErrors> = [];
   if (!details.description.trim()) errors.push("description");
   if (!details.condition) errors.push("condition");
@@ -92,6 +92,5 @@ export function itemDetailsErrors(
   } catch {
     errors.push("desiredSellerAmount");
   }
-  if (!isSaleMethod(details.saleMethod)) errors.push("saleMethod");
   return errors;
 }

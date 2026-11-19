@@ -1,8 +1,6 @@
 import type { Locale } from "./locale";
 const copies = {
   sv: {
-    minimumGuidance:
-      "Komisio tar i första hand emot varor som kan ge dig minst 500 kr. Vi gör en individuell bedömning och kan göra undantag.",
     active: "Aktiva",
     history: "Historik",
     emptyActive: "Du har inga aktiva varor.",
@@ -24,8 +22,6 @@ const copies = {
     next: "Nästa",
   },
   en: {
-    minimumGuidance:
-      "Komisio mainly accepts items that can earn you at least SEK 500. We assess each item individually and may make exceptions.",
     active: "Active",
     history: "History",
     emptyActive: "You have no active items.",
@@ -47,8 +43,6 @@ const copies = {
     next: "Next",
   },
   no: {
-    minimumGuidance:
-      "Komisio tar først og fremst imot varer som kan gi deg minst 500 SEK. Vi vurderer hver vare og kan gjøre unntak.",
     active: "Aktive",
     history: "Historikk",
     emptyActive: "Du har ingen aktive varer.",
@@ -70,8 +64,6 @@ const copies = {
     next: "Neste",
   },
   da: {
-    minimumGuidance:
-      "Komisio tager primært imod varer, der kan give dig mindst 500 SEK. Vi vurderer hver vare og kan gøre undtagelser.",
     active: "Aktive",
     history: "Historik",
     emptyActive: "Du har ingen aktive varer.",
@@ -93,8 +85,6 @@ const copies = {
     next: "Næste",
   },
   fi: {
-    minimumGuidance:
-      "Komisio vastaanottaa ensisijaisesti tuotteita, joista voit saada vähintään 500 SEK. Arvioimme jokaisen tuotteen erikseen ja voimme tehdä poikkeuksia.",
     active: "Aktiiviset",
     history: "Historia",
     emptyActive: "Sinulla ei ole aktiivisia tuotteita.",
@@ -116,8 +106,6 @@ const copies = {
     next: "Seuraava",
   },
   de: {
-    minimumGuidance:
-      "Komisio nimmt vor allem Artikel an, die dir mindestens 500 SEK einbringen können. Wir prüfen jeden Artikel einzeln und können Ausnahmen machen.",
     active: "Aktiv",
     history: "Verlauf",
     emptyActive: "Du hast keine aktiven Artikel.",
@@ -140,8 +128,6 @@ const copies = {
     next: "Weiter",
   },
   es: {
-    minimumGuidance:
-      "Komisio acepta principalmente artículos que puedan darte al menos 500 SEK. Evaluamos cada artículo y podemos hacer excepciones.",
     active: "Activos",
     history: "Historial",
     emptyActive: "No tienes artículos activos.",
@@ -163,8 +149,6 @@ const copies = {
     next: "Siguiente",
   },
   it: {
-    minimumGuidance:
-      "Komisio accetta principalmente articoli che possono renderti almeno 500 SEK. Valutiamo ogni articolo e possiamo fare eccezioni.",
     active: "Attivi",
     history: "Cronologia",
     emptyActive: "Non hai articoli attivi.",

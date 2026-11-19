@@ -2,6 +2,7 @@ import type { CommandStorage } from "./pending-command.ts";
 
 const SENSITIVE_PREFIXES = [
   "komisio.pending.intake-profile.v1.",
+  "komisio.pending.payout-preference.v1.",
   "komisio.pending.bank.v1.",
   "komisio.pending.onboarding.v1.",
   "komisio.pending.shipping.v1.",

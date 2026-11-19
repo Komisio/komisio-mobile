@@ -259,7 +259,7 @@ test("only a confirmed credit offers the item's central payout account", async (
     await h.refresh();
     const button = h
       .render()
-      .find((n) => n?.props?.label === centralPayoutCopy.sv.open);
+      .find((n) => n?.props?.label === centralPayoutCopy.sv.viewPayouts);
     assert.equal(Boolean(button), credited);
     if (button) {
       button.props.onPress();
@@ -405,6 +405,13 @@ test("payout dates follow this guarantee and credit evidence in Swedish time", (
     }).message,
     "600 kr lades till på ditt saldo den 15 november 2026.",
   );
+  const awaiting = payout("received", {
+    ...received,
+    staffSelectsMethod: true,
+    guarantee: null,
+  });
+  assert.equal(awaiting.message, t.receiptPending);
+  assert.equal(awaiting.congratulate, false);
   const legacy = payout("received", { ...received, guarantee: null });
   assert.equal(legacy.message, t.payoutRule.replace("{amount}", "600 kr"));
   assert.equal(legacy.congratulate, false);

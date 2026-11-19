@@ -94,6 +94,7 @@ test("onboarding bank payloads share logout and identity-switch cleanup", async 
 });
 
 for (const key of [
+  "komisio.pending.payout-preference.v1.user.tenant.seller",
   "komisio.pending.shipping.v1.user.offer",
   "komisio.pending.shipping-address.v1.user.tenant.seller",
   "komisio.pending.intake-profile.v1.user.tenant",

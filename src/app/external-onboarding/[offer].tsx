@@ -417,9 +417,11 @@ function Handover({
           ? t.received
           : h.status === "cancelled"
             ? t.cancelled
-            : offer.saleMethod === "direct_purchase"
-              ? externalItemDetailCopy(locale).directApproval
-              : externalItemDetailCopy(locale).approvalGreeting}
+            : offer.staffSelectsMethod && !offer.saleMethod
+              ? externalItemDetailCopy(locale).receiptApproval
+              : offer.saleMethod === "direct_purchase"
+                ? externalItemDetailCopy(locale).directApproval
+                : externalItemDetailCopy(locale).approvalGreeting}
       </Text>
       {h.status === "received" &&
       offer.guarantee &&

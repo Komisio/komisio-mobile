@@ -4,6 +4,7 @@ import type { CommandOutcome } from "./pending-command.ts";
 import { isSaleMethod, type SaleMethod } from "./item-draft-details.ts";
 
 export type ExternalOffer = {
+  staffSelectsMethod?: boolean;
   saleMethod?: SaleMethod;
   purchaseCreditedAt?: string | null;
   id: string;

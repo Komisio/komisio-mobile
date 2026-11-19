@@ -152,7 +152,6 @@ test("price wishes use exact minor-unit strings and partial drafts remain editab
     "description",
     "condition",
     "desiredSellerAmount",
-    "saleMethod",
   ]);
   assert.deepEqual(
     itemDetailsErrors({ ...details, desiredSellerAmount: "oops" }),

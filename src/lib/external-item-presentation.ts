@@ -161,6 +161,16 @@ export function agreedItemPayout(
   )
     return { message: t.noCreditInfo, congratulate: false };
   if (
+    (offer.staffSelectsMethod || item.staff_selects_method) &&
+    !offer.saleMethod &&
+    !item.sale_method &&
+    !guarantee
+  )
+    return {
+      message: t.receiptPending,
+      congratulate: handover?.status !== "received",
+    };
+  if (
     offer.saleMethod === "direct_purchase" ||
     item.sale_method === "direct_purchase"
   )

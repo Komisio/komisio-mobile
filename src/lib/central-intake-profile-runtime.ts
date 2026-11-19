@@ -1,3 +1,4 @@
+import { parsePreferenceCommand } from "./central-payout-preference";
 import { shippingTransport } from "./central-shipping-runtime";
 import { createExternalIdentityRead } from "./external-offer-http";
 import { createPendingCommand } from "./pending-command";
@@ -20,6 +21,27 @@ export async function readIntakeProfile(user: string) {
   return parseIntakeProfile(
     await createExternalIdentityRead(transport(user))({ action: "read" }),
   );
+}
+export function payoutPreferenceWriter(
+  user: string,
+  tenant: string,
+  seller: string,
+) {
+  const t = transport(user);
+  return createPendingCommand({
+    key: `komisio.pending.payout-preference.v1.${user}.${tenant}.${seller}`,
+    binding: JSON.stringify([
+      user,
+      tenant,
+      seller,
+      process.env.EXPO_PUBLIC_SUPABASE_URL,
+      t.endpoint,
+    ]),
+    storage: commandStorage,
+    lock: commandLock,
+    parse: (v) => parsePreferenceCommand(v, tenant, seller),
+    send: (c) => sendMobileCommand(c, t, intakeProfileOutcome),
+  });
 }
 export function intakeProfileWriter(user: string, tenant: string) {
   const t = transport(user);

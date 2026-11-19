@@ -41,6 +41,7 @@ function form(availableOre: number, thresholdOre: number, enabled = true) {
     },
     "expo-router": {},
     "expo-crypto": { randomUUID: () => "synthetic" },
+    "./central-payout-preference": {},
     "./pending-discard": {},
     "./bank-account": { BankAccount: "BankAccount" },
     "@/lib/central-payout-copy": {
@@ -186,6 +187,7 @@ test("payout drafts survive refresh failures and history navigation, clearing on
     },
     "expo-router": { useFocusEffect: () => {}, router: {} },
     "expo-crypto": { randomUUID: () => "synthetic" },
+    "./central-payout-preference": {},
     "./pending-discard": {},
     "./bank-account": { BankAccount: "BankAccount" },
     "@/lib/central-payout-copy": {
