@@ -4,6 +4,8 @@ import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
 import { PendingDiscard } from "./pending-discard";
 import { BalanceCard } from "./balance-card";
+import { BankAccount } from "./bank-account";
+import { centralPayoutCopy } from "@/lib/central-payout-copy";
 import {
   Button,
   Choice,
@@ -50,12 +52,13 @@ export function SellerPayouts({
   const [page, setPage] = useState(0),
     [view, setView] = useState<"request" | "history">("request");
   const [amount, setAmount] = useState("");
+  const [addingBank, setAddingBank] = useState(false);
   const read = useMemo(
     () =>
       createScopedRead((signal) =>
-        readPayouts(tenant, seller, payoutOffset(page), signal),
+        readPayouts(tenant, seller, payoutOffset(page), signal, central),
       ),
-    [tenant, seller, page],
+    [tenant, seller, page, central],
   );
   const writer = useMemo(
     () => payoutWriter(user, tenant, seller),
@@ -90,6 +93,22 @@ export function SellerPayouts({
     void writer.load();
   };
   const data = state.data;
+  const returnToPayout = useCallback(() => {
+    setAddingBank(false);
+    void read.refresh();
+    void writer.load();
+  }, [read, writer]);
+  if (addingBank) {
+    return (
+      <BankAccount
+        user={user}
+        tenant={tenant}
+        seller={seller}
+        onReturnToPayout={returnToPayout}
+        inTab={inTab}
+      />
+    );
+  }
   return (
     <Screen
       title={central ? `${d.tabs.money} · Komisio` : d.tabs.money}
@@ -171,7 +190,13 @@ export function SellerPayouts({
           <Button label={d.retry} onPress={() => void writer.load()} />
         </>
       ) : null}
-      {change.status === "success" || change.status === "conflict" ? (
+      {change.status === "conflict" &&
+      change.code === "PAYOUT_BANK_REQUIRED" ? (
+        <>
+          <Message>{centralPayoutCopy[locale].bankFirst}</Message>
+          <Button label={d.bank.title} onPress={() => setAddingBank(true)} />
+        </>
+      ) : change.status === "success" || change.status === "conflict" ? (
         <>
           <Message>{change.status === "success" ? t.saved : t.changed}</Message>
           <Button label={t.refresh} onPress={refresh} />
@@ -224,6 +249,10 @@ export function SellerPayouts({
                   setAmount={setAmount}
                   enabled={Boolean(payoutEndpoint)}
                   onSubmit={(amountOre) => {
+                    if (data.bankAccountMissing) {
+                      setAddingBank(true);
+                      return;
+                    }
                     void writer.submit({
                       currency: data.currency,
                       command: {

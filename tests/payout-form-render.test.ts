@@ -40,8 +40,12 @@ function form(availableOre: number, thresholdOre: number, enabled = true) {
       StyleSheet: { create: (value: unknown) => value },
     },
     "expo-router": {},
-    "expo-crypto": {},
+    "expo-crypto": { randomUUID: () => "synthetic" },
     "./pending-discard": {},
+    "./bank-account": { BankAccount: "BankAccount" },
+    "@/lib/central-payout-copy": {
+      centralPayoutCopy: { sv: { bankFirst: "bank" } },
+    },
     "./balance-card": {},
     "./ui": {
       View: "View",
@@ -131,6 +135,7 @@ test("payout drafts survive refresh failures and history navigation, clearing on
     data: {
       currency: "SEK",
       balance: { availableOre: 50000, reservedOre: 0, paidOre: 0 },
+      bankAccountMissing: true,
       thresholdOre: 10000,
       payouts: [],
       total: 0,
@@ -144,7 +149,10 @@ test("payout drafts survive refresh failures and history navigation, clearing on
       readState = { status: "loading", data: null };
     },
   };
+  const requests: number[] = [];
   const writer = {
+    submit: (data: { command: { amountOre: number } }) =>
+      requests.push(data.command.amountOre),
     getState: () => writeState,
     subscribe: () => {},
     load: () => {},
@@ -177,8 +185,12 @@ test("payout drafts survive refresh failures and history navigation, clearing on
       StyleSheet: { create: (value: unknown) => value },
     },
     "expo-router": { useFocusEffect: () => {}, router: {} },
-    "expo-crypto": {},
+    "expo-crypto": { randomUUID: () => "synthetic" },
     "./pending-discard": {},
+    "./bank-account": { BankAccount: "BankAccount" },
+    "@/lib/central-payout-copy": {
+      centralPayoutCopy: { sv: { bankFirst: "bank" } },
+    },
     "./balance-card": { BalanceCard: "BalanceCard" },
     "./ui": {
       Screen: "Screen",
@@ -234,6 +246,18 @@ test("payout drafts survive refresh failures and history navigation, clearing on
   const getForm = (tree: any) =>
     nodes(tree).find((node) => node.type?.name === "PayoutForm");
   getForm(render()).props.setAmount("250,50");
+  getForm(render()).props.onSubmit(25050);
+  const bank = render();
+  assert.equal(bank.type, "BankAccount");
+  assert.equal(bank.props.seller, "synthetic-seller");
+  assert.deepEqual(requests, []);
+  bank.props.onReturnToPayout();
+  ready.data.bankAccountMissing = false;
+  readState = ready;
+  assert.equal(getForm(render()).props.amount, "250,50");
+  assert.deepEqual(requests, []);
+  getForm(render()).props.onSubmit(25050);
+  assert.deepEqual(requests, [25050]);
   render().props.refresh.onRefresh();
   assert.equal(getForm(render()), undefined);
   readState = { status: "failed", data: null, failure: "failed" };

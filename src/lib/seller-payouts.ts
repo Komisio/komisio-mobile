@@ -16,6 +16,7 @@ export type PayoutCommand = {
 };
 export type PendingPayout = { currency: string; command: PayoutCommand };
 export type PayoutPage = {
+  bankAccountMissing?: boolean;
   currency: string;
   total: number;
   offset: number;
@@ -67,6 +68,8 @@ export function parsePayoutPage(
     p.sellerId !== seller ||
     balance.sellerId !== seller ||
     p.limit !== 25 ||
+    (p.bankAccountMissing !== undefined &&
+      typeof p.bankAccountMissing !== "boolean") ||
     p.offset !== offset ||
     !Number.isSafeInteger(offset) ||
     offset < 0 ||
@@ -103,6 +106,7 @@ export function parsePayoutPage(
   const thresholdOre = signedOre(p.thresholdOre);
   if (thresholdOre < 0) invalid();
   return {
+    bankAccountMissing: p.bankAccountMissing as boolean | undefined,
     currency: currency(p.currency),
     total: p.total,
     offset,
@@ -182,12 +186,14 @@ export function payoutCommandOutcome(
   const p = body as { ok?: unknown; id?: unknown; error?: unknown } | null;
   if (status === 200 && p?.ok === true && p.id === requestId)
     return { kind: "success", id: requestId };
-  // Both engine checks follow request replay: these prove this ID was not created.
+  // These engine checks follow request replay and prove this ID was not created.
   if (
     status === 409 &&
-    ["PAYOUT_BELOW_THRESHOLD", "PAYOUT_EXCEEDS_BALANCE"].includes(
-      String(p?.error),
-    )
+    [
+      "PAYOUT_BELOW_THRESHOLD",
+      "PAYOUT_EXCEEDS_BALANCE",
+      "PAYOUT_BANK_REQUIRED",
+    ].includes(String(p?.error))
   )
     return { kind: "conflict", code: String(p!.error) };
   return {

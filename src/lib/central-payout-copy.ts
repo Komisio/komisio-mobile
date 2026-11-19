@@ -2,6 +2,8 @@ import type { Locale } from "./locale";
 
 export const centralPayoutCopy = {
   sv: {
+    bankFirst:
+      "Ange ditt utbetalningskonto första gången. När du har sparat kontot kommer du tillbaka till beloppet du valde.",
     emailInUse:
       "Adressen används av ett annat konto. Ange en annan e-postadress för det här kontot.",
     open: "Visa saldo och begär utbetalning",
@@ -14,6 +16,8 @@ export const centralPayoutCopy = {
     confirmed: "Jag har bekräftat min e-postadress",
   },
   en: {
+    bankFirst:
+      "Add your payout account the first time. After you save it, you’ll return to the amount you chose.",
     emailInUse:
       "This address belongs to another account. Enter a different email for this account.",
     open: "View balance and request a payout",
@@ -26,6 +30,8 @@ export const centralPayoutCopy = {
     confirmed: "I’ve confirmed my email address",
   },
   no: {
+    bankFirst:
+      "Legg til utbetalingskontoen din første gang. Når du har lagret kontoen, kommer du tilbake til beløpet du valgte.",
     emailInUse:
       "Adressen brukes av en annen konto. Oppgi en annen e-postadresse for denne kontoen.",
     open: "Vis saldo og be om utbetaling",
@@ -38,6 +44,8 @@ export const centralPayoutCopy = {
     confirmed: "Jeg har bekreftet e-postadressen min",
   },
   da: {
+    bankFirst:
+      "Tilføj din udbetalingskonto første gang. Når du har gemt kontoen, vender du tilbage til det valgte beløb.",
     emailInUse:
       "Adressen bruges af en anden konto. Angiv en anden e-mailadresse til denne konto.",
     open: "Se saldo og anmod om udbetaling",
@@ -50,6 +58,8 @@ export const centralPayoutCopy = {
     confirmed: "Jeg har bekræftet min e-mailadresse",
   },
   fi: {
+    bankFirst:
+      "Lisää maksutilisi ensimmäisellä kerralla. Kun olet tallentanut tilin, palaat valitsemaasi summaan.",
     emailInUse:
       "Osoite on toisen tilin käytössä. Anna tälle tilille toinen sähköpostiosoite.",
     open: "Näytä saldo ja pyydä maksua",
@@ -62,6 +72,8 @@ export const centralPayoutCopy = {
     confirmed: "Olen vahvistanut sähköpostiosoitteeni",
   },
   de: {
+    bankFirst:
+      "Gib beim ersten Mal dein Auszahlungskonto an. Nach dem Speichern kehrst du zum gewählten Betrag zurück.",
     emailInUse:
       "Diese Adresse gehört zu einem anderen Konto. Gib für dieses Konto eine andere E-Mail-Adresse an.",
     open: "Guthaben ansehen und Auszahlung anfordern",
@@ -74,6 +86,8 @@ export const centralPayoutCopy = {
     confirmed: "Ich habe meine E-Mail-Adresse bestätigt",
   },
   es: {
+    bankFirst:
+      "Añade tu cuenta para recibir el primer pago. Después de guardarla, volverás al importe que elegiste.",
     emailInUse:
       "Esta dirección pertenece a otra cuenta. Introduce otro correo para esta cuenta.",
     open: "Ver saldo y solicitar un pago",
@@ -86,6 +100,8 @@ export const centralPayoutCopy = {
     confirmed: "He confirmado mi correo",
   },
   it: {
+    bankFirst:
+      "Aggiungi il conto per il primo pagamento. Dopo averlo salvato, tornerai all’importo scelto.",
     emailInUse:
       "Questo indirizzo appartiene a un altro account. Inserisci un’altra e-mail per questo account.",
     open: "Vedi il saldo e richiedi un pagamento",
@@ -106,7 +122,8 @@ export const centralPayoutCopy = {
     | "sendEmail"
     | "checkInbox"
     | "confirmed"
-    | "emailInUse",
+    | "emailInUse"
+    | "bankFirst",
     string
   >
 >;

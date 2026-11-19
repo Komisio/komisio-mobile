@@ -18,7 +18,13 @@ const page = {
   balance: { sellerId: seller, availableOre: 100, reservedOre: 0, paidOre: 0 },
 };
 
-function reader(fetch: typeof globalThis.fetch) {
+function reader(
+  fetch: typeof globalThis.fetch,
+  central = false,
+  bankRead = async (): Promise<object | null> => {
+    throw new Error("unexpected bank read");
+  },
+) {
   const supabase = createClient("https://example.invalid", "test-key", {
     auth: {
       persistSession: false,
@@ -33,6 +39,7 @@ function reader(fetch: typeof globalThis.fetch) {
       "expo/fetch": {},
       "./supabase": { supabase },
       "./command-storage": {},
+      "./bank-account-api": { readBank: bankRead },
       "./command-lock": {},
       "./pending-command": {},
       "./mobile-command-http": { mobileEndpoint: () => null },
@@ -41,8 +48,29 @@ function reader(fetch: typeof globalThis.fetch) {
     { process: { env: {} } },
   );
   return (signal = new AbortController().signal) =>
-    api.readPayouts(tenant, seller, 0, signal);
+    api.readPayouts(tenant, seller, 0, signal, central);
 }
+
+test("central balances use only the bank status, with an owner-scoped fallback on earlier servers", async () => {
+  for (const missing of [true, false]) {
+    const read = reader(
+      async () => Response.json({ ...page, bankAccountMissing: missing }),
+      true,
+    );
+    assert.equal((await read()).bankAccountMissing, missing);
+    let calls = 0;
+    const legacy = reader(
+      async () => Response.json(page),
+      true,
+      async () => {
+        calls++;
+        return missing ? null : { id: "saved" };
+      },
+    );
+    assert.equal((await legacy()).bankAccountMissing, missing);
+    assert.equal(calls, 1);
+  }
+});
 
 test("Money recovers from a temporary service failure during the same read", async () => {
   const calls: Request[] = [];
