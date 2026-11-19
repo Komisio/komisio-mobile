@@ -20,11 +20,13 @@ export async function readPayouts(
   signal: AbortSignal,
 ) {
   const { data, error } = await supabase
-    .rpc("my_seller_payouts_page", {
-      p_tenant: tenant,
-      p_seller: seller,
-      p_offset: offset,
-    })
+    // This stable RPC only reads. GET enables the SDK's bounded transport retries.
+    .rpc(
+      "my_seller_payouts_page",
+      { p_tenant: tenant, p_seller: seller, p_offset: offset },
+      { get: true },
+    )
+    .setHeader("Cache-Control", "no-cache, no-store")
     .abortSignal(signal);
   if (error) throw error;
   return parsePayoutPage(data, tenant, seller, offset);
