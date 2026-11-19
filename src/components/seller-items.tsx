@@ -16,6 +16,7 @@ import {
 } from "@/lib/seller-items";
 import { useI18n } from "@/lib/i18n";
 import { DetailSheet } from "./detail-sheet";
+import { ItemListContextPicker } from "./item-list-context-picker";
 import {
   Button,
   colors,
@@ -32,11 +33,9 @@ import {
 export function SellerItems({
   tenant,
   seller,
-  storeName,
 }: {
   tenant: string;
   seller: string;
-  storeName: string;
 }) {
   const { d, locale } = useI18n();
   const t = d.items;
@@ -85,7 +84,8 @@ export function SellerItems({
   };
   const header = (
     <View style={styles.header}>
-      <PageHeading title={t.title} intro={storeName} />
+      <PageHeading title={t.title} />
+      <ItemListContextPicker />
       <View style={styles.searchRow}>
         <View style={styles.search}>
           <Field

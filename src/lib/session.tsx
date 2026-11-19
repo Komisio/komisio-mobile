@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   useSyncExternalStore,
   type ReactNode,
@@ -23,6 +25,7 @@ export type SellerAccount = {
 };
 
 const STORE_KEY = "komisio.store";
+const LAST_STORE_KEY = "komisio.lastStore";
 
 const authState = createAuthBootstrap(supabase.auth);
 
@@ -32,6 +35,7 @@ type State = {
   authFailed: boolean;
   retryAuth: () => void;
   store: AppStore | null;
+  lastStore: AppStore | null;
   session: Session | null;
   mfaRequired: boolean;
   // undefined while loading; null when the seller has no account in the
@@ -57,6 +61,9 @@ function isStore(value: unknown): value is AppStore {
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [storeLoaded, setStoreLoaded] = useState(false);
   const [store, setStore] = useState<AppStore | null>(null);
+  const [lastStore, setLastStore] = useState<AppStore | null>(null);
+  const lastStoreRef = useRef<AppStore | null>(null);
+  const storeSaves = useRef(Promise.resolve());
   const auth = useSyncExternalStore(
     authState.subscribe,
     authState.getState,
@@ -98,14 +105,25 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [userId, appleSubject]);
 
   useEffect(() => {
-    secureStorage
-      .getItem(STORE_KEY)
-      .then((raw) => {
-        try {
-          const parsed: unknown = raw ? JSON.parse(raw) : null;
-          if (isStore(parsed)) setStore(parsed);
-        } catch {}
+    Promise.all([
+      secureStorage.getItem(STORE_KEY),
+      secureStorage.getItem(LAST_STORE_KEY).catch(() => null),
+    ])
+      .then(([raw, previous]) => {
+        const parse = (value: string | null) => {
+          try {
+            const parsed: unknown = value ? JSON.parse(value) : null;
+            return isStore(parsed) ? parsed : null;
+          } catch {
+            return null;
+          }
+        };
+        const active = parse(raw);
+        setStore(active);
+        lastStoreRef.current = active ?? parse(previous);
+        setLastStore(lastStoreRef.current);
       })
+      .catch(() => {})
       .finally(() => setStoreLoaded(true));
     const stopCommands = authState.subscribe(() => {
       const current = authState.getState();
@@ -162,11 +180,27 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       ? lookup.account
       : undefined;
 
-  const chooseStore = (next: AppStore | null) => {
+  const chooseStore = useCallback((next: AppStore | null) => {
     setStore(next);
-    if (next) void secureStorage.setItem(STORE_KEY, JSON.stringify(next));
-    else void secureStorage.removeItem(STORE_KEY);
-  };
+    if (next) {
+      lastStoreRef.current = next;
+      setLastStore(next);
+    }
+    const remembered = lastStoreRef.current;
+    // Remember the store when entering Komisio; serialize rapid switches so a
+    // delayed save cannot restore an earlier active store on the next launch.
+    storeSaves.current = storeSaves.current
+      .then(async () => {
+        if (next) await secureStorage.setItem(STORE_KEY, JSON.stringify(next));
+        else await secureStorage.removeItem(STORE_KEY);
+        if (remembered)
+          await secureStorage.setItem(
+            LAST_STORE_KEY,
+            JSON.stringify(remembered),
+          );
+      })
+      .catch(() => {});
+  }, []);
 
   const signOut = async () => {
     const signingOut = session?.user.id;
@@ -191,6 +225,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         authFailed: auth.status === "failed",
         retryAuth: () => void authState.retry(),
         store,
+        lastStore,
         session,
         mfaRequired,
         account,

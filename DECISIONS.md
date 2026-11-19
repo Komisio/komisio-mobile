@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-11-19: My items follows the active store, with an explicit Komisio/store selector. Central links select Komisio instead of retaining a source query override. Remember the previous store for switching back; preserve account and tenant gates (#115).
+
 - 2026-11-19: Store item views identify the selected store and omit central-intake shortcuts. List/detail badges share tones based on seller-visible status; pending staff markdowns remain for sale at the recorded price. Shorten manual-price copy without changing price rules (#113).
 
 - 2026-11-19: Central item rows open owner-scoped details with description, labelled amounts and native photo paging. Move offer/shipping/withdrawal actions into details. Reuse private short-lived photos without persistent caching or new native dependencies (#110).
