@@ -23,7 +23,8 @@ import {
   externalSubmission,
 } from "@/lib/external-submission-runtime";
 import type { ExternalRequestPage } from "@/lib/external-submission";
-import { hasCentralIdentity, hasVerifiedEmail } from "@/lib/identity-gates";
+import { hasCentralIdentity } from "@/lib/identity-gates";
+import { ItemListContextPicker } from "./item-list-context-picker";
 import { useItemDraft } from "@/lib/use-item-draft";
 import { PhotoCapacity } from "./photo-flow-ui";
 import { ExternalItemRow } from "./external-item-row";
@@ -34,7 +35,7 @@ import { pushCopy } from "@/lib/push-copy";
 export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
   const { locale, d } = useI18n(),
     t = externalSubmissionCopy(locale);
-  const { session, store, signOut, refreshAssurance } = useSession();
+  const { session, signOut, refreshAssurance } = useSession();
   const { sent, request } = useLocalSearchParams<{
     sent?: string;
     request?: string;
@@ -157,10 +158,11 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
   if (!verified)
     return (
       <Screen
-        title={photoFlowCopy(locale).myItems}
+        title={inTab ? d.tabs.items : photoFlowCopy(locale).myItems}
         topSafeArea={inTab}
         bottomSafeArea={!inTab}
       >
+        {inTab ? <ItemListContextPicker /> : null}
         <Message>{t.loginIntro}</Message>
         <Button
           label={t.login}
@@ -175,7 +177,7 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
     );
   return (
     <Screen
-      title={inTab ? photoFlowCopy(locale).myItems : undefined}
+      title={inTab ? d.tabs.items : undefined}
       topSafeArea={inTab}
       bottomSafeArea={!inTab}
       refresh={{
@@ -184,6 +186,7 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
         label: d.retry,
       }}
     >
+      {inTab ? <ItemListContextPicker /> : null}
       {data?.requests.some((r) => r.id === sent) ? (
         <StatusBadge>{t.success}</StatusBadge>
       ) : null}
@@ -283,18 +286,6 @@ export function ExternalItemsScreen({ inTab = false }: { inTab?: boolean }) {
           label={pushCopy[locale].title}
           variant="text"
           onPress={() => router.push("/notifications")}
-        />
-      ) : null}
-      {store && hasVerifiedEmail(session?.user) ? (
-        <Button
-          label={t.toStore}
-          variant="text"
-          onPress={() =>
-            router.replace({
-              pathname: "/(tabs)/items",
-              params: { source: "store" },
-            })
-          }
         />
       ) : null}
       <Button

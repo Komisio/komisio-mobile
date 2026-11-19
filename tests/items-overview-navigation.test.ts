@@ -32,6 +32,7 @@ test("overview filter intent clears old search once and does not override later 
   let focus: () => unknown;
   const reads: string[] = [];
   const modules: Record<string, unknown> = {
+    "./item-list-context-picker": { ItemListContextPicker: "ContextPicker" },
     react: {
       useState: () => {
         const index = hook++;
@@ -129,7 +130,6 @@ test("overview filter intent clears old search once and does not override later 
     exports.SellerItems({
       tenant: "tenant",
       seller: "seller",
-      storeName: "Synthetic store",
     });
   };
   render();

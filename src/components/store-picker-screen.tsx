@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
@@ -19,6 +19,7 @@ import {
 export default function ChooseStore() {
   const { d } = useI18n();
   const { chooseStore, session } = useSession();
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const [stores, setStores] = useState<AppStore[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [query, setQuery] = useState("");
@@ -83,6 +84,10 @@ export default function ChooseStore() {
                 label={s.name}
                 onPress={() => {
                   chooseStore(s);
+                  if (returnTo === "items" && hasVerifiedEmail(session?.user)) {
+                    router.dismissTo("/(tabs)/items");
+                    return;
+                  }
                   router.push(
                     hasVerifiedEmail(session?.user) ? "/home/shop" : "/login",
                   );
