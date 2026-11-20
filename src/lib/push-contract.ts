@@ -11,7 +11,10 @@ export type SellerPushData = {
 export type ExternalPushData = {
   v: 2;
   notificationId: string;
-  kind: "external_item_offered" | "external_item_declined";
+  kind:
+    | "external_item_offered"
+    | "external_item_declined"
+    | "external_item_purchased";
   tenantId: string;
   ownerId: string;
   requestId: string;
@@ -24,9 +27,11 @@ export function parsePushData(input: unknown): PushData | null {
   if (d.v === 2) {
     if (
       ![d.notificationId, d.tenantId, d.ownerId, d.requestId].every(isId) ||
-      !["external_item_offered", "external_item_declined"].includes(
-        String(d.kind),
-      ) ||
+      ![
+        "external_item_offered",
+        "external_item_declined",
+        "external_item_purchased",
+      ].includes(String(d.kind)) ||
       (d.kind === "external_item_offered"
         ? !isId(d.offerId)
         : d.offerId !== null)

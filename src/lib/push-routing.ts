@@ -30,9 +30,7 @@ export async function externalPushDestination(
   readRequest: (
     id: string,
   ) => Promise<{ id: string; tenant_id: string } | null>,
-  readOffer: (
-    id: string,
-  ) => Promise<{
+  readOffer: (id: string) => Promise<{
     id: string;
     requestId: string;
     tenantId: string;
@@ -43,6 +41,11 @@ export async function externalPushDestination(
   const item = await readRequest(p.requestId);
   if (!item || item.id !== p.requestId || item.tenant_id !== p.tenantId)
     return null;
+  if (p.kind === "external_item_purchased")
+    return {
+      pathname: "/external-item/[request]" as const,
+      params: { request: item.id },
+    };
   if (!p.offerId)
     return {
       pathname: "/external-items" as const,
