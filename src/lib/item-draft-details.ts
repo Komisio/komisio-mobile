@@ -68,7 +68,7 @@ export function parseItemDraftDetails(value: unknown): ItemDraftDetails {
     condition: v.condition as ItemCondition | null,
   };
 }
-/** A seller's optional price wish; no price, payout or guarantee is set here. */
+/** Parse the entered amount exactly; partial drafts can still be saved. */
 export function requestedPriceOre(input: string): string | null {
   const value = input.trim();
   if (!value) return null;
@@ -87,7 +87,8 @@ export function itemDetailsErrors(
   if (!details.description.trim()) errors.push("description");
   if (!details.condition) errors.push("condition");
   try {
-    if (requestedPriceOre(details.desiredSellerAmount) === null)
+    const amount = requestedPriceOre(details.desiredSellerAmount);
+    if (amount === null || BigInt(amount) < 30_000n)
       errors.push("desiredSellerAmount");
   } catch {
     errors.push("desiredSellerAmount");

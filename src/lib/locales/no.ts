@@ -370,7 +370,9 @@ export default {
   },
   soon: "Denne visningen bygges i neste steg.",
   profile: {
-    signedInAs: "Logget inn som",
+    signedIn: "Logget inn",
+    signedInVia: "Logget inn med {provider}",
+    signedInEmail: "Logget inn med e-post",
     store: "Butikk",
     back: "Tilbake til profilen",
     logoutFailed: "Kunne ikke logge ut. Prøv igjen.",

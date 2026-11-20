@@ -1,4 +1,5 @@
 import { isId } from "./catalogue.ts";
+import { currencyLabel } from "./locale.ts";
 import type { CommandOutcome } from "./pending-command.ts";
 
 import { isSaleMethod, type SaleMethod } from "./item-draft-details.ts";
@@ -230,7 +231,7 @@ export function offerAmount(ore: string, locale: string, currency = "SEK") {
   const formatter = new Intl.NumberFormat(locale);
   const whole = formatter.format(Number(minor / 100n));
   const decimal = formatter.format(1.1).replace(/[0-9]/g, "");
-  return `${whole}${fraction ? decimal + String(fraction).padStart(2, "0") : ""} ${currency === "SEK" && locale.startsWith("sv") ? "kr" : currency}`;
+  return `${whole}${fraction ? decimal + String(fraction).padStart(2, "0") : ""} ${currencyLabel(currency, locale)}`;
 }
 /** Server time plus elapsed monotonic time; a wrong device clock cannot extend an offer. */
 export function offerIsExpired(offer: ExternalOffer, elapsedMs: number) {

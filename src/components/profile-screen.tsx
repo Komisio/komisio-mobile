@@ -5,7 +5,11 @@ import { router } from "expo-router";
 import { useI18n } from "@/lib/i18n";
 import { useSession } from "@/lib/session";
 import { pushCopy } from "@/lib/push-copy";
-import { centralIdentityEmail, hasVerifiedEmail } from "@/lib/identity-gates";
+import {
+  centralIdentityEmail,
+  hasVerifiedEmail,
+  profileSessionMethod,
+} from "@/lib/identity-gates";
 import { CentralShippingAddress } from "./central-shipping-address";
 import { accountAuthCopy } from "@/lib/account-auth-copy";
 import { accountDeletionCopy } from "@/lib/account-deletion-copy";
@@ -25,11 +29,20 @@ import {
 
 export function ProfileScreen() {
   const { d, locale } = useI18n();
-  const { session, store, signOut } = useSession();
+  const { session, store, signOut, signInMethods } = useSession();
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const storeAccount = Boolean(store && hasVerifiedEmail(session?.user));
   const identity = centralIdentityEmail(session?.user);
+  const provider = session
+    ? profileSessionMethod(session.user, signInMethods)
+    : null;
+  const signInLabel =
+    provider === "email"
+      ? d.profile.signedInEmail
+      : provider
+        ? d.profile.signedInVia.replace("{provider}", provider)
+        : d.profile.signedIn;
   const logout = async () => {
     if (busy) return;
     setBusy(true);
@@ -52,13 +65,10 @@ export function ProfileScreen() {
             <View style={styles.identity}>
               <SettingIcon source={require("../../assets/icons/profile.svg")} />
               <View style={styles.identityText}>
-                <Text style={styles.caption}>
+                <Text style={styles.signInLabel}>
                   {identity
-                    ? d.profile.signedInAs
-                    : accountAuthCopy(locale).methods}
-                </Text>
-                <Text selectable style={styles.email}>
-                  {identity ?? accountAuthCopy(locale).needsIdentity}
+                    ? signInLabel
+                    : accountAuthCopy(locale).needsIdentity}
                 </Text>
               </View>
             </View>
@@ -216,7 +226,7 @@ const styles = StyleSheet.create({
   },
   identityText: { flex: 1, minWidth: 0, gap: 2 },
   logout: { marginLeft: "auto", maxWidth: "100%" },
-  email: { fontSize: 15, lineHeight: 22, color: colors.text },
+  signInLabel: { fontSize: 15, lineHeight: 22, color: colors.text },
   caption: { fontSize: 13, lineHeight: 18, color: colors.muted },
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
   value: { flex: 1, minWidth: 0, gap: 2 },

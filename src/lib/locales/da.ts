@@ -369,7 +369,9 @@ export default {
   },
   soon: "Denne visning bygges i næste trin.",
   profile: {
-    signedInAs: "Logget ind som",
+    signedIn: "Logget ind",
+    signedInVia: "Logget ind med {provider}",
+    signedInEmail: "Logget ind med e-mail",
     store: "Butik",
     back: "Tilbage til profilen",
     logoutFailed: "Kunne ikke logge ud. Prøv igen.",

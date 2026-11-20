@@ -148,6 +148,16 @@ test("price wishes use exact minor-unit strings and partial drafts remain editab
     "NaN",
   ])
     assert.throws(() => requestedPriceOre(input));
+  for (const amount of ["299,99", "299.99", "0,01"])
+    assert.deepEqual(
+      itemDetailsErrors({ ...details, desiredSellerAmount: amount }),
+      ["desiredSellerAmount"],
+    );
+  for (const amount of ["300", "300,00", "300.01"])
+    assert.deepEqual(
+      itemDetailsErrors({ ...details, desiredSellerAmount: amount }),
+      [],
+    );
   assert.deepEqual(itemDetailsErrors(emptyItemDetails()), [
     "description",
     "condition",

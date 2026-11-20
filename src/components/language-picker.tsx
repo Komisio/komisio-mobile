@@ -18,7 +18,7 @@ export function LanguagePicker() {
         open={open}
         onClose={() => setOpen(false)}
       >
-        <LanguageOptions />
+        <LanguageOptions onSelected={() => setOpen(false)} />
       </DetailSheet>
     </>
   );

@@ -1,5 +1,46 @@
 import type { User } from "@supabase/supabase-js";
 
+export type SignInMethod =
+  string | { method: string; timestamp?: number; provider?: string };
+
+// Presentation only. The first linked identity is not necessarily the sign-in method.
+export function profileSessionMethod(
+  user: User,
+  methods: readonly SignInMethod[] = [],
+) {
+  const identities = (user.identities ?? []).filter(
+    (i) => i.user_id === user.id,
+  );
+  const social = identities.filter(
+    (i) => i.provider === "apple" || i.provider === "google",
+  );
+  const brand = (provider: string) =>
+    provider === "apple" ? "Apple" : "Google";
+  for (const entry of methods) {
+    const method = typeof entry === "string" ? entry : entry.method;
+    if (["password", "otp", "magiclink", "email/signup"].includes(method))
+      return hasVerifiedEmail(user) ? "email" : null;
+    if (method !== "oauth" && method !== "id_token") continue;
+    if (social.length === 1) return brand(social[0].provider);
+    if (typeof entry !== "string") {
+      const explicit = social.find((i) => i.provider === entry.provider);
+      if (explicit) return brand(explicit.provider);
+      const at = entry.timestamp;
+      const matched = social.filter(
+        (i) =>
+          i.last_sign_in_at &&
+          Math.floor(Date.parse(i.last_sign_in_at) / 1000) === at,
+      );
+      if (matched.length === 1) return brand(matched[0].provider);
+    }
+    return null;
+  }
+  if (social.length === 1 && identities.length === 1)
+    return brand(social[0].provider);
+  if (!social.length && hasVerifiedEmail(user)) return "email";
+  return null;
+}
+
 // Navigation hints only. Server policies independently check identity and MFA.
 // Contact details never grant access to a seller account.
 export function hasVerifiedEmail(user: User | undefined) {

@@ -9,6 +9,7 @@ import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
 import { photoFlowCopy } from "@/lib/photo-flow-copy";
 import { useItemDraft } from "@/lib/use-item-draft";
 import { useI18n } from "@/lib/i18n";
+import { currencyLabel } from "@/lib/locale";
 import { useSession } from "@/lib/session";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
@@ -198,6 +199,7 @@ export function PhotoReviewScreen() {
         />
       </Screen>
     );
+  const currency = currencyLabel(draft.store.currency, locale);
   return (
     <Screen topSafeArea={false} keyboardInsets>
       <PhotoStep step={3} />
@@ -238,13 +240,10 @@ export function PhotoReviewScreen() {
             {details.desiredSellerAmount.trim() ? (
               <>
                 <Text style={uiStyles.body}>
-                  {t.desiredSellerAmount.replace(
-                    "{currency}",
-                    draft.store.currency,
-                  )}
+                  {t.desiredSellerAmount.replace("{currency}", currency)}
                 </Text>
                 <Text selectable style={uiStyles.rowTitle}>
-                  {details.desiredSellerAmount} {draft.store.currency}
+                  {details.desiredSellerAmount} {currency}
                 </Text>
               </>
             ) : null}

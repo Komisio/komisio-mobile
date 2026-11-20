@@ -38,6 +38,7 @@ async function render(
   expectedTenant: string | undefined,
   account: object | null,
   primary: boolean,
+  bank = false,
 ) {
   let read: ReturnType<typeof createScopedRead<any>> | undefined;
   const session = {
@@ -99,6 +100,7 @@ async function render(
   );
   const root = CentralPayoutAccount({
     tenant: expectedTenant,
+    bank,
     children: (scope: any) => scope,
   });
   root.type(root.props);
@@ -126,11 +128,18 @@ test("a stale recipient or missing central seller never falls back to a shop sel
     centralPayoutCopy.sv.empty,
   );
 });
-test("a provider-only legacy seller stays on the same account at the financial email gate", async () => {
+test("a provider-only seller goes directly to Money and only confirms email for bank administration", async () => {
+  const money = await render(
+    tenant,
+    { tenantId: tenant, sellerId: seller },
+    false,
+  );
+  assert.deepEqual({ ...money }, { user: first, tenant, seller });
   const gate = await render(
     tenant,
     { tenantId: tenant, sellerId: seller },
     false,
+    true,
   );
   assert.equal(gate.type, "PrimaryEmail");
   assert.equal(gate.props.owner, first);

@@ -15,6 +15,7 @@ import { DetailSheet } from "./detail-sheet";
 import { PhotoStep, PhotoStrip } from "./photo-flow-ui";
 import { centralIntakeCopy } from "@/lib/central-intake-copy";
 import { useI18n } from "@/lib/i18n";
+import { currencyLabel } from "@/lib/locale";
 import { itemDraftCopy } from "@/lib/item-draft-copy";
 import { photoDraftCopy } from "@/lib/photo-draft-copy";
 import {
@@ -165,7 +166,7 @@ export function PhotoDetailsScreen() {
         />
       </Screen>
     );
-  const currency = snapshot.draft.store.currency;
+  const currency = currencyLabel(snapshot.draft.store.currency, locale);
   const issueText = {
     description: t.requiredDescription,
     condition: t.requiredCondition,
@@ -275,6 +276,7 @@ export function PhotoDetailsScreen() {
           </View>
           <Text style={uiStyles.body}>{currency}</Text>
         </View>
+        <Text style={uiStyles.note}>{t.priceHint}</Text>
         <Button
           label={t.payoutQuestion}
           variant="text"
@@ -288,7 +290,7 @@ export function PhotoDetailsScreen() {
             onClose={() => setShowPayoutInfo(false)}
           >
             <Text style={uiStyles.body}>{t.payoutTiming}</Text>
-            <Text style={uiStyles.body}>{t.payoutRequest}</Text>
+            <Text style={uiStyles.body}>{t.payoutOnSale}</Text>
           </DetailSheet>
         ) : null}
       </View>

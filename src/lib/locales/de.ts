@@ -380,7 +380,9 @@ export default {
   },
   soon: "Diese Ansicht wird im nächsten Schritt erstellt.",
   profile: {
-    signedInAs: "Angemeldet als",
+    signedIn: "Angemeldet",
+    signedInVia: "Mit {provider} angemeldet",
+    signedInEmail: "Mit E-Mail angemeldet",
     store: "Geschäft",
     back: "Zurück zum Profil",
     logoutFailed: "Abmelden fehlgeschlagen. Versuche es erneut.",

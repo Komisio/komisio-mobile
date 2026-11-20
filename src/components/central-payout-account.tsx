@@ -16,13 +16,18 @@ import { Button, Loading, Message, Screen } from "./ui";
 
 type Props = {
   tenant?: string;
+  bank?: boolean;
   children: (scope: {
     user: string;
     tenant: string;
     seller: string;
   }) => ReactNode;
 };
-export function CentralPayoutAccount({ tenant, children }: Props) {
+export function CentralPayoutAccount({
+  tenant,
+  bank = false,
+  children,
+}: Props) {
   const { session, mfaRequired } = useSession(),
     { d } = useI18n();
   if (!session || mfaRequired || !hasCentralIdentity(session.user))
@@ -35,7 +40,7 @@ export function CentralPayoutAccount({ tenant, children }: Props) {
     <OwnedAccount
       key={JSON.stringify([session.user.id, tenant])}
       user={session.user.id}
-      primaryEmail={hasVerifiedEmail(session.user)}
+      needsBankEmail={bank && !hasVerifiedEmail(session.user)}
       tenant={tenant}
     >
       {children}
@@ -45,10 +50,10 @@ export function CentralPayoutAccount({ tenant, children }: Props) {
 
 function OwnedAccount({
   user,
-  primaryEmail,
+  needsBankEmail,
   tenant,
   children,
-}: Props & { user: string; primaryEmail: boolean }) {
+}: Props & { user: string; needsBankEmail: boolean }) {
   const { d, locale } = useI18n();
   // Resolve the explicitly owned central seller independently of the selected store.
   const read = useMemo(
@@ -78,7 +83,11 @@ function OwnedAccount({
     scope &&
     (tenant === undefined || tenant === scope.tenant)
   ) {
-    return primaryEmail ? children(scope) : <CentralPayoutEmail owner={user} />;
+    return needsBankEmail ? (
+      <CentralPayoutEmail owner={user} />
+    ) : (
+      children(scope)
+    );
   }
   return (
     <Screen title={`${d.tabs.money} · Komisio`}>

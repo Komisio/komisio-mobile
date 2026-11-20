@@ -29,3 +29,6 @@ export function matchLocale(value: string | null | undefined): Locale | null {
 export function formattingLocale(value: string): string {
   return tags[matchLocale(value) ?? "en"];
 }
+export function currencyLabel(currency: string, locale: string): string {
+  return currency === "SEK" && matchLocale(locale) === "sv" ? "kr" : currency;
+}

@@ -95,6 +95,24 @@ test("central decision pushes resolve authenticated request/offer bindings witho
     )?.pathname,
     "/external-onboarding/[offer]",
   );
+  const purchase = parsePushData({
+    ...p,
+    kind: "external_item_purchased",
+    offerId: null,
+  });
+  assert(purchase?.v === 2);
+  assert.equal(parsePushData({ ...purchase, offerId: offer }), null);
+  assert.deepEqual(
+    await externalPushDestination(purchase, user, item, readOffer),
+    {
+      pathname: "/external-item/[request]",
+      params: { request },
+    },
+  );
+  assert.equal(
+    await externalPushDestination(purchase, randomUUID(), item, readOffer),
+    null,
+  );
   for (const patch of [
     { offerId: null },
     { ownerId: "bad" },

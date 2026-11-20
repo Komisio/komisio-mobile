@@ -10,6 +10,36 @@ import { accountDeletionCopy } from "../src/lib/account-deletion-copy.ts";
 import { storeSellerCopy } from "../src/lib/store-seller-copy.ts";
 import * as identityGates from "../src/lib/identity-gates.ts";
 
+test("linked providers use this session's sign-in method and do not guess for an ambiguous session", () => {
+  const user = {
+    id: "owner",
+    email: "relay@example.test",
+    email_confirmed_at: "2026-11-19",
+    identities: [
+      {
+        user_id: "owner",
+        provider: "apple",
+        last_sign_in_at: "2026-11-19T10:00:00.300Z",
+      },
+      {
+        user_id: "owner",
+        provider: "google",
+        last_sign_in_at: "2026-11-19T12:00:00.100Z",
+      },
+    ],
+  } as unknown as Parameters<typeof identityGates.profileSessionMethod>[0];
+  const method = identityGates.profileSessionMethod;
+  assert.equal(
+    method(user, [
+      { method: "oauth", timestamp: Date.parse("2026-11-19T12:00:00Z") / 1000 },
+    ]),
+    "Google",
+  );
+  assert.equal(method(user, [{ method: "oauth", provider: "apple" }]), "Apple");
+  assert.equal(method(user, ["otp"]), "email");
+  assert.equal(method(user, ["oauth"]), null);
+});
+
 const require = createRequire(import.meta.url);
 function compile(file: string, modules: Record<string, unknown>) {
   const { code } = require("@babel/core").transformSync(
@@ -89,7 +119,7 @@ test("profile exposes one store action, language detail, financial links and log
         locale: "en",
         d: {
           tabs: { profile: "Profile" },
-          profile: { signedInAs: "Signed in as", store: "Store" },
+          profile: dictionaries.en.profile,
           account: { logout: "Log out" },
           store: { title: "Choose store" },
           storeInfo: { title: "Store information" },
@@ -165,10 +195,7 @@ test("profile exposes one store action, language detail, financial links and log
   ]);
   assert.ok(
     tree.some(
-      (n) =>
-        n.type === "Text" &&
-        n.props.children === "seller@example.test" &&
-        n.props.selectable,
+      (n) => n.type === "Text" && n.props.children === "Signed in with email",
     ),
   );
   session = {
@@ -188,9 +215,10 @@ test("profile exposes one store action, language detail, financial links and log
   const central = nodes(screen.ProfileScreen());
   assert.ok(
     central.some(
-      (n) => n.type === "Text" && n.props.children === "relay@example.test",
+      (n) => n.type === "Text" && n.props.children === "Signed in with Apple",
     ),
   );
+  assert.ok(!central.some((n) => n.props.children === "relay@example.test"));
   assert.equal(
     central.filter((n) => n.type === "CentralShippingAddress").length,
     1,
@@ -215,8 +243,10 @@ test("profile exposes one store action, language detail, financial links and log
     ),
   );
 });
-test("language detail presents supported native names and selection dispatches the stored locale code", () => {
+test("language options close on a saved selection and stay open for a retry on failure", async () => {
   const changes: string[] = [];
+  let saved = true;
+  let closes = 0;
   const screen = compile("../src/components/language-options.tsx", {
     "react-native": { View: "View" },
     "@/lib/i18n": {
@@ -225,14 +255,17 @@ test("language detail presents supported native names and selection dispatches t
       useI18n: () => ({
         d: { language: "Språk" },
         locale: "sv",
-        setLocale: (code: string) => changes.push(code),
+        setLocale: async (code: string) => {
+          changes.push(code);
+          return saved;
+        },
       }),
     },
     "./ui": { Choice: "Choice", Message: "Message" },
   });
-  const choices = nodes(screen.LanguageOptions()).filter(
-    (n) => n.type === "Choice",
-  );
+  const choices = nodes(
+    screen.LanguageOptions({ onSelected: () => closes++ }),
+  ).filter((n) => n.type === "Choice");
   assert.deepEqual(
     choices.map((n) => [n.props.label, n.props.selected]),
     [
@@ -247,6 +280,52 @@ test("language detail presents supported native names and selection dispatches t
     ],
   );
   assert.ok(choices.every((n) => n.props.role === "radio" && n.props.listRow));
-  choices.forEach((choice) => choice.props.onPress());
+  for (const choice of choices) await choice.props.onPress();
   assert.deepEqual(changes, [...locales]);
+  assert.equal(closes, locales.length);
+  saved = false;
+  await choices[1].props.onPress();
+  assert.equal(closes, locales.length);
+});
+
+test("selecting a language returns from Profile or dismisses the sheet in the store picker", () => {
+  const actions: string[] = [];
+  let focused = true;
+  let history = true;
+  const i18n = { useI18n: () => ({ d: dictionaries.sv }) };
+  const options = { LanguageOptions: "LanguageOptions" };
+  const route = compile("../src/app/language.tsx", {
+    "expo-router": {
+      useNavigation: () => ({ isFocused: () => focused }),
+      router: {
+        canGoBack: () => history,
+        back: () => actions.push("back"),
+        replace: (path: string) => actions.push(path),
+      },
+    },
+    "@/lib/i18n": i18n,
+    "@/components/ui": { Screen: "Screen" },
+    "@/components/language-options": options,
+  });
+  const selected = nodes(route.default()).find(
+    (n) => n.type === "LanguageOptions",
+  ).props.onSelected;
+  selected();
+  history = false;
+  selected();
+  focused = false;
+  selected();
+  assert.deepEqual(actions, ["back", "/(tabs)/profile"]);
+
+  const visibility: boolean[] = [];
+  const sheet = compile("../src/components/language-picker.tsx", {
+    react: { useState: () => [true, (open: boolean) => visibility.push(open)] },
+    "@/lib/i18n": i18n,
+    "./ui": { NavigationRow: "NavigationRow" },
+    "./detail-sheet": { DetailSheet: "DetailSheet" },
+    "./language-options": options,
+  });
+  const picker = nodes(sheet.LanguagePicker());
+  picker.find((n) => n.type === "LanguageOptions").props.onSelected();
+  assert.deepEqual(visibility, [false]);
 });

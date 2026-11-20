@@ -64,7 +64,7 @@ test("fixed-price submission survives a lost HTTP response and remains readable 
   assert.equal(f.finished[0].preserve, false);
   assert.equal(
     (await api.lookup(attempt.command.requestId))?.desired_price_ore,
-    "10050",
+    "30050",
   );
   assert.equal((await api.list()).requests[0].agreement_version_id, id(950));
 });
@@ -85,6 +85,8 @@ test("new submissions require an amount and the displayed agreement before prepa
   );
   const empty = snapshot();
   empty.draft.details.desiredSellerAmount = "";
+  await assert.rejects(f.controller().prepare(empty, "SE", id(950)));
+  empty.draft.details.desiredSellerAmount = "299,99";
   await assert.rejects(f.controller().prepare(empty, "SE", id(950)));
   assert.equal(f.calls.length, 0);
   const prepared = await f.controller().prepare(snapshot(), "SE", id(950));
@@ -133,7 +135,7 @@ function snapshot(): ItemDraftSnapshot {
         brand: "Test",
         condition: "good",
         notes: "",
-        desiredSellerAmount: "100,50",
+        desiredSellerAmount: "300,50",
         saleMethod: "direct_purchase",
       },
     },
@@ -249,7 +251,7 @@ test("preparation freezes the displayed draft and exact ore before yielding", as
   draft.draft.details.description = "Changed while preparing";
   const prepared = await result;
   assert.equal(prepared.command.description, "Jacket");
-  assert.equal(prepared.command.desiredPriceOre, "10050");
+  assert.equal(prepared.command.desiredPriceOre, "30050");
   assert.equal(prepared.state, "pending");
   assert.deepEqual(f.calls, []);
   assert.equal(f.bytes.size, 1);
