@@ -372,7 +372,9 @@ export default {
   },
   soon: "Questa schermata verrà realizzata nella fase successiva.",
   profile: {
-    signedInAs: "Accesso come",
+    signedIn: "Accesso effettuato",
+    signedInVia: "Accesso con {provider}",
+    signedInEmail: "Accesso con e-mail",
     store: "Negozio",
     back: "Torna al profilo",
     logoutFailed: "Impossibile uscire. Riprova.",

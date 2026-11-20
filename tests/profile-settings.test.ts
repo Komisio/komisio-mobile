@@ -10,6 +10,36 @@ import { accountDeletionCopy } from "../src/lib/account-deletion-copy.ts";
 import { storeSellerCopy } from "../src/lib/store-seller-copy.ts";
 import * as identityGates from "../src/lib/identity-gates.ts";
 
+test("linked providers use this session's sign-in method and do not guess for an ambiguous session", () => {
+  const user = {
+    id: "owner",
+    email: "relay@example.test",
+    email_confirmed_at: "2026-11-19",
+    identities: [
+      {
+        user_id: "owner",
+        provider: "apple",
+        last_sign_in_at: "2026-11-19T10:00:00.300Z",
+      },
+      {
+        user_id: "owner",
+        provider: "google",
+        last_sign_in_at: "2026-11-19T12:00:00.100Z",
+      },
+    ],
+  } as unknown as Parameters<typeof identityGates.profileSessionMethod>[0];
+  const method = identityGates.profileSessionMethod;
+  assert.equal(
+    method(user, [
+      { method: "oauth", timestamp: Date.parse("2026-11-19T12:00:00Z") / 1000 },
+    ]),
+    "Google",
+  );
+  assert.equal(method(user, [{ method: "oauth", provider: "apple" }]), "Apple");
+  assert.equal(method(user, ["otp"]), "email");
+  assert.equal(method(user, ["oauth"]), null);
+});
+
 const require = createRequire(import.meta.url);
 function compile(file: string, modules: Record<string, unknown>) {
   const { code } = require("@babel/core").transformSync(
@@ -89,7 +119,7 @@ test("profile exposes one store action, language detail, financial links and log
         locale: "en",
         d: {
           tabs: { profile: "Profile" },
-          profile: { signedInAs: "Signed in as", store: "Store" },
+          profile: dictionaries.en.profile,
           account: { logout: "Log out" },
           store: { title: "Choose store" },
           storeInfo: { title: "Store information" },
@@ -165,10 +195,7 @@ test("profile exposes one store action, language detail, financial links and log
   ]);
   assert.ok(
     tree.some(
-      (n) =>
-        n.type === "Text" &&
-        n.props.children === "seller@example.test" &&
-        n.props.selectable,
+      (n) => n.type === "Text" && n.props.children === "Signed in with email",
     ),
   );
   session = {
@@ -188,9 +215,10 @@ test("profile exposes one store action, language detail, financial links and log
   const central = nodes(screen.ProfileScreen());
   assert.ok(
     central.some(
-      (n) => n.type === "Text" && n.props.children === "relay@example.test",
+      (n) => n.type === "Text" && n.props.children === "Signed in with Apple",
     ),
   );
+  assert.ok(!central.some((n) => n.props.children === "relay@example.test"));
   assert.equal(
     central.filter((n) => n.type === "CentralShippingAddress").length,
     1,

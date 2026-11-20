@@ -373,7 +373,9 @@ export default {
   },
   soon: "Esta vista se creará en el siguiente paso.",
   profile: {
-    signedInAs: "Sesión iniciada como",
+    signedIn: "Sesión iniciada",
+    signedInVia: "Sesión iniciada con {provider}",
+    signedInEmail: "Sesión iniciada con correo electrónico",
     store: "Tienda",
     back: "Volver al perfil",
     logoutFailed: "No se pudo cerrar la sesión. Inténtalo de nuevo.",

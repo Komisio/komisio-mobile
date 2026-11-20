@@ -1,5 +1,7 @@
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
+import type { SignInMethod } from "./identity-gates";
+
 // Session and two-step state for the protected routes. "ready" is reached only
 // once both are known; any failure to read them (for example a rejected
 // secure-storage read) leaves the app in "failed" with a retry, never in a
@@ -8,6 +10,7 @@ export type AuthState = {
   status: "loading" | "failed" | "ready";
   session: Session | null;
   mfaRequired: boolean;
+  signInMethods?: readonly SignInMethod[];
 };
 
 type Auth = Pick<
@@ -16,7 +19,11 @@ type Auth = Pick<
 >;
 
 export function createAuthBootstrap(auth: Auth) {
-  let state: AuthState = { status: "loading", session: null, mfaRequired: false };
+  let state: AuthState = {
+    status: "loading",
+    session: null,
+    mfaRequired: false,
+  };
   const listeners = new Set<() => void>();
   let run = 0;
   const set = (next: AuthState) => {
@@ -24,11 +31,14 @@ export function createAuthBootstrap(auth: Auth) {
     listeners.forEach((l) => l());
   };
 
-  const mfaRequired = async (session: Session | null) => {
-    if (!session) return false;
+  const assurance = async (session: Session | null) => {
+    if (!session) return { mfaRequired: false };
     const { data, error } = await auth.mfa.getAuthenticatorAssuranceLevel();
     if (error || !data) throw error ?? new Error("AAL_UNAVAILABLE");
-    return data.nextLevel === "aal2" && data.currentLevel !== "aal2";
+    return {
+      mfaRequired: data.nextLevel === "aal2" && data.currentLevel !== "aal2",
+      signInMethods: data.currentAuthenticationMethods,
+    };
   };
 
   // Auth events are followed only after storage has been read once: the
@@ -50,11 +60,12 @@ export function createAuthBootstrap(auth: Auth) {
     const id = ++run;
     try {
       const session = await read();
-      const required = await mfaRequired(session);
-      if (id === run) set({ status: "ready", session, mfaRequired: required });
+      const result = await assurance(session);
+      if (id === run) set({ status: "ready", session, ...result });
       follow();
     } catch {
-      if (id === run) set({ status: "failed", session: null, mfaRequired: false });
+      if (id === run)
+        set({ status: "failed", session: null, mfaRequired: false });
     }
   };
 

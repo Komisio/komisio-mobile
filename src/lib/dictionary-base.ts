@@ -70,7 +70,9 @@ export const sv = {
   },
   soon: "Den här vyn byggs i nästa steg.",
   profile: {
-    signedInAs: "Inloggad som",
+    signedIn: "Inloggad",
+    signedInVia: "Inloggad via {provider}",
+    signedInEmail: "Inloggad med e-post",
     store: "Butik",
     back: "Tillbaka till profil",
     logoutFailed: "Det gick inte att logga ut. Försök igen.",
@@ -142,7 +144,9 @@ export const en: Dictionary = {
   },
   soon: "This view is built in the next step.",
   profile: {
-    signedInAs: "Signed in as",
+    signedIn: "Signed in",
+    signedInVia: "Signed in with {provider}",
+    signedInEmail: "Signed in with email",
     store: "Store",
     back: "Back to profile",
     logoutFailed: "Could not log out. Try again.",

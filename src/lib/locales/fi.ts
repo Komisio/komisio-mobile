@@ -368,7 +368,9 @@ export default {
   },
   soon: "Tämä näkymä toteutetaan seuraavassa vaiheessa.",
   profile: {
-    signedInAs: "Kirjautuneena",
+    signedIn: "Kirjautunut sisään",
+    signedInVia: "Kirjautumistapa: {provider}",
+    signedInEmail: "Kirjautumistapa: sähköposti",
     store: "Myymälä",
     back: "Takaisin profiiliin",
     logoutFailed: "Uloskirjautuminen epäonnistui. Yritä uudelleen.",

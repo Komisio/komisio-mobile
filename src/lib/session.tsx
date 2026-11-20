@@ -18,7 +18,7 @@ import {
 import { createAuthBootstrap } from "./auth-bootstrap";
 import { setCommandUser } from "./command-storage";
 import { sellerPush } from "./push-runtime";
-import { hasVerifiedEmail } from "./identity-gates";
+import { hasVerifiedEmail, type SignInMethod } from "./identity-gates";
 import { watchAppleRevocation } from "./apple-credential";
 
 export type { AppStore } from "./store-preferences";
@@ -39,6 +39,7 @@ type State = {
   lastStore: AppStore | null;
   session: Session | null;
   mfaRequired: boolean;
+  signInMethods?: readonly SignInMethod[];
   // undefined while loading; null when the seller has no account in the
   // store; "failed" when the lookup could not be made.
   account: SellerAccount | null | "failed" | undefined;
@@ -207,6 +208,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         lastStore,
         session,
         mfaRequired,
+        signInMethods: auth.signInMethods,
         account,
         retryAccount: () => setAttempt((n) => n + 1),
         chooseStore,
