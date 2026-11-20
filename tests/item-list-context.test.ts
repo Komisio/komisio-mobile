@@ -157,8 +157,47 @@ test("the visible picker switches back to the remembered store and clears stale 
   assert.equal(routes[0], "/home/stores");
 });
 
-function provider(saved: Record<string, string>) {
+function provider(
+  saved: Record<string, string>,
+  documents?: Map<string, string>,
+) {
   const storage = new Map(Object.entries(saved));
+  const preferences = compilePreview("lib/store-preferences.ts", {
+    "react-native": { Platform: { OS: documents ? "ios" : "android" } },
+    "./secure-storage": {
+      secureStorage: {
+        getItem: async (key: string) => storage.get(key) ?? null,
+        setItem: async (key: string, value: string) => storage.set(key, value),
+        removeItem: async (key: string) => storage.delete(key),
+      },
+    },
+    "expo-file-system": {
+      Paths: { document: "app-documents" },
+      File: class File {
+        readonly name: string;
+        constructor(directory: string, name: string) {
+          assert.equal(directory, "app-documents");
+          this.name = name;
+        }
+        get exists() {
+          return documents!.has(this.name);
+        }
+        async text() {
+          return documents!.get(this.name);
+        }
+        create() {
+          documents!.set(this.name, "");
+        }
+        async write(value: string) {
+          documents!.set(this.name, value);
+        }
+        async move(dest: File) {
+          documents!.set(dest.name, documents!.get(this.name)!);
+          documents!.delete(this.name);
+        }
+      },
+    },
+  });
   const slots: any[] = [],
     effects: (() => unknown)[] = [];
   let cursor = 0,
@@ -202,17 +241,7 @@ function provider(saved: Record<string, string>) {
         },
       },
     },
-    "./secure-storage": {
-      secureStorage: {
-        getItem: async (key: string) => storage.get(key) ?? null,
-        setItem: async (key: string, value: string) => {
-          storage.set(key, value);
-        },
-        removeItem: async (key: string) => {
-          storage.delete(key);
-        },
-      },
-    },
+    "./store-preferences": preferences,
     "./auth-bootstrap": { createAuthBootstrap: () => auth },
     "./command-storage": { setCommandUser() {} },
     "./push-runtime": { sellerPush: {} },
@@ -252,4 +281,31 @@ test("central intake retains the previous store and rapid switches persist the f
   await tick();
   assert.equal(restored.render().store, null);
   assert.equal(restored.render().lastStore.id, store.id);
+});
+
+test("iOS remembers the selected store until the app is deleted, even when the old Keychain survives", async () => {
+  const keychain = {
+    "komisio.store": JSON.stringify(store),
+    "komisio.lastStore": JSON.stringify(store),
+  };
+  const documents = new Map<string, string>();
+  const installed = provider(keychain, documents);
+  await tick();
+  assert.equal(installed.render().store, null);
+  assert.equal(installed.render().lastStore, null);
+  installed.render().chooseStore(otherStore);
+  await tick();
+  const reopened = provider(keychain, documents);
+  await tick();
+  assert.equal(reopened.render().store.id, otherStore.id);
+  reopened.render().chooseStore(null);
+  await tick();
+  const updated = provider(keychain, documents);
+  await tick();
+  assert.equal(updated.render().store, null);
+  assert.equal(updated.render().lastStore.id, otherStore.id);
+  const reinstalled = provider(keychain, new Map());
+  await tick();
+  assert.equal(reinstalled.render().store, null);
+  assert.equal(reinstalled.render().lastStore, null);
 });

@@ -10,22 +10,23 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
-import { secureStorage } from "./secure-storage";
+import {
+  readStorePreferences,
+  saveStorePreferences,
+  type AppStore,
+} from "./store-preferences";
 import { createAuthBootstrap } from "./auth-bootstrap";
 import { setCommandUser } from "./command-storage";
 import { sellerPush } from "./push-runtime";
 import { hasVerifiedEmail } from "./identity-gates";
 import { watchAppleRevocation } from "./apple-credential";
 
-export type AppStore = { id: string; name: string; slug: string };
+export type { AppStore } from "./store-preferences";
 export type SellerAccount = {
   tenantId: string;
   sellerId: string;
   storeName: string;
 };
-
-const STORE_KEY = "komisio.store";
-const LAST_STORE_KEY = "komisio.lastStore";
 
 const authState = createAuthBootstrap(supabase.auth);
 
@@ -49,20 +50,12 @@ type State = {
 
 const SessionContext = createContext<State | null>(null);
 
-function isStore(value: unknown): value is AppStore {
-  const v = value as AppStore;
-  return (
-    typeof v?.id === "string" &&
-    typeof v.name === "string" &&
-    typeof v.slug === "string"
-  );
-}
-
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [storeLoaded, setStoreLoaded] = useState(false);
   const [store, setStore] = useState<AppStore | null>(null);
   const [lastStore, setLastStore] = useState<AppStore | null>(null);
   const lastStoreRef = useRef<AppStore | null>(null);
+  const choseStore = useRef(false);
   const storeSaves = useRef(Promise.resolve());
   const auth = useSyncExternalStore(
     authState.subscribe,
@@ -105,26 +98,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [userId, appleSubject]);
 
   useEffect(() => {
-    Promise.all([
-      secureStorage.getItem(STORE_KEY),
-      secureStorage.getItem(LAST_STORE_KEY).catch(() => null),
-    ])
-      .then(([raw, previous]) => {
-        const parse = (value: string | null) => {
-          try {
-            const parsed: unknown = value ? JSON.parse(value) : null;
-            return isStore(parsed) ? parsed : null;
-          } catch {
-            return null;
-          }
-        };
-        const active = parse(raw);
-        setStore(active);
-        lastStoreRef.current = active ?? parse(previous);
-        setLastStore(lastStoreRef.current);
+    let mounted = true;
+    readStorePreferences()
+      .then(({ store, lastStore }) => {
+        if (!mounted || choseStore.current) return;
+        setStore(store);
+        lastStoreRef.current = lastStore;
+        setLastStore(lastStore);
       })
       .catch(() => {})
-      .finally(() => setStoreLoaded(true));
+      .finally(() => {
+        if (mounted) setStoreLoaded(true);
+      });
     const stopCommands = authState.subscribe(() => {
       const current = authState.getState();
       if (current.status === "ready") {
@@ -146,6 +131,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     });
     const stopAuth = authState.start();
     return () => {
+      mounted = false;
       stopCommands();
       data.subscription.unsubscribe();
       stopAuth();
@@ -181,6 +167,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       : undefined;
 
   const chooseStore = useCallback((next: AppStore | null) => {
+    choseStore.current = true;
     setStore(next);
     if (next) {
       lastStoreRef.current = next;
@@ -190,15 +177,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     // Remember the store when entering Komisio; serialize rapid switches so a
     // delayed save cannot restore an earlier active store on the next launch.
     storeSaves.current = storeSaves.current
-      .then(async () => {
-        if (next) await secureStorage.setItem(STORE_KEY, JSON.stringify(next));
-        else await secureStorage.removeItem(STORE_KEY);
-        if (remembered)
-          await secureStorage.setItem(
-            LAST_STORE_KEY,
-            JSON.stringify(remembered),
-          );
-      })
+      .then(() => saveStorePreferences({ store: next, lastStore: remembered }))
       .catch(() => {});
   }, []);
 
