@@ -6,6 +6,7 @@ import { photoDraftCopy } from "../src/lib/photo-draft-copy.ts";
 import { photoFlowCopy } from "../src/lib/photo-flow-copy.ts";
 import { itemDraftCopy } from "../src/lib/item-draft-copy.ts";
 import { centralIntakeCopy } from "../src/lib/central-intake-copy.ts";
+import { currencyLabel } from "../src/lib/locale.ts";
 import type { PushSnapshot } from "../src/lib/push-controller.ts";
 
 /** Exercise the real components, replacing only hooks and native/IO boundaries. */
@@ -120,6 +121,7 @@ function review(status: PushSnapshot["status"] | null, pending = false) {
         }),
       },
       "@/lib/identity-gates": { hasCentralIdentity: () => true },
+      "@/lib/locale": { currencyLabel },
       "@/lib/use-item-draft": {
         useItemDraft: () => ({
           snapshot: {
