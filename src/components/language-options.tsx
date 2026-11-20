@@ -2,7 +2,7 @@ import { View } from "react-native";
 import { dictionaries, locales, useI18n } from "@/lib/i18n";
 import { Choice, Message } from "./ui";
 
-export function LanguageOptions() {
+export function LanguageOptions({ onSelected }: { onSelected: () => void }) {
   const { d, locale, setLocale, saveFailed } = useI18n();
   return (
     <View style={{ gap: 8 }}>
@@ -21,7 +21,9 @@ export function LanguageOptions() {
             role="radio"
             label={dictionaries[code].languageName}
             selected={locale === code}
-            onPress={() => setLocale(code)}
+            onPress={async () => {
+              if (await setLocale(code)) onSelected();
+            }}
           />
         ))}
       </View>

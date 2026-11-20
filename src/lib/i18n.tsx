@@ -26,12 +26,12 @@ function deviceLocale(): Locale {
 const I18n = createContext<{
   locale: Locale;
   d: Dictionary;
-  setLocale: (locale: Locale) => void;
+  setLocale: (locale: Locale) => Promise<boolean>;
   saveFailed: boolean;
 }>({
   locale: "sv",
   d: dictionaries.sv,
-  setLocale: () => {},
+  setLocale: async () => false,
   saveFailed: false,
 });
 
@@ -39,7 +39,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(deviceLocale);
   const [saveFailed, setSaveFailed] = useState(false);
   const revision = useRef(0);
-  const saves = useRef(Promise.resolve());
+  const saves = useRef(Promise.resolve(true));
   useEffect(() => {
     let active = true;
     void secureStorage
@@ -63,9 +63,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     // SecureStore writes include remove/set steps; preserve selection order.
     saves.current = saves.current
       .then(() => secureStorage.setItem(KEY, next))
+      .then(() => revision.current === request)
       .catch(() => {
         if (revision.current === request) setSaveFailed(true);
+        return false;
       });
+    return saves.current;
   };
   return (
     <I18n.Provider

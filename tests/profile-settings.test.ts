@@ -243,8 +243,10 @@ test("profile exposes one store action, language detail, financial links and log
     ),
   );
 });
-test("language detail presents supported native names and selection dispatches the stored locale code", () => {
+test("language options close on a saved selection and stay open for a retry on failure", async () => {
   const changes: string[] = [];
+  let saved = true;
+  let closes = 0;
   const screen = compile("../src/components/language-options.tsx", {
     "react-native": { View: "View" },
     "@/lib/i18n": {
@@ -253,14 +255,17 @@ test("language detail presents supported native names and selection dispatches t
       useI18n: () => ({
         d: { language: "Språk" },
         locale: "sv",
-        setLocale: (code: string) => changes.push(code),
+        setLocale: async (code: string) => {
+          changes.push(code);
+          return saved;
+        },
       }),
     },
     "./ui": { Choice: "Choice", Message: "Message" },
   });
-  const choices = nodes(screen.LanguageOptions()).filter(
-    (n) => n.type === "Choice",
-  );
+  const choices = nodes(
+    screen.LanguageOptions({ onSelected: () => closes++ }),
+  ).filter((n) => n.type === "Choice");
   assert.deepEqual(
     choices.map((n) => [n.props.label, n.props.selected]),
     [
@@ -275,6 +280,52 @@ test("language detail presents supported native names and selection dispatches t
     ],
   );
   assert.ok(choices.every((n) => n.props.role === "radio" && n.props.listRow));
-  choices.forEach((choice) => choice.props.onPress());
+  for (const choice of choices) await choice.props.onPress();
   assert.deepEqual(changes, [...locales]);
+  assert.equal(closes, locales.length);
+  saved = false;
+  await choices[1].props.onPress();
+  assert.equal(closes, locales.length);
+});
+
+test("selecting a language returns from Profile or dismisses the sheet in the store picker", () => {
+  const actions: string[] = [];
+  let focused = true;
+  let history = true;
+  const i18n = { useI18n: () => ({ d: dictionaries.sv }) };
+  const options = { LanguageOptions: "LanguageOptions" };
+  const route = compile("../src/app/language.tsx", {
+    "expo-router": {
+      useNavigation: () => ({ isFocused: () => focused }),
+      router: {
+        canGoBack: () => history,
+        back: () => actions.push("back"),
+        replace: (path: string) => actions.push(path),
+      },
+    },
+    "@/lib/i18n": i18n,
+    "@/components/ui": { Screen: "Screen" },
+    "@/components/language-options": options,
+  });
+  const selected = nodes(route.default()).find(
+    (n) => n.type === "LanguageOptions",
+  ).props.onSelected;
+  selected();
+  history = false;
+  selected();
+  focused = false;
+  selected();
+  assert.deepEqual(actions, ["back", "/(tabs)/profile"]);
+
+  const visibility: boolean[] = [];
+  const sheet = compile("../src/components/language-picker.tsx", {
+    react: { useState: () => [true, (open: boolean) => visibility.push(open)] },
+    "@/lib/i18n": i18n,
+    "./ui": { NavigationRow: "NavigationRow" },
+    "./detail-sheet": { DetailSheet: "DetailSheet" },
+    "./language-options": options,
+  });
+  const picker = nodes(sheet.LanguagePicker());
+  picker.find((n) => n.type === "LanguageOptions").props.onSelected();
+  assert.deepEqual(visibility, [false]);
 });
