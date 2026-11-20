@@ -276,6 +276,7 @@ export function PhotoDetailsScreen() {
           </View>
           <Text style={uiStyles.body}>{currency}</Text>
         </View>
+        <Text style={uiStyles.note}>{t.priceHint}</Text>
         <Button
           label={t.payoutQuestion}
           variant="text"
