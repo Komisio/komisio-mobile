@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { useSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
-import { centralIdentityEmail } from "@/lib/identity-gates";
 import { accountAuth } from "@/lib/account-auth-runtime";
 import { accountAuthError } from "@/lib/account-auth";
 import { accountAuthCopy, accountErrorText } from "@/lib/account-auth-copy";
@@ -12,9 +11,7 @@ export function CentralPayoutEmail({ owner }: { owner: string }) {
   const { session, refreshAssurance } = useSession(),
     { locale, d } = useI18n();
   const t = centralPayoutCopy[locale];
-  const [email, setEmail] = useState(
-    session?.user.new_email || centralIdentityEmail(session?.user) || "",
-  );
+  const [email, setEmail] = useState(session?.user.new_email || "");
   const [sent, setSent] = useState(Boolean(session?.user.new_email)),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");

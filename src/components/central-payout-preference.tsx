@@ -9,6 +9,9 @@ import { Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { randomUUID } from "expo-crypto";
 import { BankAccount } from "./bank-account";
+import { CentralPayoutEmail } from "./central-payout-email";
+import { useSession } from "@/lib/session";
+import { hasVerifiedEmail } from "@/lib/identity-gates";
 import { Button, Card, Choice, Field, Loading, Message, uiStyles } from "./ui";
 import { centralPayoutCopy } from "@/lib/central-payout-copy";
 import { useI18n } from "@/lib/i18n";
@@ -34,6 +37,7 @@ type Props = {
 export function CentralPayoutPreference(props: Props) {
   const { d } = useI18n();
   const { user, tenant, seller } = props;
+  const { session } = useSession();
   const [returningFromBank, setReturningFromBank] = useState(false);
   const [addingBank, setAddingBank] = useState(false);
   const read = useMemo(
@@ -55,6 +59,8 @@ export function CentralPayoutPreference(props: Props) {
     setAddingBank(false);
     void read.refresh();
   }, [read]);
+  if (addingBank && !hasVerifiedEmail(session?.user))
+    return <CentralPayoutEmail owner={user} />;
   if (addingBank)
     return (
       <BankAccount
@@ -280,7 +286,7 @@ function PreferenceEditor({
       <Text style={uiStyles.note}>{t.autoHint}</Text>
       {error ? <Message tone="error">{error}</Message> : null}
       <Button
-        label={submitLabel ?? t.save}
+        label={submitLabel ?? (method === "swish" ? t.confirmSwish : t.save)}
         disabled={busy || (method === "bank" && !bank)}
         onPress={() => void save()}
       />

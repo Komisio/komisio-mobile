@@ -2,6 +2,7 @@ import type { Locale } from "./locale";
 
 export const centralPayoutCopy = {
   sv: {
+    confirmSwish: "Bekräfta Swish-nummer",
     edit: "Ändra utbetalningssätt",
     editBank: "Ändra bankkonto",
     save: "Spara utbetalningssätt",
@@ -19,12 +20,13 @@ export const centralPayoutCopy = {
     empty:
       "Här visas ditt saldo när du har lämnat in din första vara till Komisio.",
     verifyEmail:
-      "Bekräfta en e-postadress för ditt befintliga konto för att använda utbetalningar.",
+      "Bekräfta din e-postadress för att lägga till eller ändra ett bankkonto.",
     sendEmail: "Skicka bekräftelsemejl",
     checkInbox: "Öppna länken i mejlet och gå sedan tillbaka hit.",
     confirmed: "Jag har bekräftat min e-postadress",
   },
   en: {
+    confirmSwish: "Confirm Swish number",
     edit: "Change payout method",
     editBank: "Edit bank account",
     save: "Save payout method",
@@ -41,13 +43,13 @@ export const centralPayoutCopy = {
       "This address belongs to another account. Enter a different email for this account.",
     empty:
       "Your balance will appear here once you have submitted your first item to Komisio.",
-    verifyEmail:
-      "Confirm an email address on your existing account to use payouts.",
+    verifyEmail: "Confirm your email address to add or change a bank account.",
     sendEmail: "Send confirmation email",
     checkInbox: "Open the link in your email, then return here.",
     confirmed: "I’ve confirmed my email address",
   },
   no: {
+    confirmSwish: "Bekreft Swish-nummer",
     edit: "Endre utbetalingsmåte",
     editBank: "Endre bankkonto",
     save: "Lagre utbetalingsmåte",
@@ -65,12 +67,13 @@ export const centralPayoutCopy = {
     empty:
       "Saldoen vises her når du har levert inn din første vare til Komisio.",
     verifyEmail:
-      "Bekreft en e-postadresse på den eksisterende kontoen din for å bruke utbetalinger.",
+      "Bekreft e-postadressen din for å legge til eller endre en bankkonto.",
     sendEmail: "Send bekreftelse på e-post",
     checkInbox: "Åpne lenken i e-posten, og kom tilbake hit.",
     confirmed: "Jeg har bekreftet e-postadressen min",
   },
   da: {
+    confirmSwish: "Bekræft Swish-nummer",
     edit: "Skift udbetalingsmetode",
     editBank: "Rediger bankkonto",
     save: "Gem udbetalingsmetode",
@@ -88,12 +91,13 @@ export const centralPayoutCopy = {
     empty:
       "Din saldo vises her, når du har indsendt din første vare til Komisio.",
     verifyEmail:
-      "Bekræft en e-mailadresse på din eksisterende konto for at bruge udbetalinger.",
+      "Bekræft din e-mailadresse for at tilføje eller ændre en bankkonto.",
     sendEmail: "Send bekræftelsesmail",
     checkInbox: "Åbn linket i mailen, og vend tilbage hertil.",
     confirmed: "Jeg har bekræftet min e-mailadresse",
   },
   fi: {
+    confirmSwish: "Vahvista Swish-numero",
     edit: "Vaihda maksutapaa",
     editBank: "Muokkaa pankkitiliä",
     save: "Tallenna maksutapa",
@@ -111,12 +115,13 @@ export const centralPayoutCopy = {
     empty:
       "Saldosi näkyy täällä, kun olet lähettänyt ensimmäisen tuotteesi Komisiolle.",
     verifyEmail:
-      "Vahvista nykyisen tilisi sähköpostiosoite maksupyyntöjä varten.",
+      "Vahvista sähköpostiosoitteesi, jotta voit lisätä pankkitilin tai muuttaa sitä.",
     sendEmail: "Lähetä vahvistusviesti",
     checkInbox: "Avaa sähköpostiviestin linkki ja palaa sitten tänne.",
     confirmed: "Olen vahvistanut sähköpostiosoitteeni",
   },
   de: {
+    confirmSwish: "Swish-Nummer bestätigen",
     edit: "Auszahlungsmethode ändern",
     editBank: "Bankkonto ändern",
     save: "Auszahlungsmethode speichern",
@@ -134,12 +139,13 @@ export const centralPayoutCopy = {
     empty:
       "Dein Guthaben erscheint hier, sobald du deinen ersten Artikel bei Komisio eingereicht hast.",
     verifyEmail:
-      "Bestätige eine E-Mail-Adresse für dein bestehendes Konto, um Auszahlungen zu nutzen.",
+      "Bestätige deine E-Mail-Adresse, um ein Bankkonto hinzuzufügen oder zu ändern.",
     sendEmail: "Bestätigungsmail senden",
     checkInbox: "Öffne den Link in der E-Mail und kehre dann hierher zurück.",
     confirmed: "Ich habe meine E-Mail-Adresse bestätigt",
   },
   es: {
+    confirmSwish: "Confirmar número de Swish",
     edit: "Cambiar método de pago",
     editBank: "Editar cuenta bancaria",
     save: "Guardar método de pago",
@@ -157,12 +163,13 @@ export const centralPayoutCopy = {
     empty:
       "Tu saldo aparecerá aquí cuando hayas enviado tu primer artículo a Komisio.",
     verifyEmail:
-      "Confirma una dirección de correo en tu cuenta actual para solicitar pagos.",
+      "Confirma tu correo electrónico para añadir o cambiar una cuenta bancaria.",
     sendEmail: "Enviar correo de confirmación",
     checkInbox: "Abre el enlace del correo y vuelve aquí.",
     confirmed: "He confirmado mi correo",
   },
   it: {
+    confirmSwish: "Conferma numero Swish",
     edit: "Cambia metodo di pagamento",
     editBank: "Modifica conto bancario",
     save: "Salva metodo di pagamento",
@@ -180,7 +187,7 @@ export const centralPayoutCopy = {
     empty:
       "Il saldo apparirà qui dopo che avrai inviato il tuo primo articolo a Komisio.",
     verifyEmail:
-      "Conferma un indirizzo e-mail sul tuo account esistente per richiedere pagamenti.",
+      "Conferma il tuo indirizzo e-mail per aggiungere o modificare un conto bancario.",
     sendEmail: "Invia e-mail di conferma",
     checkInbox: "Apri il link nell’e-mail, poi torna qui.",
     confirmed: "Ho confermato il mio indirizzo e-mail",
@@ -196,6 +203,7 @@ export const centralPayoutCopy = {
     | "emailInUse"
     | "edit"
     | "editBank"
+    | "confirmSwish"
     | "save"
     | "autoHint"
     | "viewPayouts"

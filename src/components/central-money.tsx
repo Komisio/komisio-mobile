@@ -12,7 +12,7 @@ export function CentralMoney({
   bank?: boolean;
 }) {
   return (
-    <CentralPayoutAccount tenant={tenant}>
+    <CentralPayoutAccount tenant={tenant} bank={bank}>
       {(scope) =>
         bank ? (
           <BankAccount key={JSON.stringify(scope)} {...scope} />
