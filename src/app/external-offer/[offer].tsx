@@ -230,15 +230,6 @@ function Offer({ user, id }: { user: string; id: string }) {
             >
               {amount}
             </Text>
-            {o.saleMethod !== "direct_purchase" &&
-            !(o.staffSelectsMethod && !o.saleMethod) ? (
-              <Text style={[uiStyles.note, { color: colors.onBrandMuted }]}>
-                {t.planned.replace(
-                  "{amount}",
-                  offerAmount(o.expectedSalePriceOre, formattingLocale(locale)),
-                )}
-              </Text>
-            ) : null}
           </View>
           {o.alternativeNote != null ? (
             <View style={{ gap: 6 }}>
