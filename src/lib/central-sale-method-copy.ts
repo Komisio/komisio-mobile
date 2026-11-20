@@ -4,7 +4,9 @@ const copy = {
   sv: {
     payoutQuestion: "När får jag mina pengar?",
     payoutTiming:
-      "Godkänner Komisio ditt pris är det garanterat. Föreslår vi ett annat belopp gäller det först när du tackar ja. Köper vi varan läggs pengarna på ditt saldo när vi har tagit emot och kontrollerat den. Säljer vi den åt dig läggs pengarna på saldot när varan säljs, senast 45 dagar efter att vi tog emot den.",
+      "Oftast startar vi din Swish-utbetalning så snart vi har tagit emot och kontrollerat varan.",
+    payoutOnSale:
+      "Säljer vi varan åt dig startar utbetalningen när den säljs, senast 45 dagar efter att vi tog emot den.",
     payoutRequest:
       "När beloppet finns på ditt saldo skapar Komisio automatiskt en utbetalningsbegäran till ditt valda Swish-nummer eller bankkonto. Du kan följa den under Pengar.",
     receiptApproval: "Grattis! Komisio har godkänt din vara.",
@@ -21,7 +23,9 @@ const copy = {
   en: {
     payoutQuestion: "When do I get paid?",
     payoutTiming:
-      "If Komisio accepts your price, it is guaranteed. A different amount only applies if you accept it. If we buy it, we credit your balance after receiving and checking it. If we sell it for you, we credit your balance when it sells, or at the latest 45 days after receipt.",
+      "We usually start your Swish payout as soon as we receive and check your item.",
+    payoutOnSale:
+      "If we sell the item for you, we start your payout when it sells, no later than 45 days after we receive it.",
     payoutRequest:
       "When your balance is credited, Komisio automatically requests a payout to your chosen Swish number or bank account. You can follow it under Money.",
     receiptApproval: "Congratulations! Komisio has approved your item.",
@@ -38,7 +42,9 @@ const copy = {
   no: {
     payoutQuestion: "Når får jeg pengene?",
     payoutTiming:
-      "Godtar Komisio prisen din, er den garantert. Et annet beløp gjelder først når du takker ja. Kjøper vi varen, settes beløpet på saldoen din etter mottak og kontroll. Selger vi den for deg, får du beløpet på saldoen når den selges, senest 45 dager etter mottak.",
+      "Som regel starter vi utbetalingen via Swish så snart vi har mottatt og sjekket varen.",
+    payoutOnSale:
+      "Selger vi varen for deg, starter utbetalingen når den blir solgt, senest 45 dager etter at vi mottok den.",
     payoutRequest:
       "Når saldoen din godskrives, oppretter Komisio automatisk en utbetalingsforespørsel til valgt Swish-nummer eller bankkonto. Følg den under Penger.",
     receiptApproval: "Gratulerer! Komisio har godkjent varen din.",
@@ -55,7 +61,9 @@ const copy = {
   da: {
     payoutQuestion: "Hvornår får jeg mine penge?",
     payoutTiming:
-      "Godkender Komisio din pris, er den garanteret. Et andet beløb gælder først, når du accepterer det. Køber vi varen, får du beløbet på din saldo efter modtagelse og kontrol. Sælger vi den for dig, går beløbet ind på din saldo ved salg, senest 45 dage efter modtagelsen.",
+      "Som regel starter vi din udbetaling via Swish, så snart vi har modtaget og tjekket varen.",
+    payoutOnSale:
+      "Sælger vi varen for dig, starter udbetalingen, når den bliver solgt, dog senest 45 dage efter at vi modtog den.",
     payoutRequest:
       "Når beløbet tilføjes din saldo, opretter Komisio automatisk en udbetalingsanmodning til dit valgte Swish-nummer eller din bankkonto. Følg den under Penge.",
     receiptApproval: "Tillykke! Komisio har godkendt din vare.",
@@ -72,7 +80,9 @@ const copy = {
   fi: {
     payoutQuestion: "Milloin saan rahani?",
     payoutTiming:
-      "Jos Komisio hyväksyy hintasi, se on taattu. Ehdottamamme muu summa tulee voimaan vain, jos hyväksyt sen. Jos ostamme tuotteen, summa lisätään saldoosi vastaanoton ja tarkastuksen jälkeen. Jos myymme sen puolestasi, summa lisätään saldoosi myynnin yhteydessä, viimeistään 45 päivän kuluttua vastaanotosta.",
+      "Yleensä käynnistämme Swish-maksun heti, kun olemme vastaanottaneet ja tarkistaneet tuotteesi.",
+    payoutOnSale:
+      "Jos myymme tuotteen puolestasi, käynnistämme maksun myynnin yhteydessä, viimeistään 45 päivän kuluttua tuotteen vastaanottamisesta.",
     payoutRequest:
       "Kun summa lisätään saldoosi, Komisio luo automaattisesti maksupyynnön valitsemaasi Swish-numeroon tai pankkitilille. Voit seurata sitä Raha-osiossa.",
     receiptApproval: "Onneksi olkoon! Komisio on hyväksynyt tuotteesi.",
@@ -89,7 +99,9 @@ const copy = {
   de: {
     payoutQuestion: "Wann bekomme ich mein Geld?",
     payoutTiming:
-      "Wenn Komisio deinen Preis annimmt, ist er garantiert. Ein anderer Betrag gilt erst, wenn du zustimmst. Kaufen wir ihn an, schreiben wir dir den Betrag nach Eingang und Prüfung gut. Verkaufen wir ihn für dich, erfolgt die Gutschrift beim Verkauf, spätestens 45 Tage nach Eingang.",
+      "Meist veranlassen wir deine Auszahlung per Swish, sobald wir deinen Artikel erhalten und geprüft haben.",
+    payoutOnSale:
+      "Verkaufen wir den Artikel für dich, veranlassen wir die Auszahlung beim Verkauf, spätestens 45 Tage nach Erhalt.",
     payoutRequest:
       "Sobald der Betrag gutgeschrieben ist, erstellt Komisio automatisch einen Auszahlungsauftrag für deine Swish-Nummer oder dein Bankkonto. Unter Geld kannst du ihn verfolgen.",
     receiptApproval: "Glückwunsch! Komisio hat deinen Artikel angenommen.",
@@ -106,7 +118,9 @@ const copy = {
   es: {
     payoutQuestion: "¿Cuándo recibiré mi dinero?",
     payoutTiming:
-      "Si Komisio acepta tu precio, queda garantizado. Un importe distinto solo se aplica si lo aceptas. Si lo compramos, abonamos el importe en tu saldo tras recibirlo y revisarlo. Si lo vendemos por ti, lo abonamos cuando se venda, como máximo 45 días después de recibirlo.",
+      "Normalmente iniciamos el pago por Swish en cuanto recibimos y revisamos tu artículo.",
+    payoutOnSale:
+      "Si lo vendemos por ti, iniciamos el pago cuando se venda, como máximo 45 días después de recibirlo.",
     payoutRequest:
       "Cuando el importe se abone en tu saldo, Komisio creará automáticamente una solicitud de pago a tu número Swish o cuenta bancaria. Puedes seguirla en Dinero.",
     receiptApproval: "¡Enhorabuena! Komisio ha aceptado tu artículo.",
@@ -123,7 +137,9 @@ const copy = {
   it: {
     payoutQuestion: "Quando riceverò i miei soldi?",
     payoutTiming:
-      "Se Komisio accetta il tuo prezzo, l’importo è garantito. Un importo diverso vale solo se lo accetti. Se lo acquistiamo, lo accreditiamo sul saldo dopo averlo ricevuto e controllato. Se lo vendiamo per te, l’accredito avviene alla vendita e comunque entro 45 giorni dal ricevimento.",
+      "Di solito avviamo il pagamento tramite Swish appena riceviamo e controlliamo il tuo articolo.",
+    payoutOnSale:
+      "Se lo vendiamo per te, avviamo il pagamento al momento della vendita, al più tardi 45 giorni dopo averlo ricevuto.",
     payoutRequest:
       "Quando l’importo viene accreditato sul saldo, Komisio crea automaticamente una richiesta di pagamento al numero Swish o al conto bancario scelto. Puoi seguirla nella sezione Soldi.",
     receiptApproval: "Congratulazioni! Komisio ha approvato il tuo articolo.",

@@ -288,7 +288,7 @@ export function PhotoDetailsScreen() {
             onClose={() => setShowPayoutInfo(false)}
           >
             <Text style={uiStyles.body}>{t.payoutTiming}</Text>
-            <Text style={uiStyles.body}>{t.payoutRequest}</Text>
+            <Text style={uiStyles.body}>{t.payoutOnSale}</Text>
           </DetailSheet>
         ) : null}
       </View>
